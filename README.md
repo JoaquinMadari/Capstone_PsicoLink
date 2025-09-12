@@ -7,6 +7,4 @@ Docente a cargo: Daniel Alonso Montero Valenzuela
 Grupo: 5
 
 Integrantes:
-Fernando Cavada
-Lucas Cisternas
-Joaquín Madariaga
+Fernando Cavada, Lucas Cisternas, Joaquín Madariaga
