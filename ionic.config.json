@@ -1,0 +1,7 @@
+{
+  "name": "psicolink",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
