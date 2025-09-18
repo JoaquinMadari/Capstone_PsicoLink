@@ -4,11 +4,14 @@ const path = require('path');
 const app = express();
 
 // Define la carpeta de archivos estáticos (www/browser)
-const staticPath = path.join(__dirname, 'www');
+const staticPath = path.join(__dirname, 'www/browser');
 app.use(express.static(staticPath));
 
 // Maneja todas las rutas y redirige al index.html
-app.get(/^\/(?!api).*/, (req, res) => {
+//app.get(/^\/(?!api).*/, (req, res) => {
+//  res.sendFile(path.join(staticPath, 'index.html'));
+//});
+app.get('/*', (req, res) => {
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
