@@ -1,19 +1,24 @@
-const express = require("express");
-const path = require("path");
+const express = require('express');
+const path = require('path');
 
 const app = express();
+
+// Define la carpeta de archivos estáticos (www/browser)
+const staticPath = path.join(__dirname, 'www/browser');
+app.use(express.static(staticPath));
+
+// Maneja todas las rutas y redirige al index.html
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(staticPath, 'index.html'));
+});
+
+// Configura el puerto
 const PORT = process.env.PORT || 3000;
-
-// Servir archivos estáticos desde "www"
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'www', 'splash.html'));
-});
-
-// Fallback a index.html (para apps con routing en Ionic/Angular)
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'www', 'splash.html'));
-});
-
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
