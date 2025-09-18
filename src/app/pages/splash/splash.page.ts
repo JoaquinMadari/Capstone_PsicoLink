@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-splash',
@@ -13,10 +14,13 @@ import { RouterModule } from '@angular/router';
 })
 export class SplashPage implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
   console.log('SplashPage initialized');
+  setTimeout(() => {
+      this.router.navigateByUrl('/login');
+    }, 3000); // 3000 milisegundos = 3 segundos
 }
 
 }
