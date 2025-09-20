@@ -27,7 +27,8 @@
           <ion-label position="floating">Correo Electrónico</ion-label>
           <ion-input type="email" formControlName="email"></ion-input>
         </ion-item>
-        <div *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)" class="validation-errors">
+        <div class="validation-errors" 
+            [class.visible]="loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)">
           <div *ngIf="loginForm.get('email')?.hasError('required')">
             *El correo electrónico es obligatorio.
           </div>
@@ -35,12 +36,13 @@
             *El correo electrónico no es válido.
           </div>
         </div>
-    
+
         <ion-item>
           <ion-label position="floating">Contraseña</ion-label>
           <ion-input type="password" formControlName="password"></ion-input>
         </ion-item>
-        <div *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)" class="validation-errors">
+        <div class="validation-errors" 
+            [class.visible]="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)">
           <div *ngIf="loginForm.get('password')?.hasError('required')">
             *La contraseña es obligatoria.
           </div>
@@ -54,7 +56,7 @@
         </ion-button>
         
         <p class="ion-text-center ion-padding-top">
-          <a>¿Olvidaste tu contraseña (falta eso)?</a>
+          <a routerLink="/register">¿Olvidaste tu contraseña?</a>
         </p>
       </form>
     </ion-card-content>
