@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -13,40 +15,37 @@ import { RouterModule } from '@angular/router';
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
+  errorMessage: string = '';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: Auth,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.registerForm = this.fb.group({
-      role: ['paciente', Validators.required], // valor por defecto
+      role: ['paciente', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-
-      // estos se usan solo si es profesional
-      specialty: [''],
-      licenseNumber: ['']
+      specialty: [''],  // solo si es profesional
+      licenseNumber: [''] // solo si es profesional
     });
   }
 
   register() {
     if (this.registerForm.valid) {
-      const formData = this.registerForm.value;
+      const data = this.registerForm.value;
 
-      // 👇 si es profesional, aseguramos que los campos estén completos
-      if (formData.role === 'profesional') {
-        if (!formData.specialty || !formData.licenseNumber) {
-          console.warn('Profesionales deben ingresar especialidad y número de licencia');
-          return;
+      this.authService.register(data).subscribe({
+        next: () => {
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          this.errorMessage = 'Error en el registro';
+          console.error(err);
         }
-      }
-
-      console.log('Datos de registro:', formData);
-      // Aquí deberías hacer la llamada al backend (API Django) o Supabase
-    } else {
-      console.warn('Formulario inválido');
-      this.registerForm.markAllAsTouched();
+      });
     }
   }
-  
-
 }

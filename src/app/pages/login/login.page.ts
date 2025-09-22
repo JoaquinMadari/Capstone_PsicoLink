@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { Auth } from '../../services/auth';
 
 
 @Component({
@@ -15,48 +16,34 @@ import { RouterModule } from '@angular/router';
 })
 export class LoginPage implements OnInit {
 
-  loginForm: FormGroup;
+  loginForm!: FormGroup;
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router,
-    private toastController: ToastController
-  ) {
+    private authService: Auth,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  ngOnInit() {
-  }
-
-  async login() {
+  login() {
     if (this.loginForm.valid) {
-      console.log('Formulario enviado:', this.loginForm.value);
-      // Aquí iría la lógica de autenticación (ej. llamada a una API)
-      const email = this.loginForm.value.email;
-      const password = this.loginForm.value.password;
-
-      // Ejemplo de lógica de autenticación simple
-      if (email === 'test@psicolink.cl' && password === '123456') {
-        this.presentToast('Inicio de sesión exitoso.', 'success');
-        this.router.navigate(['/home']);
-      } else {
-        this.presentToast('Correo o contraseña incorrectos.', 'danger');
-      }
-    } else {
-      this.presentToast('Por favor, completa todos los campos correctamente.', 'warning');
+      const { email, password } = this.loginForm.value;
+      this.authService.login({ email, password }).subscribe({
+        next: () => {
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          this.errorMessage = 'Correo o contraseña incorrectos';
+          console.error(err);
+        }
+      });
     }
-  }
-
-  async presentToast(message: string, color: string) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 2000,
-      color: color,
-      position: 'top',
-    });
-    toast.present();
   }
 }
