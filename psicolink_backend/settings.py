@@ -87,10 +87,18 @@ WSGI_APPLICATION = 'psicolink_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'psicolinkdb',
+        'USER': 'lujofer',
+        'PASSWORD': 'QhzLMElvwYNhLYlrBdYLEgVuJQwHiTc6',
+        'HOST': 'dpg-d3a6hdh5pdvs73cke8l0-a.oregon-postgres.render.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
+
 
 
 # Password validation
