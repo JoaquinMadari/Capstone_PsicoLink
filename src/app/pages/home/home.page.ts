@@ -9,7 +9,10 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, Ion
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [CommonModule,IonicModule]//  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+
+imports: [CommonModule,IonicModule]//  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+
+  
 })
 export class HomePage implements OnInit {
 

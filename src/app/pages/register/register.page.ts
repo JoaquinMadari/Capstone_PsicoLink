@@ -12,7 +12,10 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent,  IonButton, IonInput, Ion
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
+
   imports: [CommonModule,FormsModule,ReactiveFormsModule,RouterModule,IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+
+
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;

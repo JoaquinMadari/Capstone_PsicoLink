@@ -12,7 +12,10 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, Ion
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
+
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel]
+
+
 })
 export class LoginPage implements OnInit {
 

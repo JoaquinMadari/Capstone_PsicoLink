@@ -12,7 +12,10 @@ import {  IonContent,    } from '@ionic/angular/standalone';
   templateUrl: './splash.page.html',
   styleUrls: ['./splash.page.scss'],
   standalone: true,
+
   imports: [CommonModule, FormsModule, RouterModule, IonicModule]//, IonContent,]
+
+
 })
 export class SplashPage implements OnInit {
 
