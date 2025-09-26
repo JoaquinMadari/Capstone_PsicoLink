@@ -1,0 +1,50 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>PsicoLink</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Cerrar sesión</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <!-- Bienvenida -->
+  <ion-card class="welcome-card">
+    <ion-card-header>
+      <ion-card-title>Bienvenido, {{ userName }}</ion-card-title>
+      <ion-card-subtitle>¿Cómo podemos ayudarte hoy?</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      Encuentra el apoyo que necesitas de forma rápida y segura.
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Accesos rápidos -->
+  <div class="quick-actions">
+    <ion-card button (click)="goTo('profesionales')" class="action-card">
+      <ion-card-header>
+        <ion-card-title>Buscar Profesionales</ion-card-title>
+      </ion-card-header>
+    </ion-card>
+
+    <ion-card button (click)="goTo('citas')" class="action-card">
+      <ion-card-header>
+        <ion-card-title>Mis Citas</ion-card-title>
+      </ion-card-header>
+    </ion-card>
+
+    <ion-card button (click)="goTo('historial')" class="action-card">
+      <ion-card-header>
+        <ion-card-title>Historial</ion-card-title>
+      </ion-card-header>
+    </ion-card>
+
+    <ion-card button (click)="goTo('soporte')" class="action-card">
+      <ion-card-header>
+        <ion-card-title>Soporte</ion-card-title>
+      </ion-card-header>
+    </ion-card>
+  </div>
+
+</ion-content>
