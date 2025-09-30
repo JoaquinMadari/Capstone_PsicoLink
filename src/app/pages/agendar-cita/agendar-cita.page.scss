@@ -1,0 +1,56 @@
+ion-header, ion-toolbar {
+  --background: #274C77;
+  --color: #ffffff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-toolbar {
+  --background: #274472; /* Blue Nova */
+  --color: #fff;
+}
+
+ion-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  background: #fff;
+}
+
+ion-card-title {
+  color: #274472;
+  font-weight: 600;
+}
+
+ion-item {
+  --background: transparent;
+  --highlight-color-focused: #A7C7E7;
+}
+
+ion-item ion-label {
+  color: #274472;
+}
+
+ion-datetime {
+  --background: #f9fbfd; /* fondo gris muy suave */
+  --ion-text-color: #0a2540; /* texto principal */
+  color: #0a2540;
+  border: 1px solid #cfd9e6;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 8px 0 12px;
+}
+
+
+
+ion-button {
+  --background: #4A90E2;
+  --color: #fff;
+}
+
+ion-list ion-item {
+  --background: #f7fbff; /* ligero */
+  margin-bottom: 8px;
+  border-radius: 8px;
+}

@@ -39,5 +39,10 @@ export const routes: Routes = [
         (m) => m.DetalleCitaPage
       ),
   },
+  {
+    path: 'Agendar',
+    loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage)
+  },
+
 ];
 

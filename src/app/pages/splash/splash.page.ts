@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
-import {  IonContent,    } from '@ionic/angular/standalone';
+import { IonContent, IonSpinner } from '@ionic/angular/standalone';
+
 
 
 @Component({
@@ -13,7 +14,7 @@ import {  IonContent,    } from '@ionic/angular/standalone';
   styleUrls: ['./splash.page.scss'],
   standalone: true,
 
-  imports: [CommonModule, FormsModule, RouterModule, IonicModule]//, IonContent,]
+  imports: [CommonModule, FormsModule, RouterModule, IonContent, IonSpinner]
 
 
 })

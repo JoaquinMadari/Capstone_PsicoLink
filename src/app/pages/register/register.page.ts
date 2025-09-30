@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
-import {  IonHeader, IonToolbar, IonTitle, IonContent,  IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
+  IonItem, IonLabel, IonInput, IonSegment, IonSegmentButton, IonButton 
+} from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-register',
@@ -13,9 +14,9 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent,  IonButton, IonInput, Ion
   styleUrls: ['./register.page.scss'],
   standalone: true,
 
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,RouterModule,IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
-
-
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, 
+  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonSegment, 
+  IonSegmentButton, IonButton]
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;

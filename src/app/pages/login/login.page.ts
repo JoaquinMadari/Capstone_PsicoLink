@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
-import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, IonInput, IonItem, IonLabel } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
+  IonItem, IonLabel, IonInput, IonButton
+} from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,8 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, Ion
   styleUrls: ['./login.page.scss'],
   standalone: true,
 
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, 
+    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton]
 
 
 })

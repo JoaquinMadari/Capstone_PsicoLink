@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
-import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
+IonButton, IonButtons
+} from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-home',
@@ -10,9 +12,9 @@ import {  IonHeader, IonToolbar, IonTitle, IonContent, IonFooter, IonButton, Ion
   styleUrls: ['./home.page.scss'],
   standalone: true,
 
-imports: [CommonModule,IonicModule]//  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+imports: [CommonModule,IonHeader, IonToolbar, IonTitle, IonContent, 
+    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonButtons]
 
-  
 })
 export class HomePage implements OnInit {
 
