@@ -8,8 +8,8 @@ router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('register/', RegisterView.as_view(), name='auth_register'),
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/register/', RegisterView.as_view(), name='auth_register'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('search/', ProfesionalSearchView.as_view(), name='profesional-search'),
 ]
