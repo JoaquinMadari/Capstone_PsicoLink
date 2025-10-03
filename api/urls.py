@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterView, AppointmentViewSet
+from .views import RegisterView, AppointmentViewSet, ProfesionalSearchView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='auth_register'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('search/', ProfesionalSearchView.as_view(), name='profesional-search'),
 ]

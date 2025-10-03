@@ -110,3 +110,5 @@ class AppointmentSerializer(serializers.ModelSerializer):
         if request and request.user and request.user.is_authenticated:
             validated_data['patient'] = request.user
         return super().create(validated_data)
+    
+# busca profesionales disponibles en un horario dado

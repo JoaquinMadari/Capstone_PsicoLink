@@ -14,6 +14,10 @@ from .serializers import AppointmentSerializer
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
@@ -73,3 +77,23 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         qs = Appointment.objects.filter(professional__id=professional_id)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
+
+# busca profesionales disponibles en un horario dado    
+class ProfesionalSearchView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['specialty']
+    search_fields = ['username', 'specialty']
+    ordering_fields = ['username']
+
+    def get_queryset(self):
+        queryset = CustomUser.objects.filter(role='profesional')
+        available_only = self.request.query_params.get('available', None)
+        if available_only == 'true':
+            now = timezone.now()
+            queryset = queryset.exclude(
+                appointments_as_professional__start_datetime__lte=now,
+                appointments_as_professional__end_datetime__gte=now,
+                appointments_as_professional__status='scheduled'
+            )
+        return queryset.distinct()
