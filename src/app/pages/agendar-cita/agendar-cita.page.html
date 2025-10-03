@@ -25,12 +25,23 @@
 
         <ion-item>
           <ion-label position="stacked">Fecha</ion-label>
-          <ion-datetime displayFormat="DD MMM YYYY" formControlName="date"></ion-datetime>
+          <ion-datetime 
+              displayFormat="DD MMM YYYY" 
+              formControlName="date"
+              presentation="date"
+              (ionChange)="form.controls['date'].markAsDirty(); form.controls['date'].updateValueAndValidity();">
+          </ion-datetime>
         </ion-item>
 
         <ion-item>
           <ion-label position="stacked">Hora</ion-label>
-          <ion-datetime displayFormat="HH:mm" pickerFormat="HH:mm" formControlName="time"></ion-datetime>
+          <ion-datetime 
+              displayFormat="HH:mm" 
+              pickerFormat="HH:mm" 
+              formControlName="time"
+              presentation="time"
+              (ionChange)="form.controls['time'].markAsDirty(); form.controls['time'].updateValueAndValidity();">
+          </ion-datetime>
         </ion-item>
 
         <ion-item>

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastController } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Auth } from 'src/app/services/auth';
+import { Appointment } from 'src/app/services/appointment';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption
+IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -13,7 +13,7 @@ IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption
   styleUrls: ['./agendar-cita.page.scss'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-  IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption]
+  IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime]
 })
 export class AgendarCitaPage implements OnInit {
   form = this.fb.group({
@@ -28,7 +28,7 @@ export class AgendarCitaPage implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private svc: Auth, //usamos Auth porque contiene createAppointment etc.
+    private svc: Appointment, //usamos Auth porque contiene createAppointment etc.
     private toastCtrl: ToastController
   ) {}
 
@@ -44,7 +44,7 @@ export class AgendarCitaPage implements OnInit {
 
   loadProfessionals() {
     //idealmente tener un endpoint /api/professionals/
-    fetch('http://localhost:8000/api/professionals/')
+    fetch('http://localhost:8000/api/search/')
       .then(r => r.json())
       .then(data => { this.professionals = data; })
       .catch(() => { this.professionals = []; });
@@ -59,16 +59,37 @@ export class AgendarCitaPage implements OnInit {
     });
   }
 
+  logFormStatus() {
+  console.log("--- ESTADO DE VALIDACIÓN DEL FORMULARIO ---");
+  console.log("Formulario General Válido:", this.form.valid);
+  
+  // Muestra el estado (VALID/INVALID) y el valor de cada campo
+  console.log("professional.status:", this.form.get('professional')?.status, "Valor:", this.form.get('professional')?.value);
+  console.log("date.status:", this.form.get('date')?.status, "Valor:", this.form.get('date')?.value);
+  console.log("time.status:", this.form.get('time')?.status, "Valor:", this.form.get('time')?.value);
+  console.log("duration.status:", this.form.get('duration')?.status, "Valor:", this.form.get('duration')?.value);
+  console.log("------------------------------------------");
+}
+
   onCreate() {
     if (!this.form.valid) return;
 
     const val = this.form.value;
-    const iso = `${val.date}T${val.time}:00Z`; // simplificado
+    const dateValue = val.date! as string; 
+    const timeValue = val.time! as string; 
+
+    const datePart = dateValue.split('T')[0];
+    
+    let timePart = timeValue;
+    timePart = timePart.includes('T') ? timePart.split('T')[1].substring(0, 5) : timePart.substring(0, 5);
+    
+
+    const startDatetimeISO = `${datePart}T${timePart}:00Z`;
 
     const payload = {
-      professional: val.professional,
-      start_datetime: iso,
-      duration_minutes: val.duration
+        professional: val.professional,
+        start_datetime: startDatetimeISO,
+        duration_minutes: val.duration
     };
 
     this.svc.createAppointment(payload).subscribe({
