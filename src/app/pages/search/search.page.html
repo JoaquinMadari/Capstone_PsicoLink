@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Buscar Profesionales</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar placeholder="Buscar por nombre o especialidad" (ionInput)="onSearchChange($event)">
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Filtros -->
+  <ion-item>
+    <ion-label>Especialidad</ion-label>
+    <ion-select [(ngModel)]="filters.specialty" (ionChange)="applyFilter()">
+      <ion-select-option value="">Todas</ion-select-option>
+      <ion-select-option value="psicologia">Psicología</ion-select-option>
+      <ion-select-option value="psiquiatria">Psiquiatría</ion-select-option>
+      <ion-select-option value="terapia">Terapia</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Lista de profesionales -->
+  <ion-list>
+    <ion-item *ngFor="let prof of profesionales">
+      <ion-label>
+        <h2>{{ prof.username }}</h2>
+        <p>{{ prof.specialty || 'Sin especialidad' }}</p>
+        <p>{{ prof.license_number ? 'Licencia: ' + prof.license_number : '' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Scroll infinito -->
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Cargando más profesionales...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

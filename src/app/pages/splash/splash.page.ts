@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { IonContent, IonSpinner } from '@ionic/angular/standalone';
@@ -13,10 +13,7 @@ import { IonContent, IonSpinner } from '@ionic/angular/standalone';
   templateUrl: './splash.page.html',
   styleUrls: ['./splash.page.scss'],
   standalone: true,
-
-  imports: [CommonModule, FormsModule, RouterModule, IonContent, IonSpinner]
-
-
+  imports: [CommonModule, FormsModule, RouterModule, IonContent,IonSpinner]
 })
 export class SplashPage implements OnInit {
 

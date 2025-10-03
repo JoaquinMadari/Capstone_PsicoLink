@@ -1,0 +1,29 @@
+/* #274C77; Blue Nova */
+/* #C5D5E4; Skipping Stones */
+/* #A7C7E7; Renew Blue*/
+
+ion-header, ion-toolbar {
+  --background: #274C77;
+  --color: #ffffff;
+}
+
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-item {
+  --background: transparent;
+  --highlight-color-focused: #A7C7E7;
+  color: #274472; /*Aqui se cambia el color del texto*/
+}
+
+ion-label {
+  color: #274C77;
+}
+
+ion-input {
+  color: #1A1A1A;
+}
+
+

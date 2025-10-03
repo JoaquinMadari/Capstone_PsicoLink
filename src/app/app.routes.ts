@@ -27,6 +27,7 @@ export const routes: Routes = [
       import('./pages/home/home.page').then((m) => m.HomePage),
   },
 
+
   {
     path: 'historial',
     loadComponent: () =>
@@ -44,5 +45,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage)
   },
 
+
+  {
+    path: 'search',
+    loadComponent: () => import('./pages/search/search.page').then( m => m.SearchPage)
+  },
 ];
 

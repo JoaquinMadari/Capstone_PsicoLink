@@ -23,24 +23,8 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './historial.page.html',
   styleUrls: ['./historial.page.scss'],
   standalone: true,
-  imports: [
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButton,
-    IonButtons,
-    IonBackButton,
-    CommonModule,
-    FormsModule,
-  ]
+  imports: [CommonModule, FormsModule, IonContent, IonHeader, IonTitle, IonToolbar, 
+    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonButton, IonButtons, IonBackButton]
 })
 export class HistorialPage {
   citas = [

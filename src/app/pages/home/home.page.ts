@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+
 import { Router } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-IonButton, IonButtons
-} from '@ionic/angular/standalone'
+IonButton, IonButtons} from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-home',

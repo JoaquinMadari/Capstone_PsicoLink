@@ -5,7 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Auth } from 'src/app/services/auth';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
 IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption
-} from '@ionic/angular/standalone'
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-agendar-cita',
@@ -13,7 +13,7 @@ IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption
   styleUrls: ['./agendar-cita.page.scss'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption]
+  IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption]
 })
 export class AgendarCitaPage implements OnInit {
   form = this.fb.group({

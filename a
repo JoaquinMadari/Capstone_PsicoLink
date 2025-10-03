@@ -1,0 +1,64 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Citas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Agendar nueva cita</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form">
+        <ion-item>
+          <ion-label position="stacked">Profesional</ion-label>
+          <ion-select formControlName="professional">
+            <ion-select-option *ngFor="let p of professionals" [value]="p.id">
+              {{ p.username }} • {{ p.specialty || '—' }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Fecha</ion-label>
+          <ion-datetime displayFormat="DD MMM YYYY" formControlName="date"></ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Hora</ion-label>
+          <ion-datetime displayFormat="HH:mm" pickerFormat="HH:mm" formControlName="time"></ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Duración (min)</ion-label>
+          <ion-input type="number" formControlName="duration"></ion-input>
+        </ion-item>
+
+        <ion-button expand="block" class="ion-margin-top" (click)="onCreate()" [disabled]="!form.valid">Agendar</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="mt-16">
+    <ion-card-header>
+      <ion-card-title>Mis próximas citas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let a of appointments">
+          <ion-label>
+            <h2>{{ a.start_datetime | date:'medium' }} ({{ a.duration_minutes }} min)</h2>
+            <p>Con: {{ a.professional_username || a.professional }}</p>
+            <p>Status: {{ a.status }}</p>
+          </ion-label>
+          <ion-button slot="end" color="danger" *ngIf="a.status === 'scheduled'" (click)="cancel(a.id)">Cancelar</ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+

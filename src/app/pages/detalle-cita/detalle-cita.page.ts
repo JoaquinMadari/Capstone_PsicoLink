@@ -13,25 +13,13 @@ import {
   IonCardSubtitle
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
-
 @Component({
   selector: 'app-detalle-cita',
   templateUrl: './detalle-cita.page.html',
   styleUrls: ['./detalle-cita.page.scss'],
   standalone: true,
-  imports: [
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    CommonModule
-  ]
+  imports: [CommonModule, IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+  
 })
 export class DetalleCitaPage {
   profesional!: string;

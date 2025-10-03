@@ -7,16 +7,13 @@ import { Auth } from '../../services/auth';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
   IonItem, IonLabel, IonInput, IonSegment, IonSegmentButton, IonButton 
 } from '@ionic/angular/standalone'
-
+import { IonicModule } from '@ionic/angular';
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, 
-  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonSegment, 
-  IonSegmentButton, IonButton]
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,IonicModule,RouterModule,IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
