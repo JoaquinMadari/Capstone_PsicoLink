@@ -1,0 +1,94 @@
+/* Estilo general */
+ion-toolbar {
+  --background: #274472;
+  --color: #fff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+.welcome-card {
+  --background: #f8fbfd;
+  border-radius: 14px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+
+  ion-card-title {
+    color: #274472;
+    font-weight: 600;
+  }
+
+  ion-card-subtitle {
+    color: #6B7A8F;
+  }
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.action-card {
+  --background: #e0e5ec;
+  border-radius: 12px;
+  text-align: center;
+
+  ion-card-title {
+    color: #4A90E2;
+    font-weight: 500;
+  }
+
+  &:hover {
+    --background: #4A90E2;
+    ion-card-title {
+      color: #fff;
+    }
+  }
+}
+
+/* 🔹 Estilo para soporte, igual al historial */
+ion-content.soporte-page,
+.soporte-page ion-content {
+  --background: #f4f6f9; /* Fondo claro */
+}
+
+ion-card {
+  --background: #f8fbfd;
+  border-radius: 14px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+
+  ion-card-title {
+    font-weight: 700; /* Negrita fuerte */
+    color: #000; /* Negro fuerte */
+  }
+
+  ion-card-content p {
+    color: #000;
+    font-size: 14px;
+    font-weight: 600; /* Más negrita en el párrafo */
+  }
+}
+
+
+ion-item {
+  --background: #ffffff; /* Fondo blanco */
+  border-radius: 10px;
+  margin: 6px 12px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
+
+  ion-label {
+    font-weight: 600;
+    color: #000;
+  }
+
+  ion-textarea {
+    color: #000;
+  }
+}
+
+ion-button {
+  --border-radius: 10px;
+  font-weight: 600;
+}

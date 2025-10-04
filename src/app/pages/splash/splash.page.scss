@@ -4,7 +4,7 @@ ion-page {
 }
 
 ion-content {
-  --ion-background-color: #e0f2f1; // Un color de fondo suave, como el verde menta
+  --ion-background-color: #e0f2f1; 
 }
 
 .splash-container {
@@ -16,7 +16,7 @@ ion-content {
 }
 
 .logo {
-  width: 500px; // Ajusta el tamaño de tu logo
+  width: 500px; 
   height: auto;
   margin-bottom: 10px;
 }
@@ -24,12 +24,12 @@ ion-content {
 .app-title {
   font-size: 2.5em;
   font-weight: bold;
-  color: #00796b; // Un color oscuro para el texto
+  color: #00796b; 
 }
 
 .slogan {
   font-size: 2em;
-  color: #4db6ac; // Un color más claro
+  color: #4db6ac; 
 }
 
 ion-spinner {

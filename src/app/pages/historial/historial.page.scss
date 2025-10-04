@@ -47,3 +47,45 @@ ion-content {
     }
   }
 }
+
+/* 🔹 Correcciones de estilos para historial */
+/* 🔹 Correcciones de estilos para historial */
+.historial-page {
+  ion-content {
+    --background: #f4f6f9; /* Fondo gris claro */
+  }
+
+  ion-list {
+    background: transparent; /* Quitar fondo negro del contenedor */
+  }
+
+  ion-item {
+    --background: #ffffff; /* Fondo blanco en cada ítem */
+    color: #000; /* 🔹 Forzar texto en negro */
+  }
+
+  ion-label h2 {
+    color: #000; /* Nombre del profesional en negro */
+    font-weight: 600;
+  }
+
+  ion-label p {
+    color: #333; /* Fecha y hora en gris oscuro */
+  }
+
+  ion-card-header {
+    --background: #f4f6f9;
+  }
+   ion-card-title {
+    font-weight: 700; /* 🔹 negrita fuerte */
+    color: #000;      /* 🔹 negro */
+  }
+
+  ion-card-subtitle {
+    font-weight: 600; /* 🔹 semi-negrita */
+    color: #333;      /* 🔹 gris oscuro */
+  }
+
+
+}
+
