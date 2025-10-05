@@ -7,6 +7,9 @@ from .models import Appointment
 from django.conf import settings
 from .models import Appointment
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from datetime import timedelta
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -47,6 +50,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 User = get_user_model()
 
+ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
+    'psicologo': (30, 120),
+    'terapeuta': (30, 90),
+    'psiquiatra': (15, 60),
+    'default': (15, 120),
+})
+
+
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = serializers.PrimaryKeyRelatedField(read_only=True)
     professional = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(), required=True)
@@ -54,61 +65,95 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = ('id','patient','professional','start_datetime','duration_minutes','end_datetime','status','notes','created_at')
-        read_only_fields = ('status','created_at','end_datetime')
+        fields = (
+            'id', 'patient', 'professional','professional_role',
+            'start_datetime', 'duration_minutes',
+            'end_datetime', 'status', 'notes', 'created_at'
+        )
+        read_only_fields = ('status', 'created_at', 'end_datetime', 'professional_role')
 
     def get_end_datetime(self, obj):
         return obj.end_datetime
 
+    # --- Validaciones individuales ---
     def validate_professional(self, value):
-        # Ensure professional has role 'profesional' (assumes CustomUser has 'role')
         if getattr(value, 'role', None) != 'profesional':
-            raise serializers.ValidationError("Selected user is not a professional.")
+            raise serializers.ValidationError("El usuario seleccionado no es un profesional.")
         return value
 
     def validate_start_datetime(self, value):
-        # disallow booking in the past
-        if value < timezone.now():
-            raise serializers.ValidationError("Cannot schedule an appointment in the past.")
+        now = timezone.now()
+        if value < now:
+            raise serializers.ValidationError("No se puede agendar en el pasado.")
         return value
 
+    def validate_duration_minutes(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Duración inválida.")
+        return value
+
+    # --- Validación integral ---
     def validate(self, data):
-        """Check for overlapping appointments for the professional."""
-        start = data.get('start_datetime')
-        duration = data.get('duration_minutes', 50)
-        end = start + timezone.timedelta(minutes=duration)
+        start = data.get('start_datetime') or getattr(self.instance, 'start_datetime', None)
+        duration = data.get('duration_minutes') or getattr(self.instance, 'duration_minutes', None)
+        professional = data.get('professional') or getattr(self.instance, 'professional', None)
 
-        professional = data.get('professional')
-        # For update operations, instance exists
-        instance = getattr(self, 'instance', None)
+        if not start or not professional or not duration:
+            # Se validan individualmente más arriba
+            return data
 
-        qs = Appointment.objects.filter(
-            professional=professional,
-            status='scheduled'
+        # Duración coherente por rol
+        specialty = getattr(professional, 'specialty', None)
+
+        if getattr(professional, 'role', 'paciente') != 'profesional' or not specialty:
+            role_key = 'default'
+        else:
+            # Usamos la especialidad en minúsculas como clave
+            role_key = specialty.lower()
+
+        min_dur, max_dur = ROLE_DURATION_LIMITS.get(role_key, ROLE_DURATION_LIMITS['default'])
+        if not (min_dur <= duration <= max_dur):
+            raise serializers.ValidationError({
+                'duration_minutes': f"La duración debe estar entre {min_dur} y {max_dur} minutos para el profesional con especialidad '{specialty}'."
+            })
+
+        # Verificar solapamientos
+        end = start + timedelta(minutes=duration)
+
+        # Filtramos citas activas del mismo profesional
+        qs = Appointment.objects.filter(professional=professional, status='scheduled')
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        # Solapamiento directo en el ORM
+        overlapping = qs.filter(
+            start_datetime__lt=end,
+            start_datetime__gt=start - timedelta(hours=3)  # optimización para no traer citas antiguas
         )
 
-        # Exclude current instance when updating
-        if instance:
-            qs = qs.exclude(pk=instance.pk)
-
-        # Overlap check/verificar que las fechas no se sobrelapen: existing.start < new_end and existing.end > new_start
-        overlapping = []
-        for a in qs:
-            a_start = a.start_datetime
-            a_end = a.end_datetime
-            if (a_start < end) and (a_end > start):
-                overlapping.append(a)
-
-        if overlapping:
-            raise serializers.ValidationError("The professional is not available at the selected time (conflicts with another appointment).")
+        for a in overlapping:
+            if (a.start_datetime < end) and (a.end_datetime > start):
+                raise serializers.ValidationError(
+                    "El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible."
+                )
 
         return data
 
+    # --- Creación / actualización atómicas ---
     def create(self, validated_data):
-        # patient set from view (request.user)
         request = self.context.get('request')
-        if request and request.user and request.user.is_authenticated:
-            validated_data['patient'] = request.user
-        return super().create(validated_data)
+        with transaction.atomic():
+            if request and request.user and request.user.is_authenticated:
+                validated_data['patient'] = request.user
+
+            # Capturamos automáticamente el rol del profesional
+            professional = validated_data.get('professional')
+            if professional:
+                validated_data['professional_role'] = getattr(professional, 'specialty', 'desconocido')
+            return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            return super().update(instance, validated_data)
     
 # busca profesionales disponibles en un horario dado

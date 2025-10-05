@@ -125,6 +125,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'api.CustomUser'
 
+# ---- Configuración de reglas del negocio ----
+ROLE_DURATION_LIMITS = {
+    'psicologo': (30, 120),
+    'terapeuta': (30, 90),
+    'psiquiatra': (15, 60),
+    'default': (15, 120),
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

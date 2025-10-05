@@ -48,38 +48,53 @@ class IsOwnerOrProfessionalOrReadOnly(permissions.BasePermission):
         # allow owner patient to modify their appointment (for cancellation) and professional to mark completed
         return obj.patient == request.user or obj.professional == request.user
 
+
+
+
 class AppointmentViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
+    """
+    ViewSet que gestiona las citas entre pacientes y profesionales.
+    Incluye validación de permisos y representación mejorada de datos.
+    """
+    queryset = Appointment.objects.all().select_related('patient', 'professional')
     serializer_class = AppointmentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrProfessionalOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """
-        If user es patient -> return / regresa sus citas.
-        If user es professional -> return / regresa sus citas como professional.
-        Admin -> all.
-        """
         user = self.request.user
         if user.is_staff:
-            return Appointment.objects.all()
+            return Appointment.objects.all().select_related('patient', 'professional')
         if getattr(user, 'role', None) == 'profesional':
-            return Appointment.objects.filter(professional=user)
-        # default: patient
-        return Appointment.objects.filter(patient=user)
+            return Appointment.objects.filter(professional=user).select_related('patient', 'professional')
+        return Appointment.objects.filter(patient=user).select_related('patient', 'professional')
 
     def perform_create(self, serializer):
-        # patient will be assigned in serializer.create using request context,
-        # but ensure professional exists and is valid
-        serializer.save()
+        """
+        Al crear una cita, el paciente se asigna automáticamente.
+        Además, garantizamos que el rol del profesional se guarde correctamente.
+        """
+        appointment = serializer.save()
+        if appointment.professional:
+            appointment.professional_role = getattr(appointment.professional, 'role', 'desconocido')
+            appointment.save(update_fields=['professional_role'])
 
-    @action(detail=False, methods=['get'], url_path='professional/(?P<professional_id>[^/.]+)')
-    def by_professional(self, request, professional_id=None):
-        """List appointments for a given professional (if permitted)."""
-        qs = Appointment.objects.filter(professional__id=professional_id)
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+    def create(self, request, *args, **kwargs):
+        """
+        Redefinimos create() para devolver información más útil tras crear la cita.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
-# busca profesionales disponibles en un horario dado    
+        # Reconsultamos el objeto recién creado para incluir datos del profesional/paciente
+        appointment = serializer.instance
+        response_data = AppointmentSerializer(appointment, context={'request': request}).data
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+
+
 class ProfesionalSearchView(generics.ListAPIView):
     serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]

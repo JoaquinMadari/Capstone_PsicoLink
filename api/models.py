@@ -2,7 +2,9 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
-from django.utils import timezone
+from django.contrib.postgres.fields import DateTimeRangeField
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.db.models import F
 from datetime import timedelta
 
 class CustomUser(AbstractUser):
@@ -27,10 +29,15 @@ class Appointment(models.Model):
         ('completed', 'Completed'),
     ]
 
-    patient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='appointments_as_patient', on_delete=models.CASCADE)
-    professional = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='appointments_as_professional', on_delete=models.CASCADE)
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='appointments_as_patient', on_delete=models.CASCADE
+    )
+    professional = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='appointments_as_professional', on_delete=models.CASCADE
+    )
+    professional_role = models.CharField(max_length=50, blank=True, null=True)
     start_datetime = models.DateTimeField()
-    duration_minutes = models.PositiveIntegerField(default=50)  # duración por defecto 50 min
+    duration_minutes = models.PositiveIntegerField(default=50)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
