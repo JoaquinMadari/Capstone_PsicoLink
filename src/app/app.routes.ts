@@ -41,7 +41,6 @@ export const routes: Routes = [
       ),
   },
   {
-<<<<<<< HEAD
     path: 'Agendar',
     loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage)
   },
@@ -51,13 +50,11 @@ export const routes: Routes = [
     path: 'search',
     loadComponent: () => import('./pages/search/search.page').then( m => m.SearchPage)
   },
-=======
-  path: 'soporte',
-  loadComponent: () =>
-    import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
-},
+  {
+    path: 'soporte',
+    loadComponent: () =>
+      import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
+  },
 
-
->>>>>>> e291774 (Frontend de la page de soporte)
 ];
 

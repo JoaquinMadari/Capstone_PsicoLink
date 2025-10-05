@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastController } from '@ionic/angular';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Appointment } from 'src/app/services/appointment';
+import { AppointmentService } from 'src/app/services/appointment';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
 IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime
 } from '@ionic/angular/standalone';
@@ -28,7 +28,7 @@ export class AgendarCitaPage implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private svc: Appointment, //usamos Auth porque contiene createAppointment etc.
+    private svc: AppointmentService,
     private toastCtrl: ToastController
   ) {}
 
@@ -38,68 +38,55 @@ export class AgendarCitaPage implements OnInit {
   }
 
   async presentToast(msg: string) {
-    const t = await this.toastCtrl.create({ message: msg, duration: 2000 });
-    await t.present();
+    const toast = await this.toastCtrl.create({ message: msg, duration: 2500 });
+    await toast.present();
   }
 
   loadProfessionals() {
-    //idealmente tener un endpoint /api/professionals/
     fetch('http://localhost:8000/api/search/')
-      .then(r => r.json())
+      .then(res => res.json())
       .then(data => { this.professionals = data; })
       .catch(() => { this.professionals = []; });
   }
 
   loadAppointments() {
     this.svc.getAppointments().subscribe({
-      next: (res: any) => {
-        this.appointments = res;
-      },
+      next: (res) => { this.appointments = res; },
       error: (err) => console.error(err)
     });
   }
 
-  logFormStatus() {
-  console.log("--- ESTADO DE VALIDACIÓN DEL FORMULARIO ---");
-  console.log("Formulario General Válido:", this.form.valid);
-  
-  // Muestra el estado (VALID/INVALID) y el valor de cada campo
-  console.log("professional.status:", this.form.get('professional')?.status, "Valor:", this.form.get('professional')?.value);
-  console.log("date.status:", this.form.get('date')?.status, "Valor:", this.form.get('date')?.value);
-  console.log("time.status:", this.form.get('time')?.status, "Valor:", this.form.get('time')?.value);
-  console.log("duration.status:", this.form.get('duration')?.status, "Valor:", this.form.get('duration')?.value);
-  console.log("------------------------------------------");
-}
-
   onCreate() {
     if (!this.form.valid) return;
 
-    const val = this.form.value;
-    const dateValue = val.date! as string; 
-    const timeValue = val.time! as string; 
+    const { professional, date: dateValue, time: timeValue, duration } = this.form.value;
+    const date = dateValue ?? ''; 
+    const time = timeValue ?? '';
 
-    const datePart = dateValue.split('T')[0];
-    
-    let timePart = timeValue;
-    timePart = timePart.includes('T') ? timePart.split('T')[1].substring(0, 5) : timePart.substring(0, 5);
-    
+    const datePart = (date as string).split('T')[0];
+    const timePart = (time as string).includes('T')
+      ? (time as string).split('T')[1].substring(0, 5)
+      : (time as string).substring(0, 5);
 
     const startDatetimeISO = `${datePart}T${timePart}:00Z`;
 
     const payload = {
-        professional: val.professional,
-        start_datetime: startDatetimeISO,
-        duration_minutes: val.duration
+      professional,
+      start_datetime: startDatetimeISO,
+      duration_minutes: duration
     };
 
     this.svc.createAppointment(payload).subscribe({
       next: () => {
-        this.presentToast('Cita agendada');
+        this.presentToast('Cita agendada correctamente');
         this.loadAppointments();
       },
       error: (err) => {
-        console.error(err);
-        this.presentToast('Error agendando');
+        const msg =
+          err.error?.duration_minutes ||
+          err.error?.non_field_errors ||
+          'Error al agendar la cita. Revise los datos.';
+        this.presentToast(msg);
       }
     });
   }
