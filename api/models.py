@@ -42,15 +42,33 @@ class Appointment(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    time_range = DateTimeRangeField(null=True, blank=True)
+
+    @property
+    def end_datetime(self):
+        return self.start_datetime + timedelta(minutes=self.duration_minutes)
+    
+    def save(self, *args, **kwargs):
+        # Aseguramos que 'time_range' se calcule antes de guardar
+        self.time_range = [self.start_datetime, self.end_datetime]
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ['start_datetime']
         indexes = [
             models.Index(fields=['professional', 'start_datetime']),
         ]
-
-    @property
-    def end_datetime(self):
-        return self.start_datetime + timedelta(minutes=self.duration_minutes)
+        
+        constraints = [
+            ExclusionConstraint(
+                name='appointment_prof_overlap',
+                expressions=[
+                    (F('time_range'), '&&'), # El operador '&&' verifica solapamiento en rangos
+                    (F('professional'), '='), # La exclusión solo aplica si el 'professional' es el mismo
+                ],
+                condition=models.Q(status='scheduled') # Solo aplica a citas activas
+            )
+        ]
 
     def __str__(self):
         return f"{self.patient} with {self.professional} @ {self.start_datetime.isoformat()} ({self.status})"

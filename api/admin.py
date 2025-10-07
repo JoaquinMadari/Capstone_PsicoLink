@@ -6,26 +6,21 @@ from datetime import timedelta
 
 # Register your models here.
 
-# 1. Heredar la clase UserAdmin
 class CustomUserAdmin(UserAdmin):
-    # Campos a mostrar en la lista (tabla) del panel de administración
     list_display = UserAdmin.list_display + ('role', 'specialty')
     
-    # Heredamos los fieldsets por defecto y añadimos uno nuevo al final
     fieldsets = UserAdmin.fieldsets + (
         ('Información Personalizada', {'fields': ('role', 'specialty', 'license_number')}),
     )
 
-    # 3. También es buena práctica añadir tus campos al formulario de "añadir" usuario
     add_fieldsets = UserAdmin.add_fieldsets + (
         (None, {'fields': ('role', 'specialty', 'license_number')}),
     )
 
-# y luego REGISTRA tu modelo con tu clase CustomUserAdmin
 try:
     admin.site.unregister(CustomUser)
 except admin.sites.NotRegistered:
-    pass # Ya está desregistrado o nunca lo estuvo.
+    pass
 
 admin.site.register(CustomUser, CustomUserAdmin)
 
@@ -59,14 +54,10 @@ class AppointmentAdmin(admin.ModelAdmin):
         'notes'
     )
     
-    # Campos de solo lectura (no se pueden editar en el admin)
     readonly_fields = ('created_at',)
 
-    # Método para que end_datetime aparezca en list_display
     def end_datetime(self, obj):
         return obj.end_datetime
     end_datetime.short_description = 'Hora Fin'
 
-# --- 2. Registrar el Modelo ---
-# Aquí le decimos a Django que use nuestra clase personalizada para este modelo
 admin.site.register(Appointment, AppointmentAdmin)

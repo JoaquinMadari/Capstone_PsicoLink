@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,8 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'api',
-    'corsheaders',
     'django_filters',
+    'django.contrib.postgres',
 ]
 
 REST_FRAMEWORK = {
@@ -54,6 +57,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -61,10 +65,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True   # Para desarrollo (en producción mejor definir orígenes)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8100", # Para desarrollo local de Ionic
+    "http://127.0.0.1:8100",
+    #"https://tu-frontend-en-render.onrender.com", 
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8100",
+    # "https://tu-frontend-en-render.onrender.com", 
+]
 
 ROOT_URLCONF = 'psicolink_backend.urls'
 
@@ -91,15 +103,13 @@ WSGI_APPLICATION = 'psicolink_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'psicolinkdb',
-        'USER': 'lujofer',
-        'PASSWORD': 'QhzLMElvwYNhLYlrBdYLEgVuJQwHiTc6',
-        'HOST': 'dpg-d3a6hdh5pdvs73cke8l0-a.oregon-postgres.render.com',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+        'OPTIONS': {'sslmode': 'require'}
     }
 }
 

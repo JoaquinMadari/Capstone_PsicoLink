@@ -3,7 +3,6 @@ from .models import CustomUser
 from django.contrib.auth.password_validation import validate_password
 
 from django.utils import timezone
-from .models import Appointment
 from django.conf import settings
 from .models import Appointment
 from django.contrib.auth import get_user_model
@@ -116,28 +115,56 @@ class AppointmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'duration_minutes': f"La duración debe estar entre {min_dur} y {max_dur} minutos para el profesional con especialidad '{specialty}'."
             })
+        
+        #VALIDACIÓN: Solapamiento con Citas del PACIENTE
+        request = self.context.get('request')
+        patient = request.user if request and request.user.is_authenticated else None
+        patient = data.get('patient') or patient # Si el campo patient se puede modificar
 
         # Verificar solapamientos
         end = start + timedelta(minutes=duration)
 
-        # Filtramos citas activas del mismo profesional
-        qs = Appointment.objects.filter(professional=professional, status='scheduled')
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
+        if patient:
+            #Filtrar citas activas del mismo paciente, excluyendo la actual si es una actualización
+            patient_qs = Appointment.objects.filter(
+                patient=patient, 
+                status='scheduled'
+            )
+            if self.instance:
+                patient_qs = patient_qs.exclude(pk=self.instance.pk)
 
-        # Solapamiento directo en el ORM
-        overlapping = qs.filter(
-            start_datetime__lt=end,
-            start_datetime__gt=start - timedelta(hours=3)  # optimización para no traer citas antiguas
-        )
-
-        for a in overlapping:
-            if (a.start_datetime < end) and (a.end_datetime > start):
+            #Verificar solapamiento
+            patient_overlapping = [
+                a for a in patient_qs.all() 
+                if (a.start_datetime < end) and (a.end_datetime > start)
+            ]
+            
+            if patient_overlapping:
+                # Se encontró una cita del paciente que se solapa
                 raise serializers.ValidationError(
-                    "El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible."
+                    "Ya tienes una cita agendada que se solapa con este horario. Por favor revisa tus citas programadas."
                 )
 
+        #VALIDACIÓN: Solapamiento con Citas del Profesional
+        # Filtramos citas activas del mismo profesional
+        qs_professional = Appointment.objects.filter(professional=professional, status='scheduled')
+        if self.instance:
+            qs_professional = qs_professional.exclude(pk=self.instance.pk)
+            
+        # NOTA: Esto requiere que el profesional (la cita 'a') tenga el método end_datetime
+        #       calculado correctamente, lo cual ya hace tu modelo Appointment.
+        overlapping_professional = [
+            a for a in qs_professional.all() 
+            if (a.start_datetime < end) and (a.end_datetime > start)
+        ]
+
+        if overlapping_professional: 
+            raise serializers.ValidationError(
+                "El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible."
+            )
+
         return data
+    
 
     # --- Creación / actualización atómicas ---
     def create(self, validated_data):
