@@ -59,35 +59,44 @@ export class AgendarCitaPage implements OnInit {
   onCreate() {
     if (!this.form.valid) return;
 
-    const { professional, date: dateValue, time: timeValue, duration } = this.form.value;
-    const date = dateValue ?? ''; 
-    const time = timeValue ?? '';
+    const { professional, date: dateValue, time: timeValue, duration } = this.form.value;    
+    const date = (dateValue ?? '') as string; 
+    const time = (timeValue ?? '') as string;
 
-    const datePart = (date as string).split('T')[0];
-    const timePart = (time as string).includes('T')
-      ? (time as string).split('T')[1].substring(0, 5)
-      : (time as string).substring(0, 5);
+    if (!date || !time) {
+      this.presentToast('Por favor selecciona la fecha y hora.');
+      return;
+    }
 
-    const startDatetimeISO = `${datePart}T${timePart}:00Z`;
+    const datePart = date.split('T')[0];
+    const timePart = time.split(':').slice(0, 2).join(':');
+    const startDatetimeLocal = `${datePart}T${timePart}:00`; 
 
     const payload = {
-      professional,
-      start_datetime: startDatetimeISO,
-      duration_minutes: duration
+        professional,
+        start_datetime: startDatetimeLocal, 
+        duration_minutes: duration
     };
 
     this.svc.createAppointment(payload).subscribe({
-      next: () => {
-        this.presentToast('Cita agendada correctamente');
-        this.loadAppointments();
-      },
-      error: (err) => {
-        const msg =
-          err.error?.duration_minutes ||
-          err.error?.non_field_errors ||
-          'Error al agendar la cita. Revise los datos.';
-        this.presentToast(msg);
-      }
+        next: () => {
+            this.presentToast('Cita agendada correctamente');
+            this.loadAppointments();
+        },
+        error: (err) => {
+            const errors = err.error || {};
+            let msg = 
+              errors.start_datetime?.[0] ||
+              errors.duration_minutes?.[0] || 
+              errors.non_field_errors?.[0] || 
+              'Error al agendar la cita. Revise los datos.';
+
+            if (Array.isArray(msg)) {
+            msg = msg[0];
+            }
+                
+            this.presentToast(msg);
+        }
     });
   }
 
