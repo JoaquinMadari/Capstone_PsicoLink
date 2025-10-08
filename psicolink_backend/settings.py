@@ -143,17 +143,28 @@ ROLE_DURATION_LIMITS = {
     'default': (15, 120),
 }
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+#TIME_ZONE = 'UTC'
 
+#USE_I18N = True
+
+#USE_TZ = True
+
+# 1. Zona horaria de la aplicación: Santiago (Chile)
+TIME_ZONE = 'America/Santiago' 
+
+# 2. Idioma de la aplicación: Español de Chile
+LANGUAGE_CODE = 'es-cl' 
+
+# 3. Activa el soporte para internacionalización
 USE_I18N = True
 
-USE_TZ = True
+# 4. Activa el soporte para zonas horarias (MANDATORIO para el manejo correcto de horarios)
+USE_TZ = True 
 
 
 # Static files (CSS, JavaScript, Images)
