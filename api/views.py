@@ -1,16 +1,20 @@
 from django.shortcuts import render
 
 from rest_framework import generics
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser
-from .serializers import RegisterSerializer, UserSerializer
+from .models import CustomUser, Appointment
+from .serializers import (RegisterSerializer, UserSerializer, AppointmentSerializer,
+    PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
+    ProfessionalSearchSerializer)
 
 
 from rest_framework import viewsets, permissions, status
-from .models import Appointment
-from .serializers import AppointmentSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
@@ -21,20 +25,38 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny,) # Permitir el acceso sin autenticación
     serializer_class = RegisterSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
 
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            "user": UserSerializer(user).data,
-            "token": str(refresh.access_token)
-        })
+class ProfileSetupView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [JWTAuthentication]
 
+    def post(self, request):
+        user = request.user
+        data = request.data
+        serializer = None # Inicializar el serializer
+        
+        # Lógica de asignación de serializador
+        if user.role == 'profesional':
+            serializer = PsicologoProfileSerializer(data=data, context={'user': user})
+            
+        elif user.role == 'paciente':
+            serializer = PacienteProfileSerializer(data=data, context={'user': user})
+            
+        elif user.role == 'organizacion': # <-- AGREGAR LÓGICA DE ORGANIZACIÓN
+            serializer = OrganizacionProfileSerializer(data=data, context={'user': user})
+            
+        else:
+            return Response({"error": "Rol no válido para configuración de perfil."}, status=400)
+
+        # Validación y Guardado
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Perfil completado exitosamente"}, status=200)
+        
+        return Response(serializer.errors, status=400)
 
 
 
@@ -96,12 +118,20 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
 
 class ProfesionalSearchView(generics.ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = ProfessionalSearchSerializer 
+    
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['specialty']
-    search_fields = ['username', 'specialty']
-    ordering_fields = ['username']
+    
+    # 1. Ajuste de Filtrado
+    # El campo está en el modelo Profile, relacionado al User (CustomUser)
+    filterset_fields = ['psicologoprofile__specialty'] # <--- CORRECCIÓN
 
+    # 2. Ajuste de Búsqueda
+    # Buscamos en los campos del Usuario Y el campo del Perfil
+    search_fields = ['username', 'psicologoprofile__specialty'] # <--- CORRECCIÓN
+
+    # 3. Ajuste de Ordenación (si quieres ordenar por especialidad)
+    ordering_fields = ['username', 'psicologoprofile__specialty']
     def get_queryset(self):
         queryset = CustomUser.objects.filter(role='profesional')
         available_only = self.request.query_params.get('available', None)

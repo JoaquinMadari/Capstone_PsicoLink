@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 from django.utils import timezone
 from django.conf import settings
@@ -11,37 +13,157 @@ from datetime import timedelta
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
-
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password', 'password2', 'role', 'specialty', 'license_number')
-        extra_kwargs = {'email': {'required': True}}
-
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Las contraseñas no coinciden."})
-        return attrs
+        # Solo necesitamos los campos de cuenta y rol para la Fase 1
+        fields = ('email', 'password', 'role') 
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        validated_data.pop('password2')
         user = CustomUser.objects.create_user(
-            username=validated_data['username'],
+            username=validated_data['email'], # Usamos el email como username para login
             email=validated_data['email'],
-            role=validated_data.get('role', 'paciente'),
-            specialty=validated_data.get('specialty', ''),
-            license_number=validated_data.get('license_number', '')
+            password=validated_data['password'],
+            role=validated_data['role']
         )
-        user.set_password(validated_data['password'])
-        user.save()
+        # IMPORTANTE: No creamos el perfil detallado aquí. Se hace después.
         return user
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'role', 'specialty', 'license_number')
+        fields = ('id', 'username', 'email', 'role')
+
+
+#--------------------------------------------------
+# ----- AQUI ESTAN LOS SERIALIZERS POR ROL --------
+#--------------------------------------------------
+
+class PsicologoProfileSerializer(serializers.ModelSerializer):
+    #Serializador para que el profesional complete su perfil después del registro.
+    
+    
+    address = serializers.CharField(required=False, allow_blank=True)
+    payment_method = serializers.CharField(required=False, allow_blank=True)
+
+    #certificates = serializers.FileField(required=False) 
+    #curriculum_vitae = serializers.FileField(required=False)
+
+    #TEMPORAL QUITAR ESTO DESPUES Y AGREGAR LO QUE ESTA ARRIBA
+    certificates = serializers.CharField(required=False, allow_blank=True) 
+    curriculum_vitae = serializers.CharField(required=False, allow_blank=True)
+    
+    #TEMPORAL
+    experience_years = serializers.IntegerField(required=False, allow_null=True)
+    
+    class Meta:
+        model = PsicologoProfile
+        # Incluye todos los campos OBLIGATORIOS de la Fase 2 para el psicólogo.
+        # Los campos NO EDITABLES (cases_attended, rating) NO deben ir aquí.
+        fields = [
+            'rut', 'age', 'gender', 'nationality', 'phone', 
+            'specialty', 'license_number', 'main_focus', 
+            'therapeutic_techniques', 'style_of_attention', 
+            'attention_schedule', 'work_modality', 'certificates',
+            'address', 'payment_method',
+            
+            # Opcionales si quieres que se rellenen aquí también
+            'inclusive_orientation', 'languages', 'experience_years', 'curriculum_vitae'
+        ]
+        
+    def create(self, validated_data):
+        # La vista ProfileSetupView le pasa el usuario autenticado
+        user = self.context['user'] 
+        
+        validated_data.pop('certificates', None)
+        validated_data.pop('curriculum_vitae', None)
+        validated_data.pop('address', None)
+        validated_data.pop('payment_method', None)
+        
+        # Manejar experience_years si llega como cadena vacía
+        exp_years = validated_data.get('experience_years')
+        if exp_years == '' or exp_years is None:
+             # Si es opcional en el modelo (null=True), lo eliminamos para que guarde NULL
+             validated_data.pop('experience_years', None)
+
+        # Crear la instancia del perfil vinculada al usuario
+        profile = PsicologoProfile.objects.create(user=user, **validated_data)
+        return profile
+    
+
+class PacienteProfileSerializer(serializers.ModelSerializer):
+    #Serializador para que el paciente complete su perfil después del registro.
+    address = serializers.CharField(required=False, allow_blank=True)
+    payment_method = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta:
+        model = PacienteProfile
+        # Incluye todos los campos OBLIGATORIOS de la Fase 2 para el paciente.
+        fields = [
+            'rut', 'age', 'gender', 'nationality', 'phone', 
+            'inclusive_orientation', 'base_disease', 'disability',
+            'address', 'payment_method', # Campos comunes de BaseProfile
+            
+            # Opcionales
+            'description', 'consultation_reason', 
+            'preference_modality', 'preferred_focus'
+        ]
+        
+    def create(self, validated_data):
+        user = self.context['user']
+
+        validated_data.pop('address', None)
+        validated_data.pop('payment_method', None)
+
+        # Crear la instancia del perfil vinculada al usuario
+        profile = PacienteProfile.objects.create(user=user, **validated_data)
+        return profile
+    
+
+class OrganizacionProfileSerializer(serializers.ModelSerializer):
+    """ Serializador para que la organización complete su perfil después del registro. """
+    
+    class Meta:
+        model = OrganizacionProfile
+        # Incluye todos los campos de la Organización.
+        fields = [
+            'organization_name', 'organization_rut', 'contact_email',
+            'contact_phone', 'num_employees', 'company_sector', 
+            'location', 'service_type_required', 'preference_modality', 
+            'type_of_attention', 'service_frequency'
+        ]
+        
+    def create(self, validated_data):
+        user = self.context['user']
+        # Crear la instancia del perfil vinculada al usuario
+        profile = OrganizacionProfile.objects.create(user=user, **validated_data)
+        return profile
+    
+#--------------------------------------------
+# ----- FIN DE LOS SERIALIZERS POR ROL ------
+#--------------------------------------------
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    #Extiende el serializer de JWT para incluir el rol del usuario en la respuesta.
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Añade el campo 'role' al payload del token
+        token['role'] = user.role 
+
+        return token
+
+    def validate(self, attrs):
+        # Llama a la validación base (que obtiene los tokens)
+        data = super().validate(attrs)
+
+        # Añade el campo 'role' a la respuesta JSON del login
+        data['user'] = {
+            'role': self.user.role
+        }
+        
+        return data
 
 
 
@@ -98,11 +220,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
         professional = data.get('professional') or getattr(self.instance, 'professional', None)
 
         if not start or not professional or not duration:
-            # Se validan individualmente más arriba
             return data
 
         # Duración coherente por rol
-        specialty = getattr(professional, 'specialty', None)
+        try:
+            specialty = professional.psicologoprofile.specialty
+        except AttributeError:
+            # Si no tiene perfil o no es psicólogo, será None
+            specialty = None 
+
 
         if getattr(professional, 'role', 'paciente') != 'profesional' or not specialty:
             role_key = 'default'
@@ -176,7 +302,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
             # Capturamos automáticamente el rol del profesional
             professional = validated_data.get('professional')
             if professional:
-                validated_data['professional_role'] = getattr(professional, 'specialty', 'desconocido')
+                try:
+                    # Usar la especialidad si existe, si no, usar 'desconocido'
+                    specialty = professional.psicologoprofile.specialty
+                    validated_data['professional_role'] = specialty
+                except AttributeError:
+                    validated_data['professional_role'] = 'desconocido'
             return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -184,3 +315,20 @@ class AppointmentSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
     
 # busca profesionales disponibles en un horario dado
+class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerializer si UserSerializer no existe
+    # 1. Definimos 'specialty' usando SerializerMethodField
+    specialty = serializers.SerializerMethodField()
+    
+    class Meta(UserSerializer.Meta): # Heredamos la Meta si es posible
+        model = CustomUser
+        # Incluye todos los campos base que ya tenías y añade 'specialty'
+        fields = UserSerializer.Meta.fields + ('specialty',) 
+        
+    def get_specialty(self, obj):
+        """ Obtiene la especialidad del perfil relacionado. """
+        try:
+            # 2. Accede a través de la relación inversa (asumimos 'psicologoprofile')
+            return obj.psicologoprofile.specialty
+        except AttributeError:
+            # En caso de que el usuario no tenga perfil (aunque tu QS filtra por 'profesional')
+            return None

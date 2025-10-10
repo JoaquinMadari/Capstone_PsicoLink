@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -71,6 +73,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100", # Para desarrollo local de Ionic
     "http://127.0.0.1:8100",
     #"https://tu-frontend-en-render.onrender.com", 
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -141,6 +155,17 @@ ROLE_DURATION_LIMITS = {
     'terapeuta': (30, 90),
     'psiquiatra': (15, 60),
     'default': (15, 120),
+}
+
+SIMPLE_JWT = {
+    # Aumenta el tiempo de vida del Access Token (ej: de 5 minutos a 30 minutos)
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30), 
+    
+    # El Refresh Token (usado para obtener nuevos Access Tokens)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7), 
+
+    # (El resto de la configuración de SIMPLE_JWT)
+    # ...
 }
 
 # Internationalization

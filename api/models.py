@@ -7,18 +7,92 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.db.models import F
 from datetime import timedelta
 
+#-------------------------------------------------------------------
+# ----- AQUI SE EMPIEZAN A DEFINIR LOS PERFILES DE LOS USUARIOS ----
+#-------------------------------------------------------------------
+
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
         ('paciente', 'Paciente'),
         ('profesional', 'Profesional'),
+        ('organizacion', 'Organización'),
+        ('admin', 'Administrador'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='paciente')
-    specialty = models.CharField(max_length=100, blank=True, null=True)
-    license_number = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(unique=True)
+
 
     def __str__(self):
         return f"{self.username} ({self.role})"
     
+class BaseProfile(models.Model):
+    # Campos comunes
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    rut = models.CharField(max_length=12)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=50)
+    nationality = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15)
+        
+    class Meta:
+        abstract = True # No creará una tabla en la DB
+
+class PsicologoProfile(BaseProfile):
+    # Aquí van los campos OBLIGATORIOS y OPCIONALES del psicólogo
+    specialty = models.CharField(max_length=100)
+    license_number = models.CharField(max_length=50)
+    main_focus = models.CharField(max_length=100)
+    therapeutic_techniques = models.TextField()
+    style_of_attention = models.TextField()
+    attention_schedule = models.CharField(max_length=255) # Mejor un JSONField o FK a un modelo de Horario
+    work_modality = models.CharField(max_length=50)
+    certificates = models.FileField(upload_to='certificates/')
+    
+    # Campos opcionales
+    inclusive_orientation = models.BooleanField(default=False)
+    languages = models.CharField(max_length=255, blank=True, null=True)
+    experience_years = models.IntegerField(blank=True, null=True)
+    curriculum_vitae = models.FileField(upload_to='cvs/', blank=True, null=True)
+    
+    # Campos No Editables (Mantenimiento interno)
+    cases_attended = models.IntegerField(default=0, editable=False)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00, editable=False)
+
+
+class PacienteProfile(BaseProfile):
+    # Aquí van los campos OBLIGATORIOS y OPCIONALES del paciente
+    inclusive_orientation = models.BooleanField(default=False)
+    base_disease = models.CharField(max_length=100)
+    disability = models.BooleanField(default=False)
+    
+    # Campos Opcionales
+    description = models.TextField(blank=True, null=True)
+    consultation_reason = models.CharField(max_length=100, blank=True, null=True)
+    preference_modality = models.CharField(max_length=50, blank=True, null=True)
+    preferred_focus = models.CharField(max_length=100, blank=True, null=True)
+
+
+class OrganizacionProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
+    
+    # Campos Obligatorios
+    organization_name = models.CharField(max_length=255)
+    organization_rut = models.CharField(max_length=15)
+    contact_email = models.EmailField()
+    
+    # Campos Opcionales
+    contact_phone = models.CharField(max_length=15, blank=True, null=True)
+    num_employees = models.IntegerField(blank=True, null=True)
+    company_sector = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    service_type_required = models.CharField(max_length=100, blank=True, null=True)
+    preference_modality = models.CharField(max_length=50, blank=True, null=True)
+    type_of_attention = models.CharField(max_length=100, blank=True, null=True)
+    service_frequency = models.CharField(max_length=100, blank=True, null=True)
+
+#---------------------------------------------------
+# --- AQUI TERMINAN LOS PERFILES DE LOS USUARIOS ---
+#---------------------------------------------------
 
 User = settings.AUTH_USER_MODEL
 
