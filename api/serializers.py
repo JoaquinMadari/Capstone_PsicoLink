@@ -15,18 +15,16 @@ from datetime import timedelta
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        # Solo necesitamos los campos de cuenta y rol para la Fase 1
         fields = ('email', 'password', 'role') 
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
-            username=validated_data['email'], # Usamos el email como username para login
+            username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
             role=validated_data['role']
         )
-        # IMPORTANTE: No creamos el perfil detallado aquí. Se hace después.
         return user
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,8 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PsicologoProfileSerializer(serializers.ModelSerializer):
     #Serializador para que el profesional complete su perfil después del registro.
-    
-    
     address = serializers.CharField(required=False, allow_blank=True)
     payment_method = serializers.CharField(required=False, allow_blank=True)
 
@@ -58,8 +54,6 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = PsicologoProfile
-        # Incluye todos los campos OBLIGATORIOS de la Fase 2 para el psicólogo.
-        # Los campos NO EDITABLES (cases_attended, rating) NO deben ir aquí.
         fields = [
             'rut', 'age', 'gender', 'nationality', 'phone', 
             'specialty', 'license_number', 'main_focus', 
@@ -102,7 +96,7 @@ class PacienteProfileSerializer(serializers.ModelSerializer):
         fields = [
             'rut', 'age', 'gender', 'nationality', 'phone', 
             'inclusive_orientation', 'base_disease', 'disability',
-            'address', 'payment_method', # Campos comunes de BaseProfile
+            'address', 'payment_method',
             
             # Opcionales
             'description', 'consultation_reason', 
@@ -222,18 +216,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
         if not start or not professional or not duration:
             return data
 
-        # Duración coherente por rol
         try:
             specialty = professional.psicologoprofile.specialty
         except AttributeError:
-            # Si no tiene perfil o no es psicólogo, será None
             specialty = None 
 
 
         if getattr(professional, 'role', 'paciente') != 'profesional' or not specialty:
             role_key = 'default'
         else:
-            # Usamos la especialidad en minúsculas como clave
             role_key = specialty.lower()
 
         min_dur, max_dur = ROLE_DURATION_LIMITS.get(role_key, ROLE_DURATION_LIMITS['default'])
@@ -245,7 +236,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         #VALIDACIÓN: Solapamiento con Citas del PACIENTE
         request = self.context.get('request')
         patient = request.user if request and request.user.is_authenticated else None
-        patient = data.get('patient') or patient # Si el campo patient se puede modificar
+        patient = data.get('patient') or patient
 
         # Verificar solapamientos
         end = start + timedelta(minutes=duration)
@@ -272,13 +263,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
                 )
 
         #VALIDACIÓN: Solapamiento con Citas del Profesional
-        # Filtramos citas activas del mismo profesional
         qs_professional = Appointment.objects.filter(professional=professional, status='scheduled')
         if self.instance:
             qs_professional = qs_professional.exclude(pk=self.instance.pk)
             
-        # NOTA: Esto requiere que el profesional (la cita 'a') tenga el método end_datetime
-        #       calculado correctamente, lo cual ya hace tu modelo Appointment.
         overlapping_professional = [
             a for a in qs_professional.all() 
             if (a.start_datetime < end) and (a.end_datetime > start)
@@ -292,18 +280,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
         return data
     
 
-    # --- Creación / actualización atómicas ---
+    # --- Creación ---
     def create(self, validated_data):
         request = self.context.get('request')
         with transaction.atomic():
             if request and request.user and request.user.is_authenticated:
                 validated_data['patient'] = request.user
 
-            # Capturamos automáticamente el rol del profesional
+            # rol del profesional
             professional = validated_data.get('professional')
             if professional:
                 try:
-                    # Usar la especialidad si existe, si no, usar 'desconocido'
+                    # especialidad si existe, si no, usar 'desconocido'
                     specialty = professional.psicologoprofile.specialty
                     validated_data['professional_role'] = specialty
                 except AttributeError:
@@ -327,8 +315,7 @@ class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerialize
     def get_specialty(self, obj):
         """ Obtiene la especialidad del perfil relacionado. """
         try:
-            # 2. Accede a través de la relación inversa (asumimos 'psicologoprofile')
+            # 2. Accede a través de 'psicologoprofile'
             return obj.psicologoprofile.specialty
         except AttributeError:
-            # En caso de que el usuario no tenga perfil (aunque tu QS filtra por 'profesional')
             return None

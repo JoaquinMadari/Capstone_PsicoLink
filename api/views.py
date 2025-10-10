@@ -67,17 +67,14 @@ class IsOwnerOrProfessionalOrReadOnly(permissions.BasePermission):
             return True
         if request.method in permissions.SAFE_METHODS:
             return True
-        # allow owner patient to modify their appointment (for cancellation) and professional to mark completed
         return obj.patient == request.user or obj.professional == request.user
 
 
 
 
 class AppointmentViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet que gestiona las citas entre pacientes y profesionales.
-    Incluye validación de permisos y representación mejorada de datos.
-    """
+    #ViewSet que gestiona las citas entre pacientes y profesionales.
+
     queryset = Appointment.objects.all().select_related('patient', 'professional')
     serializer_class = AppointmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -122,15 +119,13 @@ class ProfesionalSearchView(generics.ListAPIView):
     
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     
-    # 1. Ajuste de Filtrado
     # El campo está en el modelo Profile, relacionado al User (CustomUser)
-    filterset_fields = ['psicologoprofile__specialty'] # <--- CORRECCIÓN
+    filterset_fields = ['psicologoprofile__specialty']
 
-    # 2. Ajuste de Búsqueda
     # Buscamos en los campos del Usuario Y el campo del Perfil
-    search_fields = ['username', 'psicologoprofile__specialty'] # <--- CORRECCIÓN
+    search_fields = ['username', 'psicologoprofile__specialty']
 
-    # 3. Ajuste de Ordenación (si quieres ordenar por especialidad)
+    # Ajuste de orden
     ordering_fields = ['username', 'psicologoprofile__specialty']
     def get_queryset(self):
         queryset = CustomUser.objects.filter(role='profesional')
