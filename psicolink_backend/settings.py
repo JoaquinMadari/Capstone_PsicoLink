@@ -29,7 +29,10 @@ SECRET_KEY = 'django-insecure-dzjw*a--g8b%gtenq!)f53&35$@p+!_lcoq-!zw7m6otpxdm^5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'backend-psicolink.onrender.com',]
 
 
 # Application definition
