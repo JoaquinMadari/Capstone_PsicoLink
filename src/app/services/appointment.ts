@@ -17,6 +17,11 @@ export class AppointmentService {
     return headers;
   }
 
+  getProfessionals(): Observable<any> {
+    // Usar HttpHeaders con el token JWT
+    return this.http.get(`${this.apiUrl}/search/`, { headers: this.getAuthHeaders() }); 
+  }
+
   createAppointment(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/appointments/`, data, {
       headers: this.getAuthHeaders(),
