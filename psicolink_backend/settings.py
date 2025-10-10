@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
+import sys
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -126,8 +128,18 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
-        'OPTIONS': {'sslmode': 'require'}
-    }
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'psicolinkdb',  # Base vacía o solo para test
+        'USER': 'lujofer',
+        'PASSWORD': 'QhzLMElvwYNhLYlrBdYLEgVuJQwHiTc6',
+        'HOST': 'dpg-d3a6hdh5pdvs73cke8l0-a.oregon-postgres.render.com',
+        'PORT': '5432',
+    },
 }
 
 
@@ -204,3 +216,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+if 'test' in sys.argv:
+    DATABASES['default'] = DATABASES['test']
