@@ -75,7 +75,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100", # Para desarrollo local de Ionic
     "http://127.0.0.1:8100",
-    #"https://tu-frontend-en-render.onrender.com", 
+    "https://capstone-psicolink.onrender.com/", 
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -92,7 +92,7 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8100",
-    # "https://tu-frontend-en-render.onrender.com", 
+    "https://capstone-psicolink.onrender.com/", 
 ]
 
 ROOT_URLCONF = 'psicolink_backend.urls'
