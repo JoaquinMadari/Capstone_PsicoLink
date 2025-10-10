@@ -27,7 +27,7 @@
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">Género *</ion-label>
+          <ion-label position="stacked">Género *</ion-label>
           <ion-select formControlName="gender" placeholder="Selecciona">
             <ion-select-option value="masculino">Masculino</ion-select-option>
             <ion-select-option value="femenino">Femenino</ion-select-option>
@@ -63,7 +63,7 @@
           </ion-item>
           
           <ion-item>
-              <ion-label position="floating">Modalidad de Trabajo *</ion-label>
+              <ion-label position="stacked">Modalidad de Trabajo *</ion-label>
               <ion-select formControlName="work_modality" placeholder="Selecciona modalidad">
                   <ion-select-option value="online">Online</ion-select-option>
                   <ion-select-option value="presencial">Presencial</ion-select-option>
@@ -71,13 +71,11 @@
               </ion-select>
           </ion-item>
 
-          <ion-item>
-              <ion-label position="floating">Técnicas Terapéuticas *</ion-label>
+          <ion-item fill="outline"> <ion-label position="stacked">Técnicas Terapéuticas *</ion-label>
               <ion-textarea formControlName="therapeutic_techniques" rows="3"></ion-textarea>
           </ion-item>
-          
-          <ion-item>
-              <ion-label position="floating">Estilo de Atención *</ion-label>
+
+          <ion-item fill="outline"> <ion-label position="stacked">Estilo de Atención *</ion-label>
               <ion-textarea formControlName="style_of_attention" rows="3"></ion-textarea>
           </ion-item>
 
@@ -92,7 +90,7 @@
           </ion-item>
           
           <ion-item>
-              <ion-label position="floating">Certificados (Archivos) *</ion-label>
+              <ion-label position="stacked">Certificados (Archivos) *</ion-label>
               <ion-input type="file" formControlName="certificates"></ion-input> 
           </ion-item>
 

@@ -25,7 +25,24 @@ ion-card-subtitle {
 ion-item {
   --background: transparent;
   --highlight-color-focused: #A7C7E7;
-  color: #274472;
+  color: #274472; 
+  --color: #1A1A1A;
+  --padding-top: 5px; 
+  --padding-bottom: 5px; 
+}
+
+ion-select {
+  --placeholder-color: #6C757D;
+  --placeholder-opacity: 0.8;
+  color: #1A1A1A;
+
+  --padding-start: 0px;
+  --padding-end: 0px; 
+  --padding-top: 18px 
+  --padding-bottom: 10px; 
+  padding-left: 5px;
+  
+  font-size: 1rem;
 }
 
 .role-selector {
@@ -56,6 +73,8 @@ ion-label {
 
 ion-input {
   color: #1A1A1A;
+  --color: #1A1A1A;
+  --padding-top: 18px;
 }
 
 ion-button {
@@ -80,4 +99,20 @@ ion-textarea {
 
 .validation-errors.visible {
   visibility: visible;
+}
+
+ion-textarea {
+    color: #1A1A1A;
+    border: 1px solid #A7C7E7; 
+    border-radius: 4px;
+    
+    --background: #fcfcfc; 
+    
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    
+    width: 100%;
+    margin-top: 5px; 
 }
