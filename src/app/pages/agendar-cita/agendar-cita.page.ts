@@ -43,11 +43,17 @@ export class AgendarCitaPage implements OnInit {
   }
 
   loadProfessionals() {
-    fetch('http://localhost:8000/api/search/')
-      .then(res => res.json())
-      .then(data => { this.professionals = data; })
-      .catch(() => { this.professionals = []; });
-  }
+    //SERVICIO que maneja la autenticación JWT
+    this.svc.getProfessionals().subscribe({
+        next: (data) => {
+            this.professionals = data; 
+        },
+        error: (err) => { 
+            console.error('Error cargando profesionales:', err);
+            this.professionals = []; 
+        }
+    });
+}
 
   loadAppointments() {
     this.svc.getAppointments().subscribe({
