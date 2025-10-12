@@ -14,9 +14,15 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^20.0.0",
+<<<<<<< HEAD
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.0.0",
     "@angular/core": "^20.3.0",
+=======
+    "@angular/common": "^20.0.0",
+    "@angular/compiler": "^20.0.0",
+    "@angular/core": "^20.0.0",
+>>>>>>> 384d1ec0afc549c2574dc103a8ed955410b7c18c
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
     "@angular/platform-browser-dynamic": "^20.0.0",
@@ -27,6 +33,10 @@
     "@capacitor/keyboard": "7.0.3",
     "@capacitor/status-bar": "7.0.3",
     "@ionic/angular": "^8.0.0",
+<<<<<<< HEAD
+=======
+    "dotenv": "^17.2.3",
+>>>>>>> 384d1ec0afc549c2574dc103a8ed955410b7c18c
     "express": "^5.1.0",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
@@ -46,8 +56,11 @@
     "@capacitor/cli": "7.4.3",
     "@ionic/angular-toolkit": "^12.0.0",
     "@ionic/cli": "^7.2.1",
+<<<<<<< HEAD
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+=======
+>>>>>>> 384d1ec0afc549c2574dc103a8ed955410b7c18c
     "@types/jasmine": "~5.1.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
@@ -57,7 +70,10 @@
     "eslint-plugin-prefer-arrow": "1.2.2",
     "jasmine-core": "~5.1.0",
     "jasmine-spec-reporter": "~5.0.0",
+<<<<<<< HEAD
     "jest": "^29.7.0",
+=======
+>>>>>>> 384d1ec0afc549c2574dc103a8ed955410b7c18c
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",

@@ -87,7 +87,11 @@
       <ion-list>
         <ion-item *ngFor="let a of appointments">
           <ion-label>
+<<<<<<< HEAD
             <h2>{{ a.start_datetime | date:'medium' }} ({{ a.duration_minutes }} min)</h2>
+=======
+            <h2>{{ a.start_datetime | date:'medium':'':'es-CL' }} ({{ a.duration_minutes }} min)</h2>
+>>>>>>> 384d1ec0afc549c2574dc103a8ed955410b7c18c
             <p>Con: {{ a.professional_username || a.professional }}</p>
             <p>Status: {{ a.status }}</p>
           </ion-label>
