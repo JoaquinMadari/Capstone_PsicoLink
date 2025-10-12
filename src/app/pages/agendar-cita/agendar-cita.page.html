@@ -1,0 +1,100 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Citas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Agendar nueva cita</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form">
+        <ion-item>
+          <ion-label position="stacked">Profesional</ion-label>
+          <ion-select formControlName="professional">
+            <ion-select-option *ngFor="let p of professionals" [value]="p.id">
+              {{ p.username }} • {{ p.specialty || '—' }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Fecha</ion-label>
+          <ion-datetime 
+              displayFormat="DD MMM YYYY" 
+              formControlName="date"
+              presentation="date"
+              (ionChange)="form.controls['date'].markAsDirty(); form.controls['date'].updateValueAndValidity();">
+          </ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Hora de inicio</ion-label>
+          <ion-select 
+              formControlName="time" 
+              placeholder="Selecciona una hora"
+              (ionChange)="form.controls['time'].markAsDirty(); form.controls['time'].updateValueAndValidity();">
+            
+            <ion-select-option value="08:00:00">08:00 AM</ion-select-option>
+            <ion-select-option value="08:30:00">08:30 AM</ion-select-option>
+            <ion-select-option value="09:00:00">09:00 AM</ion-select-option>
+            <ion-select-option value="09:30:00">09:30 AM</ion-select-option>
+            <ion-select-option value="10:00:00">10:00 AM</ion-select-option>
+            <ion-select-option value="10:30:00">10:30 AM</ion-select-option>
+            <ion-select-option value="11:00:00">11:00 AM</ion-select-option>
+            <ion-select-option value="11:30:00">11:30 AM</ion-select-option>
+            <ion-select-option value="12:00:00">12:00 PM</ion-select-option>
+            <ion-select-option value="12:30:00">12:30 PM</ion-select-option>
+            <ion-select-option value="13:00:00">01:00 PM</ion-select-option>
+            <ion-select-option value="13:30:00">01:30 PM</ion-select-option>
+            <ion-select-option value="14:00:00">02:00 PM</ion-select-option>
+            <ion-select-option value="14:30:00">02:30 PM</ion-select-option>
+            <ion-select-option value="15:00:00">03:00 PM</ion-select-option>
+            <ion-select-option value="15:30:00">03:30 PM</ion-select-option>
+            <ion-select-option value="16:00:00">04:00 PM</ion-select-option>
+            <ion-select-option value="16:30:00">04:30 PM</ion-select-option>
+            <ion-select-option value="17:00:00">05:00 PM</ion-select-option>
+            <ion-select-option value="17:30:00">05:30 PM</ion-select-option>
+            <ion-select-option value="18:00:00">06:00 PM</ion-select-option>
+            <ion-select-option value="18:30:00">06:30 PM</ion-select-option>
+            <ion-select-option value="19:00:00">07:00 PM</ion-select-option>
+            <ion-select-option value="19:30:00">07:30 PM</ion-select-option>
+            <ion-select-option value="20:00:00">08:00 PM</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        
+        <ion-item>
+          <ion-label position="stacked">Duración (min)</ion-label>
+          <ion-input type="number" formControlName="duration"></ion-input>
+        </ion-item>
+
+        <ion-button expand="block" class="ion-margin-top" (click)="onCreate()" [disabled]="!form.valid">Agendar</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="mt-16">
+    <ion-card-header>
+      <ion-card-title>Mis próximas citas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let a of appointments">
+          <ion-label>
+            <h2>{{ a.start_datetime | date:'medium' }} ({{ a.duration_minutes }} min)</h2>
+            <p>Con: {{ a.professional_username || a.professional }}</p>
+            <p>Status: {{ a.status }}</p>
+          </ion-label>
+          <ion-button slot="end" color="danger" *ngIf="a.status === 'scheduled'" (click)="cancel(a.id)">Cancelar</ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+

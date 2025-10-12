@@ -1,0 +1,38 @@
+ion-page {
+  display: block !important;
+  visibility: visible !important;
+}
+
+ion-content {
+  --ion-background-color: #e0f2f1; 
+}
+
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.logo {
+  width: 500px; 
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.app-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #00796b; 
+}
+
+.slogan {
+  font-size: 2em;
+  color: #4db6ac; 
+}
+
+ion-spinner {
+  margin-top: 40px;
+  color: #009688;
+}

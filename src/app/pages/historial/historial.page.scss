@@ -1,0 +1,91 @@
+/* Estilo general */
+ion-toolbar {
+  --background: #274472;
+  --color: #fff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+.welcome-card {
+  --background: #f8fbfd;
+  border-radius: 14px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+
+  ion-card-title {
+    color: #274472;
+    font-weight: 600;
+  }
+
+  ion-card-subtitle {
+    color: #6B7A8F;
+  }
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.action-card {
+  --background: #e0e5ec;
+  border-radius: 12px;
+  text-align: center;
+
+  ion-card-title {
+    color: #4A90E2;
+    font-weight: 500;
+  }
+
+  &:hover {
+    --background: #4A90E2;
+    ion-card-title {
+      color: #fff;
+    }
+  }
+}
+
+/* 🔹 Correcciones de estilos para historial */
+/* 🔹 Correcciones de estilos para historial */
+.historial-page {
+  ion-content {
+    --background: #f4f6f9; /* Fondo gris claro */
+  }
+
+  ion-list {
+    background: transparent; /* Quitar fondo negro del contenedor */
+  }
+
+  ion-item {
+    --background: #ffffff; /* Fondo blanco en cada ítem */
+    color: #000; /* 🔹 Forzar texto en negro */
+  }
+
+  ion-label h2 {
+    color: #000; /* Nombre del profesional en negro */
+    font-weight: 600;
+  }
+
+  ion-label p {
+    color: #333; /* Fecha y hora en gris oscuro */
+  }
+
+  ion-card-header {
+    --background: #f4f6f9;
+  }
+   ion-card-title {
+    font-weight: 700; /* 🔹 negrita fuerte */
+    color: #000;      /* 🔹 negro */
+  }
+
+  ion-card-subtitle {
+    font-weight: 600; /* 🔹 semi-negrita */
+    color: #333;      /* 🔹 gris oscuro */
+  }
+
+
+}
+
