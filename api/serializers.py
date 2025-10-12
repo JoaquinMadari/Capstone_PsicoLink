@@ -15,7 +15,7 @@ from datetime import timedelta
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'role') 
+        fields = ('email', 'password', 'role', 'first_name', 'last_name') 
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -23,7 +23,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
-            role=validated_data['role']
+            role=validated_data['role'],
+            first_name=validated_data.get('first_name', ''), 
+            last_name=validated_data.get('last_name', '')
         )
         return user
 
@@ -174,18 +176,19 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    patient = serializers.PrimaryKeyRelatedField(read_only=True)
-    professional = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(), required=True)
+    patient = UserSerializer(read_only=True)
+    professional_detail = UserSerializer(source='professional', read_only=True)
+    professional = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(), required=True, write_only=True)
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = (
-            'id', 'patient', 'professional','professional_role',
-            'start_datetime', 'duration_minutes',
+            'id', 'patient', 'professional', 'professional_detail',
+            'professional_role','start_datetime', 'duration_minutes',
             'end_datetime', 'status', 'notes', 'created_at'
         )
-        read_only_fields = ('status', 'created_at', 'end_datetime', 'professional_role')
+        read_only_fields = ('created_at', 'end_datetime', 'professional_role')
 
     def get_end_datetime(self, obj):
         return obj.end_datetime
@@ -306,11 +309,14 @@ class AppointmentSerializer(serializers.ModelSerializer):
 class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerializer si UserSerializer no existe
     # 1. Definimos 'specialty' usando SerializerMethodField
     specialty = serializers.SerializerMethodField()
+
+    full_name = serializers.SerializerMethodField() 
+
     
     class Meta(UserSerializer.Meta): # Heredamos la Meta si es posible
         model = CustomUser
         # Incluye todos los campos base que ya tenías y añade 'specialty'
-        fields = UserSerializer.Meta.fields + ('specialty',) 
+        fields = UserSerializer.Meta.fields + ('specialty', 'full_name')  
         
     def get_specialty(self, obj):
         """ Obtiene la especialidad del perfil relacionado. """
@@ -319,3 +325,7 @@ class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerialize
             return obj.psicologoprofile.specialty
         except AttributeError:
             return None
+    
+    def get_full_name(self, obj):
+        # 💡 Devuelve el nombre completo para la lista de resultados
+        return obj.get_full_name() 

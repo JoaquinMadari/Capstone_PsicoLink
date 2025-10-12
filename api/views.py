@@ -123,7 +123,7 @@ class ProfesionalSearchView(generics.ListAPIView):
     filterset_fields = ['psicologoprofile__specialty']
 
     # Buscamos en los campos del Usuario Y el campo del Perfil
-    search_fields = ['username', 'psicologoprofile__specialty']
+    search_fields = ['username', 'first_name', 'last_name', 'psicologoprofile__specialty']
 
     # Ajuste de orden
     ordering_fields = ['username', 'psicologoprofile__specialty']
