@@ -30,6 +30,8 @@ export class RegisterPage implements OnInit {
 
   ngOnInit() {
     this.registerForm = this.fb.group({
+      first_name: ['', [Validators.required, Validators.maxLength(100)]],
+      last_name: ['', [Validators.required, Validators.maxLength(100)]],
       role: ['paciente', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -40,8 +42,8 @@ export class RegisterPage implements OnInit {
     const toast = await this.toastController.create({
       message: message,
       duration: 3000, // Duración del mensaje en milisegundos
-      position: 'bottom', // Posición en la parte inferior
-      color: 'dark' // O 'success', 'danger', etc.
+      position: 'bottom', 
+      color: 'dark' 
     });
 
     await toast.present();
@@ -53,12 +55,12 @@ export class RegisterPage implements OnInit {
   const data = this.registerForm.value;
   
   this.authService.register(data).subscribe({
-    next: (_) => { // Usamos _ para ignorar la respuesta
+    next: (_) => { // _ para ignorar la respuesta
       this.presentToast('Registro inicial exitoso. Iniciando sesión...'); 
       
       // 1. INICIO DE SESIÓN AUTOMÁTICO
       this.authService.login({ 
-          username: data.email, // Asumiendo que usas el email como username para el login
+          username: data.email, 
           password: data.password 
       }).subscribe({
           next: () => {
@@ -67,7 +69,7 @@ export class RegisterPage implements OnInit {
               this.router.navigate(['/profile-setup']);
           },
           error: (loginErr) => {
-              // Si el login falla (raro si el registro fue bien)
+              // Si el login falla
               this.presentToast('Error al iniciar sesión. Intenta loguearte manualmente.');
               this.router.navigate(['/login']); 
           }
