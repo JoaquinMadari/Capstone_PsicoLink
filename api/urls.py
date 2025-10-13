@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterView, ProfileSetupView, AppointmentViewSet, ProfesionalSearchView
+from .views import ProfessionalDetailView, RegisterView, ProfileSetupView, AppointmentViewSet, ProfesionalSearchView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 from .serializers import CustomTokenObtainPairSerializer
@@ -14,4 +14,5 @@ urlpatterns = [
     path('profile/setup/', ProfileSetupView.as_view(), name='profile_setup'), 
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('search/', ProfesionalSearchView.as_view(), name='profesional-search'),
+    path('professionals/<int:user_id>/', ProfessionalDetailView.as_view(), name='professional-detail'),
 ]

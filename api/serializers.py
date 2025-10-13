@@ -329,3 +329,20 @@ class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerialize
     def get_full_name(self, obj):
         # 💡 Devuelve el nombre completo para la lista de resultados
         return obj.get_full_name() 
+
+
+
+
+class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = PsicologoProfile
+        fields = [
+            'user', 'rut', 'age', 'gender', 'nationality', 'phone',
+            'specialty', 'license_number', 'main_focus',
+            'therapeutic_techniques', 'style_of_attention',
+            'attention_schedule', 'work_modality', 'certificates',
+            'inclusive_orientation', 'languages', 'experience_years',
+            'curriculum_vitae', 'cases_attended', 'rating'
+        ]

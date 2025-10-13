@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, Appointment
-from .serializers import (RegisterSerializer, UserSerializer, AppointmentSerializer,
+from .models import CustomUser, Appointment, PsicologoProfile
+from .serializers import (PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer, AppointmentSerializer,
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
     ProfessionalSearchSerializer)
 
@@ -138,3 +138,13 @@ class ProfesionalSearchView(generics.ListAPIView):
                 appointments_as_professional__status='scheduled'
             )
         return queryset.distinct()
+    
+
+class ProfessionalDetailView(generics.RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]  # o IsAuthenticated si corresponde
+    serializer_class = PsicologoProfileDetailSerializer
+    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get(self.lookup_url_kwarg)
+        return PsicologoProfile.objects.select_related('user').get(user__id=user_id)
