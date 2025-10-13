@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
-  private apiUrl: string = environment.API_URL;
-
+  private apiUrl = 'http://localhost:8000/api'; // Cambia en despliegue
 
   constructor(private http: HttpClient) {}
 
@@ -17,11 +15,6 @@ export class AppointmentService {
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) headers = headers.set('Authorization', `Bearer ${token}`);
     return headers;
-  }
-
-  getProfessionals(): Observable<any> {
-    // Usar HttpHeaders con el token JWT
-    return this.http.get(`${this.apiUrl}/search/`, { headers: this.getAuthHeaders() }); 
   }
 
   createAppointment(data: any): Observable<any> {
@@ -43,7 +36,7 @@ export class AppointmentService {
   }
 
   updateAppointment(id: number, data: any): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/appointments/${id}/`, data, {
+    return this.http.put(`${this.apiUrl}/appointments/${id}/`, data, {
       headers: this.getAuthHeaders(),
     });
   }
