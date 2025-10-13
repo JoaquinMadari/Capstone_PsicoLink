@@ -1,23 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastController } from '@ionic/angular';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppointmentService } from 'src/app/services/appointment';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
 IonButton, IonButtons, IonBackButton,IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime
 } from '@ionic/angular/standalone';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-agendar-cita',
   templateUrl: './agendar-cita.page.html',
   styleUrls: ['./agendar-cita.page.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
   IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime]
 })
 export class AgendarCitaPage implements OnInit {
   form = this.fb.group({
-    professional: [null, Validators.required],
+    professional: this.fb.control<number | null>(null, Validators.required),
     date: [null, Validators.required],
     time: [null, Validators.required],
     duration: [50, Validators.required]
@@ -29,12 +30,29 @@ export class AgendarCitaPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private svc: AppointmentService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
     this.loadProfessionals();
     this.loadAppointments();
+
+    this.route.queryParams.subscribe(params => {
+    const professionalId = params['professionalId'];
+    
+    if (professionalId && !isNaN(Number(professionalId))) {
+      const professionalControl = this.form.get('professional');
+
+      if (professionalControl) {
+        professionalControl.setValue(parseInt(professionalId as string, 10));
+        
+        professionalControl.disable();
+      }
+    } else {
+      this.form.get('professional')?.enable(); 
+    }
+  });
   }
 
   async presentToast(msg: string) {

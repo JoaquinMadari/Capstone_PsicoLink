@@ -1,28 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular'; // <-- aquí
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, IonSearchbar, 
-  IonItem, IonLabel, IonSelectOption, IonList, 
-  IonInfiniteScroll, IonInfiniteScrollContent 
-} from '@ionic/angular/standalone';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonSearchbar, IonItem, IonLabel,
+  IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll, IonBackButton, IonButtons } from '@ionic/angular/standalone';
+import { Router, RouterModule } from '@angular/router';
 import { SearchService } from '../../services/search';
-
-// 🔹 Tipos de la respuesta de la API
-interface Profesional {
-  id: number;
-  name: string;
-  specialty: string;
-  // agrega más campos según tu API
-}
-
-interface SearchResponse {
-  results: Profesional[];
-  count?: number;
-  next?: string;
-  previous?: string;
-}
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs'; // Necesario para evitar búsquedas excesivas
 
 @Component({
   selector: 'app-search',
@@ -30,66 +13,85 @@ interface SearchResponse {
   styleUrls: ['./search.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    IonicModule,
-    FormsModule,
+    CommonModule, 
     ReactiveFormsModule,
+    // Módulos Ionic
+    IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar, IonItem, IonLabel,
+    IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll,
+    IonBackButton, IonButtons,
+    RouterModule 
   ]
 })
 export class SearchPage implements OnInit {
-  form: FormGroup; // <-- Reactive Form para filtros
-  profesionales: Profesional[] = [];
-  query = '';
-  filters = { specialty: '' };
-  ordering = '';
+  private searchService = inject(SearchService);
+  private router = inject(Router);
+  private fb = inject(FormBuilder); 
+
+  searchForm: FormGroup; 
+  profesionales: any[] = [];
   page = 1;
 
-  constructor(
-    public searchService: SearchService,
-    private fb: FormBuilder // <-- inyectamos FormBuilder
-  ) {
-    // Inicializamos el FormGroup
-    this.form = this.fb.group({
-      specialtyFilter: ['']
+  constructor() {
+    this.searchForm = this.fb.group({
+      query: [''], 
+      specialty: [''] 
     });
   }
 
   ngOnInit() {
-    this.loadResults();
-  }
-
-  loadResults(event?: any) {
-    this.searchService
-      .search(this.query, this.filters, this.ordering, this.page)
-      .subscribe((res: SearchResponse) => {
-        if (this.page === 1) {
-          this.profesionales = res.results;
-        } else {
-          this.profesionales.push(...res.results);
-        }
-
-        if (event) {
-          event.target.complete();
-        }
+    this.searchForm.valueChanges
+      .pipe(
+        startWith(this.searchForm.value),
+        debounceTime(150), 
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) 
+      )
+      .subscribe(() => {
+        this.page = 1; 
+        this.loadResults();
       });
   }
 
-  onSearchChange(event: any) {
-    this.query = event.detail.value;
-    this.page = 1;
-    this.loadResults();
-  }
+  loadResults(event?: any) {
+    const { query, specialty } = this.searchForm.value; 
 
-  applyFilter() {
-    // Tomamos el valor del FormControl en vez de ngModel
-    this.filters.specialty = this.form.value.specialtyFilter;
-    this.page = 1;
-    this.loadResults();
+    const filters = { specialty: specialty };
+    const ordering = '';
+
+    this.searchService.search(query, filters, ordering, this.page).subscribe({
+      next: (res: any) => {
+        const newResults = res.results || res;
+        
+        if (this.page === 1) {
+          this.profesionales = newResults;
+        } else {
+          this.profesionales.push(...newResults);
+        }
+    
+        if (event && event.target) {
+          event.target.complete();
+          if (res && !res.next) { 
+            event.target.disabled = true; 
+          } else {
+            event.target.disabled = false;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar resultados:', err);
+        if (event) event.target.complete();
+      }
+    });
   }
 
   loadMore(event: any) {
     this.page += 1;
     this.loadResults(event);
   }
-}
+  
+  goToAgendar(professionalId: number) {
+    this.router.navigate(['/Agendar'], { 
+        queryParams: { professionalId: professionalId } 
+    });
+  }
 
+}

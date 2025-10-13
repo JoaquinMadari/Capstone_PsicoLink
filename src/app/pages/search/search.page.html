@@ -1,37 +1,50 @@
 <ion-header>
   <ion-toolbar>
+    <ion-back-button slot="start" defaultHref="/home"></ion-back-button>
     <ion-title>Buscar Profesionales</ion-title>
-  </ion-toolbar>
-  <ion-toolbar>
-    <ion-searchbar placeholder="Buscar por nombre o especialidad" (ionInput)="onSearchChange($event)">
-    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <!-- Filtros -->
-  <ion-item>
-    <ion-label>Especialidad</ion-label>
-    <ion-select [formControl]="form.controls['specialtyFilter']">
-    <ion-select-option value="">Todas</ion-select-option>
-    <ion-select-option value="psicologia">Psicología</ion-select-option>
-    <ion-select-option value="psiquiatria">Psiquiatría</ion-select-option>
-    <ion-select-option value="terapia">Terapia</ion-select-option>
-    </ion-select>
-  </ion-item>
+  <form [formGroup]="searchForm">
+    <ion-toolbar>
+      <ion-searchbar 
+          placeholder="Buscar por nombre o especialidad" 
+          [formControlName]="'query'"
+          (ionClear)="loadResults(1)">
+      </ion-searchbar>
+    </ion-toolbar>
 
-  <!-- Lista de profesionales -->
+    <ion-item>
+      <ion-label>Especialidad</ion-label>
+      <ion-select [formControlName]="'specialty'"> 
+        <ion-select-option value="">Todas</ion-select-option>
+        <ion-select-option value="Psicología Clínica">Psicología Clínica</ion-select-option>
+        <ion-select-option value="Psiquiatría">Psiquiatría</ion-select-option>
+        <ion-select-option value="Terapia de Pareja">Terapia de Pareja</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </form> 
+  
   <ion-list>
-    <ion-item *ngFor="let prof of profesionales">
+    <ion-item 
+      *ngFor="let prof of profesionales" 
+      button 
+      detail 
+      (click)="goToAgendar(prof.id)"> 
+      
       <ion-label>
-        <h2>{{ prof.username }}</h2>
-        <p>{{ prof.specialty || 'Sin especialidad' }}</p>
+        <h2>{{ prof.full_name || prof.username }}</h2>
+        <p>Especialidad: {{ prof.specialty || 'Sin especialidad' }}</p>
         <p>{{ prof.license_number ? 'Licencia: ' + prof.license_number : '' }}</p>
       </ion-label>
     </ion-item>
+    
+    <ion-item *ngIf="profesionales.length === 0">
+        <ion-label>No se encontraron profesionales.</ion-label>
+    </ion-item>
   </ion-list>
 
-  <!-- Scroll infinito -->
   <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
     <ion-infinite-scroll-content
       loadingSpinner="bubbles"
