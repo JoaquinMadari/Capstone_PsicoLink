@@ -1,14 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class SearchService {
-  private apiUrl = 'http://localhost:8000/search/'; // ajusta si usas otra URL o puerto
+  private apiUrl: string = environment.API_URL;
 
   constructor(private http: HttpClient) {}
+
+  private getAuthHeaders(): HttpHeaders {
+    // ... (Tu lógica para obtener el token JWT)
+    const token = localStorage.getItem('access_token');
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+    return headers;
+  }
 
   search(query: string, filters: any = {}, ordering: string = '', page: number = 1): Observable<any> {
     let params = new HttpParams()
@@ -25,6 +35,6 @@ export class SearchService {
       params = params.set('ordering', ordering);
     }
 
-    return this.http.get(this.apiUrl, { params });
+    return this.http.get(`${this.apiUrl}/search/`, { params, headers: this.getAuthHeaders() });
   }
 }
