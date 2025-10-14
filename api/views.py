@@ -19,8 +19,11 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
 from django.utils import timezone
+from datetime import datetime, date, time as dtime, timedelta
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+
 
 
 class RegisterView(generics.CreateAPIView):
@@ -110,6 +113,62 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         response_data = AppointmentSerializer(appointment, context={'request': request}).data
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+    
+    
+    @action(detail=False, methods=['get'], url_path='busy', permission_classes=[permissions.IsAuthenticated])
+    def busy(self, request):
+        """
+        Devuelve bloques ocupados para un día dado:
+        GET /api/appointments/busy/?professional=##&date=YYYY-MM-DD
+        Respuesta:
+        {
+          "professional": [{"id":..,"start":"..","end":".."}, ...],
+          "patient": [{"id":..,"start":"..","end":".."}, ...]
+        }
+        """
+        professional_id = request.query_params.get('professional')
+        date_str = request.query_params.get('date')
+
+        if not professional_id or not date_str:
+            return Response({"detail": "Parámetros 'professional' y 'date' son requeridos."}, status=400)
+
+        try:
+            day = date.fromisoformat(date_str)  # YYYY-MM-DD
+        except ValueError:
+            return Response({"detail": "Formato de fecha inválido. Use YYYY-MM-DD."}, status=400)
+
+        tz = timezone.get_current_timezone()
+        day_start = timezone.make_aware(datetime.combine(day, dtime.min), tz)
+        day_end   = timezone.make_aware(datetime.combine(day, dtime.max), tz)
+
+        # Profesionales ocupados ese día (citas activas/‘scheduled’) que solapan el rango del día
+        qs_prof = Appointment.objects.filter(
+            professional_id=professional_id,
+            status='scheduled',
+            time_range__overlap=(day_start, day_end),
+        ).only('id', 'start_datetime', 'duration_minutes')
+
+        # Paciente autenticado ocupado ese día
+        qs_patient = Appointment.objects.filter(
+            patient=request.user,
+            status='scheduled',
+            time_range__overlap=(day_start, day_end),
+        ).only('id', 'start_datetime', 'duration_minutes')
+
+        def serialize(qs):
+            out = []
+            for a in qs:
+                out.append({
+                    "id": a.id,
+                    "start": a.start_datetime.isoformat(),
+                    "end":   (a.start_datetime + timedelta(minutes=a.duration_minutes)).isoformat()
+                })
+            return out
+
+        return Response({
+            "professional": serialize(qs_prof),
+            "patient": serialize(qs_patient)
+        })
 
 
 
