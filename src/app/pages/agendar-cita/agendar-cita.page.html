@@ -18,7 +18,8 @@
           <ion-label position="stacked">Profesional</ion-label>
           <ion-select formControlName="professional">
             <ion-select-option *ngFor="let p of professionals" [value]="p.id">
-              {{ p.username }} • {{ p.specialty || '—' }}
+              {{ p.full_name || (p.first_name || p.last_name ? (p.first_name + ' ' + p.last_name) : p.username) }}
+              • {{ p.specialty_label || p.specialty || '—' }}
             </ion-select-option>
           </ion-select>
         </ion-item>
@@ -73,12 +74,33 @@
           <ion-input type="number" formControlName="duration"></ion-input>
         </ion-item>
 
+        <!-- Motivo (opcional) -->
+        <ion-item>
+          <ion-label position="stacked">Motivo</ion-label>
+          <ion-input formControlName="reason" maxlength="255" placeholder="(opcional)"></ion-input>
+        </ion-item>
+
+        <!-- Modalidad Mixta -->
+        <ion-item *ngIf="selectedProfessional?.work_modality === 'Mixta'">
+          <ion-label position="stacked">Modalidad</ion-label>
+          <ion-select formControlName="modality" interface="popover" placeholder="Elige modalidad">
+            <ion-select-option value="Presencial">Presencial</ion-select-option>
+            <ion-select-option value="Online">Online</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Si es fija (Presencial u Online), mostrar como texto deshabilitado -->
+        <ion-item *ngIf="selectedProfessional?.work_modality === 'Presencial' || selectedProfessional?.work_modality === 'Online'">
+          <ion-label position="stacked">Modalidad</ion-label>
+          <ion-input [value]="selectedProfessional?.work_modality" disabled></ion-input>
+        </ion-item>
+
         <ion-button expand="block" class="ion-margin-top" (click)="onCreate()" [disabled]="!form.valid">Agendar</ion-button>
       </form>
     </ion-card-content>
   </ion-card>
 
-  <ion-card class="mt-8" *ngIf="form.value.professional && form.value.date">
+  <ion-card class="mt-8" *ngIf="hasProAndDate">
     <ion-card-header>
       <ion-card-title>
         Disponibilidad ({{ form.value.date | date:'fullDate':'':'es-CL' }})
@@ -123,10 +145,33 @@
         <ion-item *ngFor="let a of appointments">
           <ion-label>
             <h2>{{ a.start_datetime | date:'medium':'':'es-CL' }} ({{ a.duration_minutes }} min)</h2>
-            <p>Con: {{ a.professional_username || a.professional }}</p>
+
+            <!-- nombre del profesional -->
+            <p>
+              Profesional:
+              {{ a?.professional_detail?.full_name
+                || (a?.professional_detail?.first_name || a?.professional_detail?.last_name
+                    ? (a?.professional_detail?.first_name + ' ' + a?.professional_detail?.last_name)
+                    : a?.professional_detail?.username) }}
+            </p>
+
+            <!-- nombre del paciente -->
+            <p *ngIf="a?.patient">
+              Paciente:
+              {{ a?.patient?.full_name
+                || (a?.patient?.first_name || a?.patient?.last_name
+                    ? (a?.patient?.first_name + ' ' + a?.patient?.last_name)
+                    : a?.patient?.username) }}
+            </p>
+
             <p>Status: {{ a.status }}</p>
           </ion-label>
-          <ion-button slot="end" color="danger" *ngIf="a.status === 'scheduled'" (click)="cancel(a.id)">Cancelar</ion-button>
+
+          <ion-button slot="end" color="danger"
+                      *ngIf="a.status === 'scheduled'"
+                      (click)="cancel(a.id)">
+            Cancelar
+          </ion-button>
         </ion-item>
       </ion-list>
     </ion-card-content>

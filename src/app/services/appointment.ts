@@ -47,7 +47,7 @@ export class AppointmentService {
   }
 
   updateAppointment(id: number, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/appointments/${id}/`, data, {
+    return this.http.patch(`${this.apiUrl}/appointments/${id}/`, data, {
       headers: this.getAuthHeaders(),
     });
   }
