@@ -5,7 +5,7 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'splash',
     pathMatch: 'full',
-    
+
   },
   {
     path: 'splash',
@@ -59,7 +59,16 @@ export const routes: Routes = [
   {
   path: 'mis-citas',
   loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage)
-},
+  },
+  {
+  path: 'profile-setup',
+    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage)
+  },
+  {
+    path: 'profile/:id',
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+  },
+
 
 ];
 

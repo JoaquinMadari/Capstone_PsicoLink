@@ -32,23 +32,27 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   login() {
-  if (this.loginForm.valid) {
-    const { username, password } = this.loginForm.value;
-    this.authService.login({ username, password }).subscribe({
-      next: () => {
+    if (!this.loginForm.valid) return;
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login({ username: email, password }).subscribe({
+      next: (resp) => {
+        localStorage.setItem('access', resp.access);
+        localStorage.setItem('refresh', resp.refresh);
+        const role = resp?.user?.role || null;
+        if (role) localStorage.setItem('role', role);
+
         this.router.navigate(['/home']);
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage = 'Usuario o contraseña incorrectos';
-        console.error(err);
       }
     });
   }
-}
 }

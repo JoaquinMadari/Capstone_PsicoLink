@@ -66,3 +66,43 @@ ion-select {
 ion-select-option {
   color: #0a2540;
 }
+
+
+
+
+
+// Commit: Mostrar horarios ocupados
+.slot-legend ion-chip { margin-right: 6px; }
+.legend-pro     { --color: var(--bn-600); border-color: var(--bn-500); }
+.legend-patient { --color: var(--ss-600); border-color: var(--ss-500); }
+.legend-both    { --color: #c55252; border-color: #e57373; }
+
+.slots-grid {
+  .slot {
+    width: 100%;
+    padding: 10px 8px;
+    margin: 6px 0;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink-900);
+    box-shadow: var(--shadow-1);
+    font-weight: 600;
+  }
+  .slot.busy-pro {
+    background: rgba(92,110,147,0.15);
+    border-color: rgba(92,110,147,0.35);
+  }
+  .slot.busy-patient {
+    background: rgba(112,147,158,0.15);
+    border-color: rgba(112,147,158,0.35);
+  }
+  .slot.busy-both {
+    background: rgba(229,115,115,0.18);
+    border-color: rgba(229,115,115,0.45);
+  }
+  .slot:disabled {
+    opacity: 0.55;
+    filter: grayscale(0.2);
+  }
+}
