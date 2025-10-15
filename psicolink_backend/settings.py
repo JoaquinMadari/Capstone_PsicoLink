@@ -123,22 +123,18 @@ WSGI_APPLICATION = 'psicolink_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
+        'NAME': config('TEST_DB_NAME'),
         'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
+        'PASSWORD': config('TEST_DB_PASSWORD'),
+        'HOST': config('TEST_DB_HOST'),
         'PORT': config('DB_PORT'),
-        'OPTIONS': {
-            'sslmode': 'require',
+        #'OPTIONS': {
+        #    'sslmode': 'require',
         },
-    },
-    'test': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'psicolinkdb',  # Base vacía o solo para test
-        'USER': 'lujofer',
-        'PASSWORD': 'QhzLMElvwYNhLYlrBdYLEgVuJQwHiTc6',
-        'HOST': 'dpg-d3a6hdh5pdvs73cke8l0-a.oregon-postgres.render.com',
-        'PORT': '5432',
+        
+        'TEST': {
+            'NAME': config('TEST_DB_NAME'),  # base de test ya creada
+        
     },
 }
 
@@ -216,5 +212,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-if 'test' in sys.argv:
-    DATABASES['default'] = DATABASES['test']
