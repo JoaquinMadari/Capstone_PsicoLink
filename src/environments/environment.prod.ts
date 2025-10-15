@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: false,
+ API_URL: 'https://backend-psicolink.onrender.com/api'
 };
