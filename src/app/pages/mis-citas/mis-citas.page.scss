@@ -8,7 +8,7 @@ ion-content {
   --background: #C5D5E4;
 }
 
-/* 🩵 Tarjeta principal (Centro de Soporte) */
+/* 🩵 Tarjeta principal (Listado de Citas) */
 ion-card {
   --background: #f8fbfd !important; /* Fondo claro */
   background: #f8fbfd !important;
@@ -17,6 +17,7 @@ ion-card {
   box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* Encabezado y título del card */
 ion-card-header {
   background: transparent !important;
 }
@@ -26,34 +27,32 @@ ion-card-title {
   font-weight: 600;
 }
 
+/* Contenido dentro del card */
 ion-card-content {
   background: transparent !important;
   color: #000 !important;
 }
 
-/* ✏️ Campo de mensaje */
+/* Listado de citas */
+ion-list {
+  --background: transparent !important; /* Quitar fondo oscuro */
+  background: transparent !important;
+}
+
 ion-item {
-  --background: #ffffff !important;
+  --background: #ffffff !important; /* Cada cita con fondo blanco */
   border-radius: 10px;
-  margin: 12px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 8px;
 }
 
-ion-label {
-  font-weight: 600;
+ion-label h2,
+ion-label p {
   color: #000 !important;
 }
 
-ion-textarea {
+/* Mensaje cuando no hay citas */
+p.ion-text-center {
   color: #000 !important;
-  font-size: 15px;
-  background: transparent;
-}
-
-/* 🔘 Botón Enviar */
-ion-button {
-  --border-radius: 10px;
-  font-weight: 600;
-  margin: 12px;
+  background: transparent !important;
 }
 

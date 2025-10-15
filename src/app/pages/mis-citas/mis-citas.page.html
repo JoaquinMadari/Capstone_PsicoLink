@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Citas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Listado de Citas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+
+      <ion-list *ngIf="appointments.length > 0; else emptyState">
+        <ion-item *ngFor="let a of appointments">
+          <ion-label>
+            <h2>{{ a.start_datetime | date:'medium':'':'es-CL' }} ({{ a.duration_minutes }} min)</h2>
+            <p>Con: {{ a.professional_username || a.professional }}</p>
+            <p>Estado: {{ a.status }}</p>
+          </ion-label>
+          <ion-button slot="end" color="danger" *ngIf="a.status === 'scheduled'" (click)="cancel(a.id)">
+            Cancelar
+          </ion-button>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #emptyState>
+        <p class="ion-text-center">No tienes citas registradas.</p>
+      </ng-template>
+
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

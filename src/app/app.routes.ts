@@ -5,6 +5,7 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'splash',
     pathMatch: 'full',
+    
   },
   {
     path: 'splash',
@@ -55,6 +56,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
   },
+  {
+  path: 'mis-citas',
+  loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage)
+},
 
 ];
 
