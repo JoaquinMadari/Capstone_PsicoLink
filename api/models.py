@@ -42,9 +42,29 @@ class BaseProfile(models.Model):
     class Meta:
         abstract = True # No creará una tabla en la DB
 
+
+class Specialty(models.TextChoices):
+    PSIQUIATRIA = 'psiquiatria', 'Psiquiatría'
+    PSICOLOGIA_CLINICA = 'psicologia_clinica', 'Psicología Clínica'
+    INFANTO_JUVENIL = 'infanto_juvenil', 'Psicología Infantil y Adolescente'
+    PAREJA_FAMILIA = 'pareja_familia', 'Terapia de Pareja y Familia'
+    NEUROPSICOLOGIA = 'neuropsicologia', 'Neuropsicología'
+    SEXOLOGIA = 'sexologia_clinica', 'Sexología Clínica'
+    ADICCIONES = 'adicciones', 'Adicciones'
+    GERONTO = 'gerontopsicologia', 'Psicología Geriátrica'
+    SALUD = 'psicologia_salud', 'Psicología de la Salud'
+    EVALUACION = 'evaluacion_psicologica', 'Evaluación/Peritaje Psicológico'
+    EDUCATIVA = 'psicologia_educativa', 'Psicología Educativa'
+    OTRO = 'otro', 'Otro'
+
 class PsicologoProfile(BaseProfile):
     # Aquí van los campos OBLIGATORIOS y OPCIONALES del psicólogo
-    specialty = models.CharField(max_length=100)
+    specialty = models.CharField(
+        max_length=50,
+        choices=Specialty.choices,
+        default=Specialty.PSICOLOGIA_CLINICA
+    )
+    specialty_other = models.CharField(max_length=100, blank=True, null=True)
     license_number = models.CharField(max_length=50)
     main_focus = models.CharField(max_length=100)
     therapeutic_techniques = models.TextField()

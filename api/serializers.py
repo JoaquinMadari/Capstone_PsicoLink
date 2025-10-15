@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile
+from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile, Specialty
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -53,12 +53,17 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
     
     #TEMPORAL
     experience_years = serializers.IntegerField(required=False, allow_null=True)
+
+    specialty_label = serializers.SerializerMethodField(read_only=True)
+    specialty = serializers.ChoiceField(choices=Specialty.choices)
+    specialty_other = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     class Meta:
         model = PsicologoProfile
         fields = [
             'rut', 'age', 'gender', 'nationality', 'phone', 
-            'specialty', 'license_number', 'main_focus', 
+            'specialty','specialty_label','specialty_other', 
+            'license_number', 'main_focus', 
             'therapeutic_techniques', 'style_of_attention', 
             'attention_schedule', 'work_modality', 'certificates',
             'address', 'payment_method',
@@ -66,6 +71,26 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
             # Opcionales si quieres que se rellenen aquí también
             'inclusive_orientation', 'languages', 'experience_years', 'curriculum_vitae'
         ]
+
+    def validate(self, data):
+        spec = data.get('specialty', getattr(self.instance, 'specialty', None))
+        other = data.get('specialty_other', getattr(self.instance, 'specialty_other', None))
+
+        if spec == Specialty.OTRO:
+            if not other or not str(other).strip():
+                raise serializers.ValidationError({'specialty_other': 'Indica tu especialidad.'})
+            if len(str(other).strip()) > 100:
+                raise serializers.ValidationError({'specialty_other': 'Máximo 100 caracteres.'})
+        else:
+            data['specialty_other'] = None
+
+        return data
+
+    def get_specialty_label(self, obj):
+        if obj.specialty == Specialty.OTRO and obj.specialty_other:
+            return obj.specialty_other
+        return obj.get_specialty_display()
+    
         
     def create(self, validated_data):
         # La vista ProfileSetupView le pasa el usuario autenticado
@@ -94,7 +119,6 @@ class PacienteProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PacienteProfile
-        # Incluye todos los campos OBLIGATORIOS de la Fase 2 para el paciente.
         fields = [
             'rut', 'age', 'gender', 'nationality', 'phone', 
             'inclusive_orientation', 'base_disease', 'disability',
@@ -168,9 +192,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 User = get_user_model()
 
 ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
-    'psicologo': (30, 120),
-    'terapeuta': (30, 90),
-    'psiquiatra': (15, 60),
+    'psiquiatria': (15, 60),
+    'psicologia_clinica': (30, 120),
+    'infanto_juvenil': (45, 90),
+    'pareja_familia': (50, 90),
+    'neuropsicologia': (45, 120),
+    'sexologia_clinica': (45, 90),
+    'adicciones': (45, 90),
+    'gerontopsicologia': (45, 90),
+    'psicologia_salud': (45, 90),
+    'evaluacion_psicologica': (30, 120),
+    'psicologia_educativa': (45, 90),
     'default': (15, 120),
 })
 
@@ -307,22 +339,23 @@ class AppointmentSerializer(serializers.ModelSerializer):
     
 # busca profesionales disponibles en un horario dado
 class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerializer si UserSerializer no existe
-    # 1. Definimos 'specialty' usando SerializerMethodField
     specialty = serializers.SerializerMethodField()
-
+    specialty_label = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField() 
 
     
     class Meta(UserSerializer.Meta): # Heredamos la Meta si es posible
         model = CustomUser
-        # Incluye todos los campos base que ya tenías y añade 'specialty'
-        fields = UserSerializer.Meta.fields + ('specialty', 'full_name')  
+        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name')  
         
     def get_specialty(self, obj):
-        """ Obtiene la especialidad del perfil relacionado. """
+        try: return obj.psicologoprofile.specialty
+        except AttributeError: return None
+
+    def get_specialty_label(self, obj):
         try:
-            # 2. Accede a través de 'psicologoprofile'
-            return obj.psicologoprofile.specialty
+            p = obj.psicologoprofile
+            return p.specialty_other if p.specialty == Specialty.OTRO and p.specialty_other else p.get_specialty_display()
         except AttributeError:
             return None
     
@@ -335,14 +368,21 @@ class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerialize
 
 class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    specialty_label = serializers.SerializerMethodField()
 
     class Meta:
         model = PsicologoProfile
         fields = [
             'user', 'rut', 'age', 'gender', 'nationality', 'phone',
-            'specialty', 'license_number', 'main_focus',
+            'specialty', 'specialty_label', 'specialty_other',
+            'license_number', 'main_focus',
             'therapeutic_techniques', 'style_of_attention',
             'attention_schedule', 'work_modality', 'certificates',
             'inclusive_orientation', 'languages', 'experience_years',
             'curriculum_vitae', 'cases_attended', 'rating'
         ]
+
+    def get_specialty_label(self, obj):
+        if obj.specialty == Specialty.OTRO and obj.specialty_other:
+            return obj.specialty_other
+        return obj.get_specialty_display()

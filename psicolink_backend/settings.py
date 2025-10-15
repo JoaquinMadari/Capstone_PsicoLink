@@ -120,22 +120,26 @@ WSGI_APPLICATION = 'psicolink_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE'),
-        'NAME': config('TEST_DB_NAME'),
+        'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
-        'PASSWORD': config('TEST_DB_PASSWORD'),
-        'HOST': config('TEST_DB_HOST'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
-        #'OPTIONS': {
-        #    'sslmode': 'require',
+        'OPTIONS': {
+            'sslmode': 'require',
+            }
         },
         
-        'TEST': {
-            'NAME': config('TEST_DB_NAME'),  # base de test ya creada
         
-    },
+    #    'TEST': {
+    #        'NAME': config('TEST_DB_NAME', default=None),  # base de test ya creada
+    #    
+    #},
+    
 }
 
 
@@ -162,9 +166,17 @@ AUTH_USER_MODEL = 'api.CustomUser'
 
 # ---- Configuración de reglas del negocio ----
 ROLE_DURATION_LIMITS = {
-    'psicologo': (30, 120),
-    'terapeuta': (30, 90),
-    'psiquiatra': (15, 60),
+    'psiquiatria': (15, 60),
+    'psicologia_clinica': (30, 120),
+    'infanto_juvenil': (45, 90),
+    'pareja_familia': (50, 90),
+    'neuropsicologia': (45, 120),
+    'sexologia_clinica': (45, 90),
+    'adicciones': (45, 90),
+    'gerontopsicologia': (45, 90),
+    'psicologia_salud': (45, 90),
+    'evaluacion_psicologica': (30, 120),
+    'psicologia_educativa': (45, 90),
     'default': (15, 120),
 }
 

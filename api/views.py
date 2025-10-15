@@ -31,6 +31,18 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = (AllowAny,) # Permitir el acceso sin autenticación
     serializer_class = RegisterSerializer
 
+class SpecialtyListView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        from .models import Specialty
+        data = []
+        for val, label in Specialty.choices:
+            data.append({
+                "value": val,
+                "label": label,
+                "requires_detail": (val == Specialty.OTRO)
+            })
+        return Response(data)
 
 class ProfileSetupView(APIView):
     permission_classes = (IsAuthenticated,)
