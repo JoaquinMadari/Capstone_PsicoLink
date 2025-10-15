@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
   {
@@ -43,13 +44,17 @@ export const routes: Routes = [
   },
   {
     path: 'Agendar',
-    loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage)
+    loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente'] }
   },
 
 
   {
     path: 'search',
-    loadComponent: () => import('./pages/search/search.page').then( m => m.SearchPage)
+    loadComponent: () => import('./pages/search/search.page').then( m => m.SearchPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente'] }
   },
   {
     path: 'soporte',
@@ -57,12 +62,14 @@ export const routes: Routes = [
       import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
   },
   {
-  path: 'mis-citas',
-  loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage)
+    path: 'mis-citas',
+    loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage)
   },
   {
-  path: 'profile-setup',
-    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage)
+    path: 'profile-setup',
+    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente', 'profesional'] }
   },
   {
     path: 'profile/:id',

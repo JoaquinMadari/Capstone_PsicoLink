@@ -14,16 +14,30 @@
 
       <ion-card-content>
         <form [formGroup]="proForm">
+          <!-- RUT -->
           <ion-item>
             <ion-label position="stacked">RUT</ion-label>
             <ion-input formControlName="rut" placeholder="12.345.678-9"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('rut')?.invalid && proForm.get('rut')?.touched">
+            <div *ngIf="proForm.get('rut')?.hasError('required')">*El RUT es obligatorio.</div>
+            <div *ngIf="proForm.get('rut')?.hasError('rut')">*RUT inválido.</div>
+          </div>
 
+          <!-- Edad -->
           <ion-item>
             <ion-label position="stacked">Edad</ion-label>
             <ion-input type="number" formControlName="age"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('age')?.invalid && proForm.get('age')?.touched">
+            <div *ngIf="proForm.get('age')?.hasError('required')">*La edad es obligatoria.</div>
+            <div *ngIf="proForm.get('age')?.hasError('min')">*Debe ser mayor o igual a 18.</div>
+            <div *ngIf="proForm.get('age')?.hasError('max')">*Debe ser menor o igual a 120.</div>
+          </div>
 
+          <!-- Género -->
           <ion-item>
             <ion-label position="stacked">Género</ion-label>
             <ion-select formControlName="gender">
@@ -32,17 +46,34 @@
               <ion-select-option value="Otro">Otro</ion-select-option>
             </ion-select>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('gender')?.invalid && proForm.get('gender')?.touched">
+            <div *ngIf="proForm.get('gender')?.hasError('required')">*El género es obligatorio.</div>
+          </div>
 
+          <!-- Nacionalidad -->
           <ion-item>
             <ion-label position="stacked">Nacionalidad</ion-label>
             <ion-input formControlName="nationality"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('nationality')?.invalid && proForm.get('nationality')?.touched">
+            <div *ngIf="proForm.get('nationality')?.hasError('blank')">*La nacionalidad es obligatoria.</div>
+            <div *ngIf="proForm.get('nationality')?.hasError('maxlength')">*Máximo 50 caracteres.</div>
+          </div>
 
+          <!-- Teléfono -->
           <ion-item>
             <ion-label position="stacked">Teléfono</ion-label>
             <ion-input formControlName="phone" placeholder="+56 9 1234 5678"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('phone')?.invalid && proForm.get('phone')?.touched">
+            <div *ngIf="proForm.get('phone')?.hasError('required')">*El teléfono es obligatorio.</div>
+            <div *ngIf="proForm.get('phone')?.hasError('phone')">*Formato inválido. Ej: +569XXXXXXXX.</div>
+          </div>
 
+          <!-- Especialidad -->
           <ion-item>
             <ion-label position="stacked">Especialidad</ion-label>
             <ion-select formControlName="specialty" interface="popover">
@@ -51,37 +82,79 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('specialty')?.invalid && proForm.get('specialty')?.touched">
+            <div *ngIf="proForm.get('specialty')?.hasError('required')">*La especialidad es obligatoria.</div>
+          </div>
 
+          <!-- Especialidad (otro) -->
           <ion-item *ngIf="proForm.value.specialty === 'otro'">
             <ion-label position="stacked">Describe tu especialidad</ion-label>
             <ion-input formControlName="specialty_other" maxlength="100" placeholder="Ej. Psicoterapia integrativa"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               *ngIf="proForm.value.specialty === 'otro'"
+               [class.visible]="proForm.get('specialty_other')?.invalid && proForm.get('specialty_other')?.touched">
+            <div *ngIf="proForm.get('specialty_other')?.hasError('blank')">*Este campo es obligatorio.</div>
+            <div *ngIf="proForm.get('specialty_other')?.hasError('maxlength')">*Máximo 100 caracteres.</div>
+          </div>
 
+          <!-- N° Licencia -->
           <ion-item>
             <ion-label position="stacked">N° Licencia</ion-label>
             <ion-input formControlName="license_number"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('license_number')?.invalid && proForm.get('license_number')?.touched">
+            <div *ngIf="proForm.get('license_number')?.hasError('blank')">*El número de licencia es obligatorio.</div>
+            <div *ngIf="proForm.get('license_number')?.hasError('maxlength')">*Máximo 50 caracteres.</div>
+          </div>
 
+          <!-- Enfoque principal -->
           <ion-item>
             <ion-label position="stacked">Enfoque principal</ion-label>
             <ion-input formControlName="main_focus"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('main_focus')?.invalid && proForm.get('main_focus')?.touched">
+            <div *ngIf="proForm.get('main_focus')?.hasError('blank')">*El enfoque es obligatorio.</div>
+            <div *ngIf="proForm.get('main_focus')?.hasError('maxlength')">*Máximo 100 caracteres.</div>
+          </div>
 
+          <!-- Técnicas terapéuticas -->
           <ion-item>
             <ion-label position="stacked">Técnicas terapéuticas</ion-label>
             <ion-textarea formControlName="therapeutic_techniques"></ion-textarea>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('therapeutic_techniques')?.invalid && proForm.get('therapeutic_techniques')?.touched">
+            <div *ngIf="proForm.get('therapeutic_techniques')?.hasError('blank')">*Este campo es obligatorio.</div>
+            <div *ngIf="proForm.get('therapeutic_techniques')?.hasError('maxlength')">*Máximo 2000 caracteres.</div>
+          </div>
 
+          <!-- Estilo de atención -->
           <ion-item>
             <ion-label position="stacked">Estilo de atención</ion-label>
             <ion-textarea formControlName="style_of_attention"></ion-textarea>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('style_of_attention')?.invalid && proForm.get('style_of_attention')?.touched">
+            <div *ngIf="proForm.get('style_of_attention')?.hasError('blank')">*Este campo es obligatorio.</div>
+            <div *ngIf="proForm.get('style_of_attention')?.hasError('maxlength')">*Máximo 2000 caracteres.</div>
+          </div>
 
+          <!-- Disponibilidad -->
           <ion-item>
             <ion-label position="stacked">Disponibilidad (texto)</ion-label>
             <ion-textarea formControlName="attention_schedule" placeholder="Ej. Lun-Vie 09:00–18:00"></ion-textarea>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('attention_schedule')?.invalid && proForm.get('attention_schedule')?.touched">
+            <div *ngIf="proForm.get('attention_schedule')?.hasError('blank')">*La disponibilidad es obligatoria.</div>
+            <div *ngIf="proForm.get('attention_schedule')?.hasError('maxlength')">*Máximo 255 caracteres.</div>
+          </div>
 
+          <!-- Modalidad -->
           <ion-item>
             <ion-label position="stacked">Modalidad</ion-label>
             <ion-select formControlName="work_modality">
@@ -90,21 +163,37 @@
               <ion-select-option value="Mixta">Mixta</ion-select-option>
             </ion-select>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('work_modality')?.invalid && proForm.get('work_modality')?.touched">
+            <div *ngIf="proForm.get('work_modality')?.hasError('required')">*La modalidad es obligatoria.</div>
+          </div>
 
+          <!-- Inclusiva -->
           <ion-item lines="none">
             <ion-label>Atención inclusiva</ion-label>
             <ion-toggle formControlName="inclusive_orientation"></ion-toggle>
           </ion-item>
 
+          <!-- Idiomas -->
           <ion-item>
             <ion-label position="stacked">Idiomas</ion-label>
             <ion-input formControlName="languages" placeholder="Español, Inglés"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('languages')?.invalid && proForm.get('languages')?.touched">
+            <div *ngIf="proForm.get('languages')?.hasError('maxlength')">*Máximo 255 caracteres.</div>
+          </div>
 
+          <!-- Años de experiencia -->
           <ion-item>
             <ion-label position="stacked">Años de experiencia</ion-label>
             <ion-input type="number" formControlName="experience_years"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="proForm.get('experience_years')?.invalid && proForm.get('experience_years')?.touched">
+            <div *ngIf="proForm.get('experience_years')?.hasError('min')">*No puede ser negativo.</div>
+            <div *ngIf="proForm.get('experience_years')?.hasError('max')">*Máximo 60 años.</div>
+          </div>
 
           <ion-button expand="block" class="ion-margin-top" (click)="saveProfessional()" [disabled]="!proForm.valid">
             Guardar
@@ -123,16 +212,30 @@
 
       <ion-card-content>
         <form [formGroup]="paForm">
+          <!-- RUT -->
           <ion-item>
             <ion-label position="stacked">RUT</ion-label>
             <ion-input formControlName="rut" placeholder="12.345.678-9"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('rut')?.invalid && paForm.get('rut')?.touched">
+            <div *ngIf="paForm.get('rut')?.hasError('required')">*El RUT es obligatorio.</div>
+            <div *ngIf="paForm.get('rut')?.hasError('rut')">*RUT inválido.</div>
+          </div>
 
+          <!-- Edad -->
           <ion-item>
             <ion-label position="stacked">Edad</ion-label>
             <ion-input type="number" formControlName="age"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('age')?.invalid && paForm.get('age')?.touched">
+            <div *ngIf="paForm.get('age')?.hasError('required')">*La edad es obligatoria.</div>
+            <div *ngIf="paForm.get('age')?.hasError('min')">*Debe ser mayor o igual a 1.</div>
+            <div *ngIf="paForm.get('age')?.hasError('max')">*Debe ser menor o igual a 120.</div>
+          </div>
 
+          <!-- Género -->
           <ion-item>
             <ion-label position="stacked">Género</ion-label>
             <ion-select formControlName="gender">
@@ -141,42 +244,77 @@
               <ion-select-option value="Otro">Otro</ion-select-option>
             </ion-select>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('gender')?.invalid && paForm.get('gender')?.touched">
+            <div *ngIf="paForm.get('gender')?.hasError('required')">*El género es obligatorio.</div>
+          </div>
 
+          <!-- Nacionalidad -->
           <ion-item>
             <ion-label position="stacked">Nacionalidad</ion-label>
             <ion-input formControlName="nationality"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('nationality')?.invalid && paForm.get('nationality')?.touched">
+            <div *ngIf="paForm.get('nationality')?.hasError('blank')">*La nacionalidad es obligatoria.</div>
+            <div *ngIf="paForm.get('nationality')?.hasError('maxlength')">*Máximo 50 caracteres.</div>
+          </div>
 
+          <!-- Teléfono -->
           <ion-item>
             <ion-label position="stacked">Teléfono</ion-label>
             <ion-input formControlName="phone" placeholder="+56 9 1234 5678"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('phone')?.invalid && paForm.get('phone')?.touched">
+            <div *ngIf="paForm.get('phone')?.hasError('required')">*El teléfono es obligatorio.</div>
+            <div *ngIf="paForm.get('phone')?.hasError('phone')">*Formato inválido. Ej: +569XXXXXXXX.</div>
+          </div>
 
+          <!-- Inclusiva -->
           <ion-item lines="none">
             <ion-label>Atención inclusiva</ion-label>
             <ion-toggle formControlName="inclusive_orientation"></ion-toggle>
           </ion-item>
 
+          <!-- Enfermedad base -->
           <ion-item>
             <ion-label position="stacked">Enfermedad base</ion-label>
             <ion-input formControlName="base_disease"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('base_disease')?.invalid && paForm.get('base_disease')?.touched">
+            <div *ngIf="paForm.get('base_disease')?.hasError('blank')">*Este campo es obligatorio.</div>
+            <div *ngIf="paForm.get('base_disease')?.hasError('maxlength')">*Máximo 100 caracteres.</div>
+          </div>
 
+          <!-- Discapacidad -->
           <ion-item lines="none">
             <ion-label>Discapacidad</ion-label>
             <ion-toggle formControlName="disability"></ion-toggle>
           </ion-item>
 
+          <!-- Descripción -->
           <ion-item>
             <ion-label position="stacked">Descripción</ion-label>
             <ion-textarea formControlName="description"></ion-textarea>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('description')?.invalid && paForm.get('description')?.touched">
+            <div *ngIf="paForm.get('description')?.hasError('maxlength')">*Máximo 2000 caracteres.</div>
+          </div>
 
+          <!-- Motivo de consulta -->
           <ion-item>
             <ion-label position="stacked">Motivo de consulta</ion-label>
             <ion-input formControlName="consultation_reason"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('consultation_reason')?.invalid && paForm.get('consultation_reason')?.touched">
+            <div *ngIf="paForm.get('consultation_reason')?.hasError('maxlength')">*Máximo 100 caracteres.</div>
+          </div>
 
+          <!-- Modalidad preferida -->
           <ion-item>
             <ion-label position="stacked">Modalidad preferida</ion-label>
             <ion-select formControlName="preference_modality">
@@ -186,10 +324,15 @@
             </ion-select>
           </ion-item>
 
+          <!-- Enfoque preferido -->
           <ion-item>
             <ion-label position="stacked">Enfoque preferido</ion-label>
             <ion-input formControlName="preferred_focus"></ion-input>
           </ion-item>
+          <div class="validation-errors"
+               [class.visible]="paForm.get('preferred_focus')?.invalid && paForm.get('preferred_focus')?.touched">
+            <div *ngIf="paForm.get('preferred_focus')?.hasError('maxlength')">*Máximo 100 caracteres.</div>
+          </div>
 
           <ion-button expand="block" class="ion-margin-top" (click)="savePatient()" [disabled]="!paForm.valid">
             Guardar
