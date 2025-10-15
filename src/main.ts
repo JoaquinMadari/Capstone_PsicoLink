@@ -27,7 +27,6 @@ registerLocaleData(localeEsCl, 'es-CL');
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy},
-    { provide: LOCALE_ID, useValue: 'es-CL' },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(),

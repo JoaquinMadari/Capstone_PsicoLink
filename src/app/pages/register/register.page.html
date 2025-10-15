@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Registro de Cuenta Base</ion-title>
+    <ion-title>Registro</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -9,39 +9,27 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>Crea tu cuenta</ion-card-title>
-      <ion-card-subtitle>Paso 1: Selecciona tu rol y establece tus credenciales.</ion-card-subtitle>
+      <ion-card-subtitle>Selecciona tu rol y completa los datos</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
       <form [formGroup]="registerForm">
         
+        <!-- Selector de rol -->
         <ion-item lines="none">
           <ion-label>Rol</ion-label>
           <div class="role-selector">
-            <ion-segment formControlName="role" value="paciente">
+            <ion-segment formControlName="role">
               <ion-segment-button value="paciente">
                 Paciente
               </ion-segment-button>
               <ion-segment-button value="profesional">
                 Profesional
               </ion-segment-button>
-              <ion-segment-button value="organizacion">
-                Organización
-              </ion-segment-button>
             </ion-segment>
           </div>
         </ion-item>
-        
-        <ion-item>
-          <ion-label position="floating">Nombre *</ion-label>
-          <ion-input type="text" formControlName="first_name" required></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Apellido *</ion-label>
-          <ion-input type="text" formControlName="last_name" required></ion-input>
-        </ion-item>
-        
+        <!-- Campos comunes -->
         <ion-item>
           <ion-label position="floating">Correo Electrónico</ion-label>
           <ion-input type="email" formControlName="email"></ion-input>
@@ -60,14 +48,22 @@
           <div *ngIf="registerForm.get('password')?.hasError('minlength')">*Debe tener al menos 6 caracteres.</div>
         </div>
 
+        <!-- Campos adicionales SOLO para profesionales -->
+        <div *ngIf="registerForm.get('role')?.value === 'profesional'">
+          <ion-item>
+            <ion-label position="floating">Especialidad</ion-label>
+            <ion-input type="text" formControlName="specialty"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Número de Licencia</ion-label>
+            <ion-input type="text" formControlName="licenseNumber"></ion-input>
+          </ion-item>
+        </div>
+
         <ion-button expand="block" (click)="register()" [disabled]="!registerForm.valid" class="ion-margin-top">
-          Registrarse y Continuar
+          Registrarse
         </ion-button>
-        
-        <ion-item lines="none" class="ion-margin-top ion-text-center">
-          <ion-label>¿Ya tienes cuenta? <a [routerLink]="['/login']">Inicia sesión</a></ion-label>
-        </ion-item>
-        
       </form>
     </ion-card-content>
   </ion-card>

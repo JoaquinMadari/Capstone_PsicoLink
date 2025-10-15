@@ -26,15 +26,13 @@ export class SearchService {
       .set('page', page.toString());
 
     Object.keys(filters).forEach(key => {
-      if (filters[key]) {
-        params = params.set(key, filters[key]);
-      }
+      if (filters[key]) params = params.set(key, filters[key]);
     });
 
-    if (ordering) {
-      params = params.set('ordering', ordering);
-    }
+    if (ordering) params = params.set('ordering', ordering);
 
     return this.http.get(`${this.apiUrl}/search/`, { params, headers: this.getAuthHeaders() });
   }
 }
+
+

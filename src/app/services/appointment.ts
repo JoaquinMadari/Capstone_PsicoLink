@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 export interface BusyInterval { id: number; start: string; end: string; }
 export interface BusyResponse { professional: BusyInterval[]; patient: BusyInterval[]; }
@@ -11,8 +10,7 @@ export interface BusyResponse { professional: BusyInterval[]; patient: BusyInter
   providedIn: 'root'
 })
 export class AppointmentService {
-  private apiUrl: string = environment.API_URL;
-
+  private apiUrl = 'http://localhost:8000/api'; // Cambia en despliegue
 
   constructor(private http: HttpClient) {}
 
@@ -49,7 +47,7 @@ export class AppointmentService {
   }
 
   updateAppointment(id: number, data: any): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/appointments/${id}/`, data, {
+    return this.http.put(`${this.apiUrl}/appointments/${id}/`, data, {
       headers: this.getAuthHeaders(),
     });
   }
