@@ -10,7 +10,7 @@ export interface BusyResponse { professional: BusyInterval[]; patient: BusyInter
   providedIn: 'root'
 })
 export class AppointmentService {
-  private apiUrl = 'http://localhost:8000'; // Cambia en despliegue
+  private apiUrl = 'http://localhost:8000/api'; // Cambia en despliegue
 
   constructor(private http: HttpClient) {}
 

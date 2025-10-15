@@ -1,22 +1,24 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea  } from '@ionic/angular/standalone'
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Catalog, SpecialtyOption } from 'src/app/services/catalog';
 import { environment } from 'src/environments/environment';
-
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-profile-setup',
   templateUrl: './profile-setup.page.html',
   styleUrls: ['./profile-setup.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonItem, IonLabel, IonInput,IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea ]
+  imports: [
+    CommonModule, FormsModule, ReactiveFormsModule,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonCard,
+    IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
+    IonItem, IonLabel, IonInput, IonButton, IonSelectOption,
+    IonToggle, IonSelect, IonTextarea
+  ]
 })
 export class ProfileSetupPage implements OnInit {
   private fb = inject(FormBuilder);
@@ -36,7 +38,7 @@ export class ProfileSetupPage implements OnInit {
     this.viewerRole = (localStorage.getItem('role') as any) || 'paciente';
 
     // Cargar catálogo
-    this.catalog.getSpecialties().subscribe((list) => this.specialties = list || []);
+    this.catalog.getSpecialties().subscribe(list => this.specialties = list || []);
 
     // Forms
     this.proForm = this.fb.group({
@@ -58,7 +60,6 @@ export class ProfileSetupPage implements OnInit {
       experience_years: [null]
     });
 
-    // cuando cambia specialty, validar specialty_other
     this.proForm.get('specialty')!.valueChanges.subscribe(val => {
       const ctrl = this.proForm.get('specialty_other')!;
       if (val === 'otro') {
@@ -115,4 +116,7 @@ export class ProfileSetupPage implements OnInit {
       });
   }
 }
+
+
+
 
