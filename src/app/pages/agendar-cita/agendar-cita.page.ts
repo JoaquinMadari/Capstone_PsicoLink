@@ -138,7 +138,7 @@ export class AgendarCitaPage implements OnInit {
     this.slotStatus = map;
   }
 
-  //NUEVO: deshabilitar inicios que no alcancen por la duración elegida
+  //deshabilitar inicios que no alcancen por la duración elegida
   isStartDisabled(s: string): boolean {
     const dur = Number(this.form.value.duration) || 0;
     const dateISO = this.getDatePartISO(this.form.value.date);
