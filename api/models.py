@@ -128,6 +128,11 @@ class Appointment(models.Model):
         ('completed', 'Completed'),
     ]
 
+    MODALITY_CHOICES = [
+        ('Presencial', 'Presencial'),
+        ('Online', 'Online'),
+    ]
+
     patient = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='appointments_as_patient', on_delete=models.CASCADE
     )
@@ -138,6 +143,8 @@ class Appointment(models.Model):
     start_datetime = models.DateTimeField()
     duration_minutes = models.PositiveIntegerField(default=50)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    modality = models.CharField(max_length=20, choices=MODALITY_CHOICES, blank=True, null=True)
+    reason = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -30,9 +30,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'role')
+        fields = ('id', 'username', 'email', 'role', 'first_name', 'last_name', 'full_name')
+
+    def get_full_name(self, obj):
+        name = (obj.get_full_name() or '').strip()
+        return name or None
 
 
 #--------------------------------------------------
@@ -210,15 +216,17 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = UserSerializer(read_only=True)
     professional_detail = UserSerializer(source='professional', read_only=True)
-    professional = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(), required=True, write_only=True)
+    professional = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(), required=True, write_only=True
+    )
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = (
             'id', 'patient', 'professional', 'professional_detail',
-            'professional_role','start_datetime', 'duration_minutes',
-            'end_datetime', 'status', 'notes', 'created_at'
+            'professional_role', 'start_datetime', 'duration_minutes',
+            'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at'
         )
         read_only_fields = ('created_at', 'end_datetime', 'professional_role')
 
@@ -247,88 +255,74 @@ class AppointmentSerializer(serializers.ModelSerializer):
         start = data.get('start_datetime') or getattr(self.instance, 'start_datetime', None)
         duration = data.get('duration_minutes') or getattr(self.instance, 'duration_minutes', None)
         professional = data.get('professional') or getattr(self.instance, 'professional', None)
+        modality = data.get('modality') or getattr(self.instance, 'modality', None)
 
         if not start or not professional or not duration:
             return data
 
+        # límites por especialidad
         try:
             specialty = professional.psicologoprofile.specialty
         except AttributeError:
-            specialty = None 
+            specialty = None
 
-
-        if getattr(professional, 'role', 'paciente') != 'profesional' or not specialty:
-            role_key = 'default'
-        else:
-            role_key = specialty.lower()
-
+        role_key = 'default' if getattr(professional, 'role', 'paciente') != 'profesional' or not specialty else specialty.lower()
         min_dur, max_dur = ROLE_DURATION_LIMITS.get(role_key, ROLE_DURATION_LIMITS['default'])
         if not (min_dur <= duration <= max_dur):
             raise serializers.ValidationError({
                 'duration_minutes': f"La duración debe estar entre {min_dur} y {max_dur} minutos para el profesional con especialidad '{specialty}'."
             })
-        
-        #VALIDACIÓN: Solapamiento con Citas del PACIENTE
+
+        # Validacion de modalidad según el perfil del profesional
+        try:
+            allowed = professional.psicologoprofile.work_modality
+        except AttributeError:
+            allowed = None
+
+        if allowed in ('Presencial', 'Online'):
+            if modality and modality != allowed:
+                raise serializers.ValidationError({'modality': f"Este profesional solo atiende en modalidad {allowed}."})
+            data['modality'] = allowed
+        elif allowed == 'Mixta':
+            if not modality:
+                raise serializers.ValidationError({'modality': "Debes elegir 'Presencial' u 'Online'."})
+            if modality not in ('Presencial', 'Online'):
+                raise serializers.ValidationError({'modality': "Valor inválido. Usa 'Presencial' u 'Online'."})
+        else:
+            pass
+
+        # Solapamientos
         request = self.context.get('request')
         patient = request.user if request and request.user.is_authenticated else None
         patient = data.get('patient') or patient
-
-        # Verificar solapamientos
         end = start + timedelta(minutes=duration)
 
         if patient:
-            #Filtrar citas activas del mismo paciente, excluyendo la actual si es una actualización
-            patient_qs = Appointment.objects.filter(
-                patient=patient, 
-                status='scheduled'
-            )
+            qs = Appointment.objects.filter(patient=patient, status='scheduled')
             if self.instance:
-                patient_qs = patient_qs.exclude(pk=self.instance.pk)
+                qs = qs.exclude(pk=self.instance.pk)
+            if any((a.start_datetime < end) and (a.end_datetime > start) for a in qs):
+                raise serializers.ValidationError("Ya tienes una cita agendada que se solapa con este horario. Por favor revisa tus citas programadas.")
 
-            #Verificar solapamiento
-            patient_overlapping = [
-                a for a in patient_qs.all() 
-                if (a.start_datetime < end) and (a.end_datetime > start)
-            ]
-            
-            if patient_overlapping:
-                # Se encontró una cita del paciente que se solapa
-                raise serializers.ValidationError(
-                    "Ya tienes una cita agendada que se solapa con este horario. Por favor revisa tus citas programadas."
-                )
-
-        #VALIDACIÓN: Solapamiento con Citas del Profesional
-        qs_professional = Appointment.objects.filter(professional=professional, status='scheduled')
+        qs_prof = Appointment.objects.filter(professional=professional, status='scheduled')
         if self.instance:
-            qs_professional = qs_professional.exclude(pk=self.instance.pk)
-            
-        overlapping_professional = [
-            a for a in qs_professional.all() 
-            if (a.start_datetime < end) and (a.end_datetime > start)
-        ]
-
-        if overlapping_professional: 
-            raise serializers.ValidationError(
-                "El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible."
-            )
+            qs_prof = qs_prof.exclude(pk=self.instance.pk)
+        if any((a.start_datetime < end) and (a.end_datetime > start) for a in qs_prof):
+            raise serializers.ValidationError("El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible.")
 
         return data
     
-
-    # --- Creación ---
+    # --- Creación / Update ---
     def create(self, validated_data):
         request = self.context.get('request')
         with transaction.atomic():
             if request and request.user and request.user.is_authenticated:
                 validated_data['patient'] = request.user
-
-            # rol del profesional
             professional = validated_data.get('professional')
             if professional:
                 try:
-                    # especialidad si existe, si no, usar 'desconocido'
-                    specialty = professional.psicologoprofile.specialty
-                    validated_data['professional_role'] = specialty
+                    spec = professional.psicologoprofile.specialty
+                    validated_data['professional_role'] = spec
                 except AttributeError:
                     validated_data['professional_role'] = 'desconocido'
             return super().create(validated_data)
@@ -337,16 +331,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             return super().update(instance, validated_data)
     
-# busca profesionales disponibles en un horario dado
-class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerializer si UserSerializer no existe
+
+
+class ProfessionalSearchSerializer(UserSerializer):
     specialty = serializers.SerializerMethodField()
     specialty_label = serializers.SerializerMethodField()
-    full_name = serializers.SerializerMethodField() 
+    full_name = serializers.SerializerMethodField()
+    work_modality = serializers.SerializerMethodField() 
 
     
-    class Meta(UserSerializer.Meta): # Heredamos la Meta si es posible
+    class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name')  
+        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name', 'work_modality')  
         
     def get_specialty(self, obj):
         try: return obj.psicologoprofile.specialty
@@ -359,9 +355,11 @@ class ProfessionalSearchSerializer(UserSerializer): # O hereda de ModelSerialize
         except AttributeError:
             return None
     
-    def get_full_name(self, obj):
-        # 💡 Devuelve el nombre completo para la lista de resultados
-        return obj.get_full_name() 
+    def get_work_modality(self, obj):
+        try:
+            return obj.psicologoprofile.work_modality  # 'Presencial' | 'Online' | 'Mixta'
+        except AttributeError:
+            return None
 
 
 

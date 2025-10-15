@@ -60,7 +60,7 @@ class ProfileSetupView(APIView):
         elif user.role == 'paciente':
             serializer = PacienteProfileSerializer(data=data, context={'user': user})
             
-        elif user.role == 'organizacion': # <-- AGREGAR LÓGICA DE ORGANIZACIÓN
+        elif user.role == 'organizacion': # <-- Falta LÓGICA DE ORGANIZACIÓN
             serializer = OrganizacionProfileSerializer(data=data, context={'user': user})
             
         else:
