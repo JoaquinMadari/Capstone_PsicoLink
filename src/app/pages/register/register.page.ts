@@ -17,37 +17,43 @@ import { IonicModule } from '@ionic/angular';
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
-  errorMessage: string = '';
+  errorMessage = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: Auth,
-    private router: Router
-  ) {}
+  constructor(private fb: FormBuilder, private auth: Auth, private router: Router) {}
 
   ngOnInit() {
     this.registerForm = this.fb.group({
       role: ['paciente', Validators.required],
+      first_name: ['', Validators.required],
+      last_name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      specialty: [''],  // solo si es profesional
-      licenseNumber: [''] // solo si es profesional
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   register() {
-    if (this.registerForm.valid) {
-      const data = this.registerForm.value;
+    if (!this.registerForm.valid) return;
 
-      this.authService.register(data).subscribe({
-        next: () => {
-          this.router.navigate(['/home']);
-        },
-        error: (err) => {
-          this.errorMessage = 'Error en el registro';
-          console.error(err);
-        }
-      });
-    }
+    const payload = this.registerForm.value;
+
+    this.auth.register(payload).subscribe({
+      next: () => {
+        this.auth.login({ username: payload.email, password: payload.password }).subscribe({
+          next: (resp) => {
+            localStorage.setItem('access', resp.access);
+            localStorage.setItem('refresh', resp.refresh);
+            const role = resp?.user?.role || payload.role;
+            if (role) localStorage.setItem('role', role);
+
+            this.router.navigate(['/profile-setup']);
+          },
+          error: () => this.router.navigate(['/login'])
+        });
+      },
+      error: (err) => {
+        this.errorMessage = 'Error en el registro';
+        console.error(err);
+      }
+    });
   }
 }

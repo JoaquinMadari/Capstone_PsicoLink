@@ -5,7 +5,6 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-
   <ion-card>
     <ion-card-header>
       <ion-card-title>Crea tu cuenta</ion-card-title>
@@ -14,22 +13,36 @@
 
     <ion-card-content>
       <form [formGroup]="registerForm">
-        
-        <!-- Selector de rol -->
+        <!-- Rol -->
         <ion-item lines="none">
           <ion-label>Rol</ion-label>
           <div class="role-selector">
             <ion-segment formControlName="role">
-              <ion-segment-button value="paciente">
-                Paciente
-              </ion-segment-button>
-              <ion-segment-button value="profesional">
-                Profesional
-              </ion-segment-button>
+              <ion-segment-button value="paciente">Paciente</ion-segment-button>
+              <ion-segment-button value="profesional">Profesional</ion-segment-button>
+              <!-- agregar 'organizacion' más adelante -->
             </ion-segment>
           </div>
         </ion-item>
-        <!-- Campos comunes -->
+
+        <!-- Nombres -->
+        <ion-item>
+          <ion-label position="floating">Nombre</ion-label>
+          <ion-input type="text" formControlName="first_name"></ion-input>
+        </ion-item>
+        <div class="validation-errors" [class.visible]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched">
+          <div *ngIf="registerForm.get('first_name')?.hasError('required')">*El nombre es obligatorio.</div>
+        </div>
+
+        <ion-item>
+          <ion-label position="floating">Apellido</ion-label>
+          <ion-input type="text" formControlName="last_name"></ion-input>
+        </ion-item>
+        <div class="validation-errors" [class.visible]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched">
+          <div *ngIf="registerForm.get('last_name')?.hasError('required')">*El apellido es obligatorio.</div>
+        </div>
+
+        <!-- Correo -->
         <ion-item>
           <ion-label position="floating">Correo Electrónico</ion-label>
           <ion-input type="email" formControlName="email"></ion-input>
@@ -39,6 +52,7 @@
           <div *ngIf="registerForm.get('email')?.hasError('email')">*Correo inválido.</div>
         </div>
 
+        <!-- Password -->
         <ion-item>
           <ion-label position="floating">Contraseña</ion-label>
           <ion-input type="password" formControlName="password"></ion-input>
@@ -48,24 +62,14 @@
           <div *ngIf="registerForm.get('password')?.hasError('minlength')">*Debe tener al menos 6 caracteres.</div>
         </div>
 
-        <!-- Campos adicionales SOLO para profesionales -->
-        <div *ngIf="registerForm.get('role')?.value === 'profesional'">
-          <ion-item>
-            <ion-label position="floating">Especialidad</ion-label>
-            <ion-input type="text" formControlName="specialty"></ion-input>
-          </ion-item>
-
-          <ion-item>
-            <ion-label position="floating">Número de Licencia</ion-label>
-            <ion-input type="text" formControlName="licenseNumber"></ion-input>
-          </ion-item>
-        </div>
-
-        <ion-button expand="block" (click)="register()" [disabled]="!registerForm.valid" class="ion-margin-top">
+        <ion-button expand="block" class="ion-margin-top" (click)="register()" [disabled]="!registerForm.valid">
           Registrarse
         </ion-button>
+
+        <p class="ion-text-center ion-padding-top">
+          <a routerLink="/login">¿Ya tienes cuenta? Inicia sesión</a>
+        </p>
       </form>
     </ion-card-content>
   </ion-card>
 </ion-content>
-

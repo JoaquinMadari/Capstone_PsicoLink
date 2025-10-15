@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
   IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea  } from '@ionic/angular/standalone'
 import { Router } from '@angular/router';
-import { Auth } from 'src/app/services/auth';
-import { ToastController } from '@ionic/angular';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Catalog, SpecialtyOption } from 'src/app/services/catalog';
+import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-profile-setup',
@@ -17,142 +19,100 @@ import { ToastController } from '@ionic/angular';
   IonItem, IonLabel, IonInput,IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea ]
 })
 export class ProfileSetupPage implements OnInit {
-  profileForm!: FormGroup;
-  role: string | null = null;
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private catalog = inject(Catalog);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: Auth, // Servicio para obtener datos del usuario y enviar el perfil
-    private router: Router,
-    private toastController: ToastController
-  ) {}
+  viewerRole: 'profesional' | 'paciente' | 'organizacion' | 'admin' | undefined;
+  specialties: SpecialtyOption[] = [];
+
+  proForm!: FormGroup;
+  paForm!: FormGroup;
+
+  api = (environment.API_URL || '').replace(/\/$/, '');
 
   ngOnInit() {
-  this.authService.getCurrentUserRole().subscribe(role => {
-    if (role) {
-      // El rol es un string
-      this.role = role; 
-      this.initializeForm(role);
+    this.viewerRole = (localStorage.getItem('role') as any) || 'paciente';
 
-    } else {
-      // El rol es null
-      this.router.navigate(['/login']);
-    }
-  });
-}
+    // Cargar catálogo
+    this.catalog.getSpecialties().subscribe((list) => this.specialties = list || []);
 
-  // Crea el formulario basado en el rol
- initializeForm(role: string) {
-    let formConfig: any;
+    // Forms
+    this.proForm = this.fb.group({
+      rut: ['', Validators.required],
+      age: [null, [Validators.required, Validators.min(18), Validators.max(120)]],
+      gender: ['', Validators.required],
+      nationality: ['', Validators.required],
+      phone: ['', Validators.required],
+      specialty: ['', Validators.required],
+      specialty_other: [''],
+      license_number: ['', Validators.required],
+      main_focus: ['', Validators.required],
+      therapeutic_techniques: ['', Validators.required],
+      style_of_attention: ['', Validators.required],
+      attention_schedule: ['', Validators.required],
+      work_modality: ['', Validators.required],
+      inclusive_orientation: [false],
+      languages: [''],
+      experience_years: [null]
+    });
 
-    if (role === 'organizacion') {
-        // Los campos de Organización son completamente diferentes de BaseProfile
-        formConfig = this.fb.group({
-            // Campos Obligatorios
-            organization_name: ['', Validators.required],
-            organization_rut: ['', Validators.required],
-            contact_email: ['', [Validators.required, Validators.email]],
-            
-            // Campos Opcionales
-            contact_phone: [''],
-            num_employees: [''],
-            company_sector: [''],
-            location: [''],
-            service_type_required: [''],
-            preference_modality: [''],
-            type_of_attention: [''],
-            service_frequency: [''],
-        });
-
-    } else {
-        //Campos Base (Comunes a Paciente y Profesional)
-        const baseFields = {
-            rut: ['', Validators.required],
-            age: ['', Validators.required],
-            gender: ['', Validators.required],
-            nationality: ['', Validators.required],
-            phone: ['', Validators.required],
-            payment_method: ['algo'],
-            address: ['algo'], // Opcional o condicional
-        };
-
-        let specificFields = {};
-
-        //Campos Específicos para PROFESIONAL
-        if (role === 'profesional') {
-            specificFields = {
-                specialty: ['', Validators.required],
-                license_number: ['', Validators.required],
-                
-                // Campos obligatorios
-                main_focus: ['', Validators.required],
-                therapeutic_techniques: ['', Validators.required],
-                style_of_attention: ['', Validators.required],
-                attention_schedule: ['', Validators.required],
-                work_modality: ['', Validators.required],
-                certificates: [''],
-                
-                // Campos opcionales
-                inclusive_orientation: [false],
-                languages: [''],
-                experience_years: [null],
-                curriculum_vitae: [''],
-            };
-        } 
-        
-        // Campos Específicos para PACIENTE
-        else if (role === 'paciente') {
-            specificFields = {
-                base_disease: ['', Validators.required],
-                disability: [false, Validators.required],
-                
-                // Campos opcionales
-                description: [''],
-                consultation_reason: [''],
-                preference_modality: [''],
-                preferred_focus: [''],
-            };
-        } 
-        formConfig = this.fb.group({ ...baseFields, ...specificFields });
-    }
-    this.profileForm = formConfig;
-}
-
-  saveProfile() {
-    if (!this.profileForm.valid) return;
-
-    const data = this.profileForm.value;
-
-    if (data.experience_years === '' || data.experience_years === undefined) {
-        data.experience_years = null;
-    }
-    // Llamar al endpoint /api/profile/setup/
-    this.authService.completeProfile(data).subscribe({
-      next: (_) => {
-        this.presentToast('Perfil completado. ¡Bienvenido!');
-        this.router.navigate(['/home']);
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Error al guardar el perfil.';
-        this.presentToast(errorMsg);
+    // cuando cambia specialty, validar specialty_other
+    this.proForm.get('specialty')!.valueChanges.subscribe(val => {
+      const ctrl = this.proForm.get('specialty_other')!;
+      if (val === 'otro') {
+        ctrl.addValidators([Validators.required, Validators.maxLength(100)]);
+      } else {
+        ctrl.clearValidators();
+        ctrl.setValue('');
       }
+      ctrl.updateValueAndValidity();
+    });
+
+    this.paForm = this.fb.group({
+      rut: ['', Validators.required],
+      age: [null, [Validators.required, Validators.min(1), Validators.max(120)]],
+      gender: ['', Validators.required],
+      nationality: ['', Validators.required],
+      phone: ['', Validators.required],
+      inclusive_orientation: [false],
+      base_disease: ['', Validators.required],
+      disability: [false],
+      description: [''],
+      consultation_reason: [''],
+      preference_modality: [''],
+      preferred_focus: ['']
     });
   }
 
-  skipSetup() {
-    // Si el usuario omite, asume que solo se guardaron los datos obligatorios del registro inicial
-    this.presentToast('Perfil incompleto. Puedes completarlo más tarde.');
-    this.router.navigate(['/home']);
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('access');
+    let h = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) h = h.set('Authorization', `Bearer ${token}`);
+    return h;
   }
 
-  async presentToast(message: string) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 3000,
-      position: 'bottom',
-      color: 'dark'
-    });
-    await toast.present();
+  saveProfessional() {
+    if (!this.proForm.valid) return;
+    const payload = this.proForm.value;
+
+    this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() })
+      .subscribe({
+        next: () => this.router.navigate(['/home']),
+        error: (err) => console.error('Error guardando perfil profesional', err)
+      });
+  }
+
+  savePatient() {
+    if (!this.paForm.valid) return;
+    const payload = this.paForm.value;
+
+    this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() })
+      .subscribe({
+        next: () => this.router.navigate(['/home']),
+        error: (err) => console.error('Error guardando perfil paciente', err)
+      });
   }
 }
 

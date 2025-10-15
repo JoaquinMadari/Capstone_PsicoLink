@@ -1,6 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-back-button slot="start" defaultHref="/home"></ion-back-button>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
     <ion-title>Buscar Profesionales</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -8,50 +10,51 @@
 <ion-content>
   <form [formGroup]="searchForm">
     <ion-toolbar>
-      <ion-searchbar 
-          placeholder="Buscar por nombre o especialidad" 
-          [formControlName]="'query'"
-          (ionClear)="loadResults(1)">
+      <ion-searchbar
+        placeholder="Buscar por nombre o especialidad"
+        formControlName="query"
+        (ionClear)="resetAndLoad()">
       </ion-searchbar>
     </ion-toolbar>
 
-    <ion-item lines="full">
+    <ion-item>
       <ion-label position="stacked">Especialidad</ion-label>
-      <ion-select [formControlName]="'specialty'" interface="action-sheet"> 
+      <ion-select formControlName="specialty" interface="popover">
         <ion-select-option value="">Todas las especialidades</ion-select-option>
-        <ion-select-option value="Psicología Clínica">Psicología Clínica</ion-select-option>
-        <ion-select-option value="Psiquiatría">Psiquiatría</ion-select-option>
-        <ion-select-option value="Terapia de Pareja">Terapia de Pareja</ion-select-option>
+        <ion-select-option *ngFor="let s of specialties" [value]="s.value">
+          {{ s.label }}
+        </ion-select-option>
       </ion-select>
     </ion-item>
-  </form> 
-  
+  </form>
+
   <ion-list lines="none">
-    <ion-item 
-      *ngFor="let prof of profesionales" 
-      button 
+    <ion-item
+      *ngFor="let p of profesionales; trackBy: trackByPro"
+      button
       class="ion-margin-vertical ion-padding-vertical custom-item-card"
-      (click)="goToProfile(prof.id)">
-      
-      <ion-icon name="person-circle" slot="start" size="large" color="primary"></ion-icon>
-      
-      <ion-label class="ion-text-wrap">
-        <h2 class="ion-text-xl ion-font-bold">{{ prof.full_name || prof.username }}</h2> 
-        <p>Especialidad: <strong>{{ prof.specialty || 'Sin especialidad' }}</strong></p>
-        <p class="ion-text-sm">{{ prof.license_number ? 'Licencia: ' + prof.license_number : 'Sin número de licencia' }}</p>
+      (click)="goToProfile(p.id)">
+
+      <ion-icon name="person-circle-outline" slot="start" size="large" color="primary"></ion-icon>
+
+      <ion-label>
+        <h2>{{ p.full_name || p.username }}</h2>
+        <p>{{ p.specialty_label || p.specialty || '—' }}</p>
       </ion-label>
-      
-      <ion-button 
-        slot="end" 
-        size="small" 
-        shape="round" 
-        (click)="goToAgendarFromList($event, prof.id)"> 
+
+      <ion-button
+        slot="end"
+        fill="solid"
+        size="small"
+        (click)="goToAgendarFromList($event, p.id)">
         Agendar
       </ion-button>
     </ion-item>
-    
+
     <ion-item *ngIf="profesionales.length === 0" lines="full" class="ion-text-center">
-      <ion-label class="ion-padding">No se encontraron profesionales que coincidan con los filtros.</ion-label>
+      <ion-label class="ion-padding">
+        No se encontraron profesionales que coincidan con los filtros.
+      </ion-label>
     </ion-item>
   </ion-list>
 

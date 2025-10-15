@@ -1,130 +1,201 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Completa tu Perfil</ion-title>
+    <ion-title>Completar Perfil</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content class="ion-padding">
+  <ng-container *ngIf="viewerRole === 'profesional'; else pacienteBlock">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Perfil Profesional</ion-card-title>
+        <ion-card-subtitle>Completa tus datos</ion-card-subtitle>
+      </ion-card-header>
 
-  <ion-card *ngIf="role">
-    <ion-card-header>
-      <ion-card-title>Datos de {{ role | titlecase }}</ion-card-title>
-      <ion-card-subtitle>Campos marcados con (*) son obligatorios.</ion-card-subtitle>
-    </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="proForm">
+          <ion-item>
+            <ion-label position="stacked">RUT</ion-label>
+            <ion-input formControlName="rut" placeholder="12.345.678-9"></ion-input>
+          </ion-item>
 
-    <ion-card-content>
-      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <ion-item>
+            <ion-label position="stacked">Edad</ion-label>
+            <ion-input type="number" formControlName="age"></ion-input>
+          </ion-item>
 
-        <h2>Información Básica (*)</h2>
-        <ion-item>
-          <ion-label position="floating">RUT *</ion-label>
-          <ion-input type="text" formControlName="rut"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Edad *</ion-label>
-          <ion-input type="number" formControlName="age"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="stacked">Género *</ion-label>
-          <ion-select formControlName="gender" placeholder="Selecciona">
-            <ion-select-option value="masculino">Masculino</ion-select-option>
-            <ion-select-option value="femenino">Femenino</ion-select-option>
-            <ion-select-option value="otro">Otro/No Binario</ion-select-option>
+          <ion-item>
+            <ion-label position="stacked">Género</ion-label>
+            <ion-select formControlName="gender">
+              <ion-select-option value="Masculino">Masculino</ion-select-option>
+              <ion-select-option value="Femenino">Femenino</ion-select-option>
+              <ion-select-option value="Otro">Otro</ion-select-option>
             </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Nacionalidad *</ion-label>
-          <ion-input type="text" formControlName="nationality"></ion-input>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="floating">Teléfono *</ion-label>
-          <ion-input type="tel" formControlName="phone"></ion-input>
-        </ion-item>
-
-        <div *ngIf="role === 'profesional'">
-          <h3 class="ion-padding-top">Detalles Profesionales (*)</h3>
-          
-          <ion-item>
-              <ion-label position="floating">Especialidad *</ion-label>
-              <ion-input type="text" formControlName="specialty"></ion-input>
-          </ion-item>
-          <ion-item>
-              <ion-label position="floating">N° Licencia *</ion-label>
-              <ion-input type="text" formControlName="license_number"></ion-input>
           </ion-item>
 
           <ion-item>
-              <ion-label position="floating">Foco Principal *</ion-label>
-              <ion-input type="text" formControlName="main_focus"></ion-input>
-          </ion-item>
-          
-          <ion-item>
-              <ion-label position="stacked">Modalidad de Trabajo *</ion-label>
-              <ion-select formControlName="work_modality" placeholder="Selecciona modalidad">
-                  <ion-select-option value="online">Online</ion-select-option>
-                  <ion-select-option value="presencial">Presencial</ion-select-option>
-                  <ion-select-option value="mixto">Mixto</ion-select-option>
-              </ion-select>
-          </ion-item>
-
-          <ion-item fill="outline"> <ion-label position="stacked">Técnicas Terapéuticas *</ion-label>
-              <ion-textarea formControlName="therapeutic_techniques" rows="3"></ion-textarea>
-          </ion-item>
-
-          <ion-item fill="outline"> <ion-label position="stacked">Estilo de Atención *</ion-label>
-              <ion-textarea formControlName="style_of_attention" rows="3"></ion-textarea>
+            <ion-label position="stacked">Nacionalidad</ion-label>
+            <ion-input formControlName="nationality"></ion-input>
           </ion-item>
 
           <ion-item>
-              <ion-label position="floating">Agenda/Horario (Texto simple) *</ion-label>
-              <ion-input type="text" formControlName="attention_schedule"></ion-input>
+            <ion-label position="stacked">Teléfono</ion-label>
+            <ion-input formControlName="phone" placeholder="+56 9 1234 5678"></ion-input>
           </ion-item>
 
           <ion-item>
-              <ion-label position="floating">Años de Experiencia (Opcional)</ion-label>
-              <ion-input type="number" formControlName="experience_years" min="0"></ion-input>
-          </ion-item>
-          
-          <ion-item>
-              <ion-label position="stacked">Certificados (Archivos) *</ion-label>
-              <ion-input type="file" formControlName="certificates"></ion-input> 
+            <ion-label position="stacked">Especialidad</ion-label>
+            <ion-select formControlName="specialty" interface="popover">
+              <ion-select-option *ngFor="let s of specialties" [value]="s.value">
+                {{ s.label }}
+              </ion-select-option>
+            </ion-select>
           </ion-item>
 
-          <h3 class="ion-padding-top">Datos Opcionales</h3>
-          <ion-item>
-              <ion-label>Orientación Inclusiva</ion-label>
-              <ion-toggle formControlName="inclusive_orientation"></ion-toggle>
+          <ion-item *ngIf="proForm.value.specialty === 'otro'">
+            <ion-label position="stacked">Describe tu especialidad</ion-label>
+            <ion-input formControlName="specialty_other" maxlength="100" placeholder="Ej. Psicoterapia integrativa"></ion-input>
           </ion-item>
-        </div>
 
-        <div *ngIf="role === 'paciente'">
-          <ion-item class="ion-margin-top">
-            <ion-label position="floating">Enfermedad de Base *</ion-label>
-            <ion-input type="text" formControlName="base_disease"></ion-input>
-          </ion-item>
           <ion-item>
-            <ion-label position="floating">¿Tiene Discapacidad? *</ion-label>
+            <ion-label position="stacked">N° Licencia</ion-label>
+            <ion-input formControlName="license_number"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Enfoque principal</ion-label>
+            <ion-input formControlName="main_focus"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Técnicas terapéuticas</ion-label>
+            <ion-textarea formControlName="therapeutic_techniques"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Estilo de atención</ion-label>
+            <ion-textarea formControlName="style_of_attention"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Disponibilidad (texto)</ion-label>
+            <ion-textarea formControlName="attention_schedule" placeholder="Ej. Lun-Vie 09:00–18:00"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Modalidad</ion-label>
+            <ion-select formControlName="work_modality">
+              <ion-select-option value="Presencial">Presencial</ion-select-option>
+              <ion-select-option value="Online">Online</ion-select-option>
+              <ion-select-option value="Mixta">Mixta</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>Atención inclusiva</ion-label>
+            <ion-toggle formControlName="inclusive_orientation"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Idiomas</ion-label>
+            <ion-input formControlName="languages" placeholder="Español, Inglés"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Años de experiencia</ion-label>
+            <ion-input type="number" formControlName="experience_years"></ion-input>
+          </ion-item>
+
+          <ion-button expand="block" class="ion-margin-top" (click)="saveProfessional()" [disabled]="!proForm.valid">
+            Guardar
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ng-template #pacienteBlock>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Perfil Paciente</ion-card-title>
+        <ion-card-subtitle>Completa tus datos</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="paForm">
+          <ion-item>
+            <ion-label position="stacked">RUT</ion-label>
+            <ion-input formControlName="rut" placeholder="12.345.678-9"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Edad</ion-label>
+            <ion-input type="number" formControlName="age"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Género</ion-label>
+            <ion-select formControlName="gender">
+              <ion-select-option value="Masculino">Masculino</ion-select-option>
+              <ion-select-option value="Femenino">Femenino</ion-select-option>
+              <ion-select-option value="Otro">Otro</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Nacionalidad</ion-label>
+            <ion-input formControlName="nationality"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Teléfono</ion-label>
+            <ion-input formControlName="phone" placeholder="+56 9 1234 5678"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>Atención inclusiva</ion-label>
+            <ion-toggle formControlName="inclusive_orientation"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Enfermedad base</ion-label>
+            <ion-input formControlName="base_disease"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label>Discapacidad</ion-label>
             <ion-toggle formControlName="disability"></ion-toggle>
           </ion-item>
-          </div>
 
-        <div *ngIf="role === 'organizacion'">
-           </div>
+          <ion-item>
+            <ion-label position="stacked">Descripción</ion-label>
+            <ion-textarea formControlName="description"></ion-textarea>
+          </ion-item>
 
-        <ion-button expand="block" type="submit" [disabled]="!profileForm.valid" class="ion-margin-top">
-          Guardar Perfil
-        </ion-button>
-        
-        <ion-button expand="block" fill="clear" (click)="skipSetup()" class="ion-margin-top">
-          Omitir (Completar más tarde)
-        </ion-button>
-        
-      </form>
-    </ion-card-content>
-  </ion-card>
+          <ion-item>
+            <ion-label position="stacked">Motivo de consulta</ion-label>
+            <ion-input formControlName="consultation_reason"></ion-input>
+          </ion-item>
 
+          <ion-item>
+            <ion-label position="stacked">Modalidad preferida</ion-label>
+            <ion-select formControlName="preference_modality">
+              <ion-select-option value="Presencial">Presencial</ion-select-option>
+              <ion-select-option value="Online">Online</ion-select-option>
+              <ion-select-option value="Mixta">Mixta</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Enfoque preferido</ion-label>
+            <ion-input formControlName="preferred_focus"></ion-input>
+          </ion-item>
+
+          <ion-button expand="block" class="ion-margin-top" (click)="savePatient()" [disabled]="!paForm.valid">
+            Guardar
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </ng-template>
 </ion-content>

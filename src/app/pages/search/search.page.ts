@@ -5,7 +5,14 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonSearchbar, IonItem, Ion
   IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll, IonBackButton, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { Router, RouterModule } from '@angular/router';
 import { SearchService } from '../../services/search';
+import { Catalog } from 'src/app/services/catalog';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
+
+interface SpecialtyOption {
+  value: string;
+  label: string;
+  requires_detail?: boolean; // para "otro"
+}
 
 @Component({
   selector: 'app-search',
@@ -25,60 +32,62 @@ import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 export class SearchPage implements OnInit {
   private searchService = inject(SearchService);
   private router = inject(Router);
-  private fb = inject(FormBuilder); 
+  private fb = inject(FormBuilder);
+  private catalog = inject(Catalog);
 
-  searchForm: FormGroup; 
+  searchForm: FormGroup;
   profesionales: any[] = [];
   page = 1;
 
+  specialties: SpecialtyOption[] = [];
+
   constructor() {
     this.searchForm = this.fb.group({
-      query: [''], 
-      specialty: [''] 
+      query: [''],
+      specialty: ['']
     });
   }
 
   ngOnInit() {
+    this.catalog.getSpecialties().subscribe(list => {
+      this.specialties = list || [];
+    });
+
     this.searchForm.valueChanges
       .pipe(
         startWith(this.searchForm.value),
         debounceTime(300),
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) 
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
       )
       .subscribe(() => {
-        this.page = 1; 
+        this.page = 1;
         this.loadResults();
       });
   }
 
   loadResults(event?: any) {
-    const { query, specialty } = this.searchForm.value; 
+    const { query, specialty } = this.searchForm.value as { query: string; specialty: string };
 
-    const filters = { specialty: specialty };
+    const filters: Record<string, string> = {};
+    if (specialty) {
+      filters['psicologoprofile__specialty'] = specialty;
+    }
+
     const ordering = '';
 
     this.searchService.search(query, filters, ordering, this.page).subscribe({
       next: (res: any) => {
-        const newResults = res.results || res;
-        
-        if (this.page === 1) {
-          this.profesionales = newResults;
-        } else {
-          this.profesionales.push(...newResults);
-        }
-      
-        if (event && event.target) {
+        const newResults = res?.results ?? res ?? [];
+        this.profesionales = this.page === 1 ? newResults : [...this.profesionales, ...newResults];
+
+        if (event?.target) {
           event.target.complete();
-          if (res && !res.next) { 
-            event.target.disabled = true; 
-          } else {
-            event.target.disabled = false;
-          }
+          event.target.disabled = !res?.next;
         }
       },
       error: (err) => {
         console.error('Error al cargar resultados:', err);
-        if (event) event.target.complete();
+        if (event?.target) event.target.complete();
       }
     });
   }
@@ -87,17 +96,23 @@ export class SearchPage implements OnInit {
     this.page += 1;
     this.loadResults(event);
   }
-  
+
   goToProfile(professionalId: number) {
-    this.router.navigate(['/profile', professionalId]); 
+    this.router.navigate(['/profile', professionalId]);
   }
 
   goToAgendarFromList(event: Event, professionalId: number) {
-    event.stopPropagation(); 
-    
-    this.router.navigate(['/Agendar'], { 
-        queryParams: { professionalId: professionalId } 
-    });
+    event.stopPropagation();
+    this.router.navigate(['/Agendar'], { queryParams: { professionalId } });
   }
+
+
+  resetAndLoad() {
+    this.page = 1;
+    this.searchForm.patchValue({ query: '' });
+    this.loadResults();
+  }
+
+  trackByPro = (_: number, p: any) => p?.id ?? _;
 
 }
