@@ -2,10 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonSearchbar, IonItem, IonLabel,
-  IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll, IonBackButton, IonButtons } from '@ionic/angular/standalone';
+  IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll, IonBackButton, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { Router, RouterModule } from '@angular/router';
 import { SearchService } from '../../services/search';
-import { debounceTime, distinctUntilChanged, startWith } from 'rxjs'; // Necesario para evitar búsquedas excesivas
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-search',
@@ -18,7 +18,7 @@ import { debounceTime, distinctUntilChanged, startWith } from 'rxjs'; // Necesar
     // Módulos Ionic
     IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar, IonItem, IonLabel,
     IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll,
-    IonBackButton, IonButtons,
+    IonBackButton, IonButtons, IonButton, IonIcon,
     RouterModule 
   ]
 })
@@ -42,7 +42,7 @@ export class SearchPage implements OnInit {
     this.searchForm.valueChanges
       .pipe(
         startWith(this.searchForm.value),
-        debounceTime(150), 
+        debounceTime(300),
         distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)) 
       )
       .subscribe(() => {
@@ -66,7 +66,7 @@ export class SearchPage implements OnInit {
         } else {
           this.profesionales.push(...newResults);
         }
-    
+      
         if (event && event.target) {
           event.target.complete();
           if (res && !res.next) { 
@@ -88,7 +88,13 @@ export class SearchPage implements OnInit {
     this.loadResults(event);
   }
   
-  goToAgendar(professionalId: number) {
+  goToProfile(professionalId: number) {
+    this.router.navigate(['/profile', professionalId]); 
+  }
+
+  goToAgendarFromList(event: Event, professionalId: number) {
+    event.stopPropagation(); 
+    
     this.router.navigate(['/Agendar'], { 
         queryParams: { professionalId: professionalId } 
     });

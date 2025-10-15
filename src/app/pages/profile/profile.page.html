@@ -1,0 +1,114 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Perfil profesional</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <!-- Loading -->
+  <ng-container *ngIf="loading">
+    <ion-list>
+      <ion-item>
+        <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+      </ion-item>
+      <ion-item>
+        <ion-skeleton-text animated style="width: 90%"></ion-skeleton-text>
+      </ion-item>
+      <ion-item>
+        <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <!-- Error -->
+  <ion-card *ngIf="!loading && error">
+    <ion-card-header>
+      <ion-card-title>Error</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>{{ error }}</ion-card-content>
+  </ion-card>
+
+  <!-- OK -->
+  <ng-container *ngIf="!loading && !error && data as d">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ d.user?.full_name || d.user?.username }}</ion-card-title>
+        <ion-card-subtitle>
+          {{ d.specialty }} • {{ d.work_modality }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>
+              <h3>Contacto</h3>
+              <p>Email: {{ d.user?.email }}</p>
+              <p>Teléfono: <a (click)="callPhone(d.phone)">{{ d.phone }}</a></p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Datos generales</h3>
+              <p>RUT: {{ d.rut }}</p>
+              <p>Edad: {{ d.age }} • Género: {{ d.gender }} • Nacionalidad: {{ d.nationality }}</p>
+              <p *ngIf="d.languages">Idiomas: {{ d.languages }}</p>
+              <p *ngIf="d.experience_years !== null && d.experience_years !== undefined">
+                Años de experiencia: {{ d.experience_years }}
+              </p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Enfoque y técnicas</h3>
+              <p><strong>Enfoque principal:</strong> {{ d.main_focus }}</p>
+              <p [style.white-space]="'pre-line'">
+                <strong>Técnicas:</strong> {{ d.therapeutic_techniques }}
+              </p>
+              <p [style.white-space]="'pre-line'">
+                <strong>Estilo de atención:</strong> {{ d.style_of_attention }}
+              </p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Disponibilidad</h3>
+              <p [style.white-space]="'pre-line'">
+                {{ d.attention_schedule }}
+              </p>
+              <p *ngIf="d.inclusive_orientation">Atención inclusiva</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Licencia</h3>
+              <p>N° de licencia: {{ d.license_number }}</p>
+              <p *ngIf="d.cases_attended">Casos atendidos: {{ d.cases_attended }}</p>
+              <p *ngIf="d.rating">Rating: {{ d.rating }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="d.curriculum_vitae">
+            <ion-label>
+              <h3>Currículum</h3>
+              <ion-button fill="outline" (click)="openCV(d.curriculum_vitae)">Ver CV</ion-button>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-button expand="block" color="primary" *ngIf="isPatientView()" (click)="bookAppointment()">
+          Agendar hora
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+</ion-content>

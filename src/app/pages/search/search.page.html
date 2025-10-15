@@ -15,10 +15,10 @@
       </ion-searchbar>
     </ion-toolbar>
 
-    <ion-item>
-      <ion-label>Especialidad</ion-label>
-      <ion-select [formControlName]="'specialty'"> 
-        <ion-select-option value="">Todas</ion-select-option>
+    <ion-item lines="full">
+      <ion-label position="stacked">Especialidad</ion-label>
+      <ion-select [formControlName]="'specialty'" interface="action-sheet"> 
+        <ion-select-option value="">Todas las especialidades</ion-select-option>
         <ion-select-option value="Psicología Clínica">Psicología Clínica</ion-select-option>
         <ion-select-option value="Psiquiatría">Psiquiatría</ion-select-option>
         <ion-select-option value="Terapia de Pareja">Terapia de Pareja</ion-select-option>
@@ -26,28 +26,38 @@
     </ion-item>
   </form> 
   
-  <ion-list>
+  <ion-list lines="none">
     <ion-item 
       *ngFor="let prof of profesionales" 
       button 
-      detail 
-      (click)="goToAgendar(prof.id)"> 
+      class="ion-margin-vertical ion-padding-vertical custom-item-card"
+      (click)="goToProfile(prof.id)">
       
-      <ion-label>
-        <h2>{{ prof.full_name || prof.username }}</h2>
-        <p>Especialidad: {{ prof.specialty || 'Sin especialidad' }}</p>
-        <p>{{ prof.license_number ? 'Licencia: ' + prof.license_number : '' }}</p>
+      <ion-icon name="person-circle" slot="start" size="large" color="primary"></ion-icon>
+      
+      <ion-label class="ion-text-wrap">
+        <h2 class="ion-text-xl ion-font-bold">{{ prof.full_name || prof.username }}</h2> 
+        <p>Especialidad: <strong>{{ prof.specialty || 'Sin especialidad' }}</strong></p>
+        <p class="ion-text-sm">{{ prof.license_number ? 'Licencia: ' + prof.license_number : 'Sin número de licencia' }}</p>
       </ion-label>
+      
+      <ion-button 
+        slot="end" 
+        size="small" 
+        shape="round" 
+        (click)="goToAgendarFromList($event, prof.id)"> 
+        Agendar
+      </ion-button>
     </ion-item>
     
-    <ion-item *ngIf="profesionales.length === 0">
-        <ion-label>No se encontraron profesionales.</ion-label>
+    <ion-item *ngIf="profesionales.length === 0" lines="full" class="ion-text-center">
+      <ion-label class="ion-padding">No se encontraron profesionales que coincidan con los filtros.</ion-label>
     </ion-item>
   </ion-list>
 
   <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)">
     <ion-infinite-scroll-content
-      loadingSpinner="bubbles"
+      loadingSpinner="lines"
       loadingText="Cargando más profesionales...">
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>

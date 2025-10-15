@@ -7,6 +7,7 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, Io
 import { Router } from '@angular/router';
 import { Auth } from 'src/app/services/auth';
 import { ToastController } from '@ionic/angular';
+
 @Component({
   selector: 'app-profile-setup',
   templateUrl: './profile-setup.page.html',
