@@ -1,15 +1,31 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 from django.contrib.postgres.fields import DateTimeRangeField
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.db.models import F
 from datetime import timedelta
-
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 #-------------------------------------------------------------------
 # ----- AQUI SE EMPIEZAN A DEFINIR LOS PERFILES DE LOS USUARIOS ----
 #-------------------------------------------------------------------
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El email es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
@@ -29,7 +45,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+    objects = UserManager()
     
+    # Hace que email sea el campo de identificación principal
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']  # username sigue siendo requerido pero no para login
 class BaseProfile(models.Model):
     # Campos comunes
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
@@ -154,8 +174,25 @@ class Appointment(models.Model):
     def end_datetime(self):
         return self.start_datetime + timedelta(minutes=self.duration_minutes)
     
+    def clean(self):
+        """Validaciones a nivel de modelo"""
+        if self.start_datetime and self.start_datetime < timezone.now():
+            raise ValidationError({'start_datetime': 'No se pueden crear citas en el pasado'})
+        
+        if self.duration_minutes <= 0:
+            raise ValidationError({'duration_minutes': 'La duración debe ser mayor a 0'})
+    
     def save(self, *args, **kwargs):
-        # Aseguramos que 'time_range' se calcule antes de guardar
+        # Ejecuta validaciones antes de guardar
+        self.full_clean()
+        # Asigna professional_role automáticamente si está vacío
+        if not self.professional_role and self.professional:
+            try:
+                profile = self.professional.psicologoprofile
+                self.professional_role = profile.specialty
+            except PsicologoProfile.DoesNotExist:
+                pass
+        # Cálculo de time_range
         self.time_range = [self.start_datetime, self.end_datetime]
         super().save(*args, **kwargs)
 

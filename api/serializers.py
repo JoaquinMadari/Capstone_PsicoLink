@@ -215,10 +215,11 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
 
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = UserSerializer(read_only=True)
-    professional_detail = UserSerializer(source='professional', read_only=True)
     professional = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(), required=True, write_only=True
+        queryset=User.objects.filter(role='profesional'),
+        required=True
     )
+    professional_detail = UserSerializer(source='professional', read_only=True)
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
     class Meta:

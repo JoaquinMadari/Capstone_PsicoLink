@@ -56,9 +56,9 @@ class ProfileSerializersTests(TestCase):
     def test_psicologo_profile_serializer_create(self):
         payload = {
             "rut": "12345678-9", "age": 35, "gender": "Otro", "nationality": "Chileno", "phone": "123456789",
-            "specialty": "Cognitivo", "license_number": "1234", "main_focus": "Ansiedad",
+            "specialty": "psiquiatria", "license_number": "1234", "main_focus": "Ansiedad",
             "therapeutic_techniques": "CBT", "style_of_attention": "Individual", "attention_schedule": "Lun-Vie",
-            "work_modality": "Online", "certificates": "cert.pdf", "experience_years": ""
+            "work_modality": "Online", "certificates": "cert.pdf", "experience_years": None
         }
         serializer = PsicologoProfileSerializer(data=payload, context={"user": self.professional_user})
         self.assertTrue(serializer.is_valid(), msg=serializer.errors)
@@ -112,8 +112,8 @@ class AppointmentSerializerTests(TestCase):
 class ProfessionalSearchSerializerTests(TestCase):
     def test_full_name_and_specialty_fields(self):
         prof_user = User.objects.create_user(username="profuser", email="prof@example.com", password="pass", role="profesional", first_name="Juan", last_name="Perez")
-        PsicologoProfile.objects.create(user=prof_user, rut="11111111-1", age=40, gender="M", nationality="Chileno", phone="12345678", specialty="Cognitivo", license_number="123", main_focus="Ansiedad", therapeutic_techniques="CBT", style_of_attention="Individual", attention_schedule="Lun-Vie", work_modality="Online", certificates="cert.pdf")
+        PsicologoProfile.objects.create(user=prof_user, rut="11111111-1", age=40, gender="M", nationality="Chileno", phone="12345678", specialty="psiquiatria", license_number="123", main_focus="Ansiedad", therapeutic_techniques="CBT", style_of_attention="Individual", attention_schedule="Lun-Vie", work_modality="Online", certificates="cert.pdf")
         serializer = ProfessionalSearchSerializer(prof_user)
         data = serializer.data
         self.assertEqual(data["full_name"], "Juan Perez")
-        self.assertEqual(data["specialty"], "Cognitivo")
+        self.assertEqual(data["specialty"], "psiquiatria")

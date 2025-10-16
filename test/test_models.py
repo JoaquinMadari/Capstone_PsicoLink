@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from django.db.utils import IntegrityError
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from api.models import Appointment, PsicologoProfile, PacienteProfile, OrganizacionProfile
 
@@ -40,7 +41,7 @@ class CustomUserModelTests(TestCase):
 
     def test_create_user_without_email(self):
         with self.assertRaises(ValueError):
-            User.objects.create_user(username="noemail", email=None, password="pass")
+            User.objects.create_user(username="noemail", email="", password="pass")
 
 
 # ----------------------------
@@ -55,7 +56,7 @@ class ProfilesTestCase(TestCase):
 
     def test_create_profiles(self):
         paciente = PacienteProfile.objects.create(user=self.patient_user, rut='12345678-9', age=30, gender='Otro', nationality='Chileno', phone='123456789', base_disease='None')
-        profesional = PsicologoProfile.objects.create(user=self.professional_user, rut='87654321-0', age=40, gender='Otro', nationality='Chileno', phone='987654321', specialty='Cognitivo', license_number='1234', main_focus='Ansiedad', therapeutic_techniques='CBT', style_of_attention='Individual', attention_schedule='Lun-Vie', work_modality='Online', certificates='cert.pdf')
+        profesional = PsicologoProfile.objects.create(user=self.professional_user, rut='87654321-0', age=40, gender='Otro', nationality='Chileno', phone='987654321', specialty='psiquiatria', license_number='1234', main_focus='Ansiedad', therapeutic_techniques='CBT', style_of_attention='Individual', attention_schedule='Lun-Vie', work_modality='Online', certificates='cert.pdf')
         organizacion = OrganizacionProfile.objects.create(user=self.org_user, organization_name='Org Test', organization_rut='123456789', contact_email='contact@org.com')
 
         self.assertTrue(PacienteProfile.objects.filter(user=self.patient_user).exists())
@@ -137,37 +138,39 @@ class AppointmentTestCase(TestCase):
             professional=self.professional,
             start_datetime=start,
             duration_minutes=50,
-            professional_role='Cognitivo'
+            professional_role='psiquiatria'
         )
         self.assertEqual(appointment.status, 'scheduled')
-        self.assertEqual(appointment.professional_role, 'Cognitivo')
+        self.assertEqual(appointment.professional_role, 'psiquiatria')
         self.assertEqual(appointment.end_datetime, start + timezone.timedelta(minutes=50))
         self.assertEqual(appointment.time_range, [start, start + timezone.timedelta(minutes=50)])
 
     def test_overlap_constraint(self):
         start = timezone.now() + timezone.timedelta(hours=1)
         end = start + timezone.timedelta(minutes=50)
-        Appointment.objects.create(patient=self.patient, professional=self.professional, start_datetime=start, duration_minutes=50, time_range=[start, end])
+        Appointment.objects.create(patient=self.patient, professional=self.professional, start_datetime=start, duration_minutes=50)
 
+        # Cambia IntegrityError por ValidationError
         with self.assertRaises(IntegrityError):
             Appointment.objects.create(
                 patient=self.patient,
                 professional=self.professional,
                 start_datetime=start + timezone.timedelta(minutes=25),
-                duration_minutes=50,
-                time_range=[start + timezone.timedelta(minutes=25), end + timezone.timedelta(minutes=25)]
+                duration_minutes=50
             )
 
     def test_appointment_in_past(self):
         past = timezone.now() - timezone.timedelta(days=1)
-        with self.assertRaises(Exception):
-            Appointment.objects.create(
+        with self.assertRaises(ValidationError):  # Cambia Exception por ValidationError
+            appointment = Appointment(
                 patient=self.patient,
                 professional=self.professional,
                 start_datetime=past,
                 duration_minutes=50,
-                professional_role='Cognitivo'
+                professional_role='psiquiatria'
             )
+            appointment.full_clean()  # Fuerza la validación
+            appointment.save()  # Esto debería fallar
 
     def test_negative_duration(self):
         start = timezone.now() + timezone.timedelta(hours=1)
@@ -177,5 +180,5 @@ class AppointmentTestCase(TestCase):
                 professional=self.professional,
                 start_datetime=start,
                 duration_minutes=-10,
-                professional_role='Cognitivo'
+                professional_role='psiquiatria'
             )
