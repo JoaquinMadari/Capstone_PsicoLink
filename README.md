@@ -37,9 +37,6 @@ flowchart LR
   A -->|HTTPS/JSON| API
 
   API -->|ORM| DB
-  API -->|archivos| ST
-  API -->|cache/colas| R
-  API -->|eventos/logs| LG
 
   %% Relaciones internas
   U -.-> P
@@ -58,7 +55,6 @@ flowchart TB
     Catalog["Catálogo<br/>Especialidades"]
     Search["Search<br/>Profesionales"]
     Appointments["Appointments<br/>ViewSet + Busy"]
-    Validators["Validaciones<br/>duración/solapamientos/modalidad"]
   end
 
   %% Quién usa a quién (dependencias internas)
@@ -66,7 +62,7 @@ flowchart TB
   Auth -- "request.user / roles" --> Appointments
   Auth -- "request.user / roles" --> Search
 
-  Catalog -- "slug/label" --> Profiles
+  Catalog -- "Enviar rol de especialidad" --> Profiles
   Catalog -- "filtros" --> Search
 
   Search -- "consulta perfiles (ORM)" --> Profiles
