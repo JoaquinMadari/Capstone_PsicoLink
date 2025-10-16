@@ -11,13 +11,13 @@ Fernando Cavada, Lucas Cisternas, Joaquín Madariaga
 
 
 
-
+ARQUITECTURA ACTUAL DEL PROYECTO (INCOMPLETO)
 
 ```mermaid
 flowchart LR
   subgraph Clients ["Clientes"]
     M["Ionic/Angular<br/>App móvil"]
-    A["Panel Admin Web<br/>(opcional)"]
+    A["Panel Admin Web<br/>"]
   end
 
   subgraph API ["Backend API - Django REST"]
@@ -27,14 +27,10 @@ flowchart LR
     C["Catalog<br/>Especialidades"]
     S["Search<br/>Búsqueda de profesionales"]
     AP["Appointments<br/>CRUD + Busy + Validaciones"]
-    N["Notifications<br/>(opcional)"]
   end
 
   subgraph Data ["Datos & Plataforma"]
     DB[("PostgreSQL<br/>Supabase")]
-    ST[("Storage<br/>Supabase/S3")]
-    R[("Redis<br/>(opcional)")]
-    LG[("Logs/Métricas<br/>Sentry/ELK")]
   end
 
   M -->|HTTPS/JSON| API
@@ -56,20 +52,23 @@ flowchart LR
 ```mermaid
 
 flowchart TB
-  subgraph "Django REST"
-    direction TB
+  subgraph "Django REST (Componentes)"
     Auth["Auth/Users<br/>JWT (SimpleJWT)"]
-    Profiles["Profiles<br/>Serializers/Views"]
-    Catalog["Catalog<br/>Especialidades"]
+    Profiles["Profiles<br/>Pac/Psic/Org"]
+    Catalog["Catálogo<br/>Especialidades"]
     Search["Search<br/>Profesionales"]
     Appointments["Appointments<br/>ViewSet + Busy"]
-    Validators["Validaciones<br/>Duración/solapamientos/modalidad"]
+    Validators["Validaciones<br/>duración/solapamientos/modalidad"]
   end
 
-  Auth --> Profiles
-  Search --> Profiles
-  Appointments --> Profiles
-  Appointments --> Validators
-  Catalog --> Profiles
+  %% Quién usa a quién (dependencias internas)
+  Auth -- "request.user / roles" --> Profiles
+  Auth -- "request.user / roles" --> Appointments
+  Auth -- "request.user / roles" --> Search
 
+  Catalog -- "slug/label" --> Profiles
+  Catalog -- "filtros" --> Search
+
+  Search -- "consulta perfiles (ORM)" --> Profiles
+  Appointments -- "lee especialidad/rol" --> Profiles
 ```
