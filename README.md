@@ -13,7 +13,7 @@ Fernando Cavada, Lucas Cisternas, Joaquín Madariaga
 
 
 
-
+```mermaid
 flowchart LR
   subgraph Clients ["Clientes"]
     M["Ionic/Angular<br/>App móvil"]
@@ -51,3 +51,4 @@ flowchart LR
   AP -.-> U
   AP -.-> P
   C -.-> P
+```
