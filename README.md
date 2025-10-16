@@ -51,6 +51,9 @@ flowchart LR
   AP -.-> U
   AP -.-> P
   C -.-> P
+```
+
+```mermaid
 
 flowchart TB
   subgraph "Django REST"
