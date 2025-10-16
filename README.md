@@ -51,4 +51,22 @@ flowchart LR
   AP -.-> U
   AP -.-> P
   C -.-> P
+
+flowchart TB
+  subgraph "Django REST"
+    direction TB
+    Auth["Auth/Users<br/>JWT (SimpleJWT)"]
+    Profiles["Profiles<br/>Serializers/Views"]
+    Catalog["Catalog<br/>Especialidades"]
+    Search["Search<br/>Profesionales"]
+    Appointments["Appointments<br/>ViewSet + Busy"]
+    Validators["Validaciones<br/>Duración/solapamientos/modalidad"]
+  end
+
+  Auth --> Profiles
+  Search --> Profiles
+  Appointments --> Profiles
+  Appointments --> Validators
+  Catalog --> Profiles
+
 ```
