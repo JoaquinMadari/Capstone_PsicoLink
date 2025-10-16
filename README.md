@@ -10,9 +10,9 @@ Integrantes:
 Fernando Cavada, Lucas Cisternas, Joaquín Madariaga
 
 
-
-ARQUITECTURA ACTUAL DEL PROYECTO (INCOMPLETO)
-
+-------------------------------------------------
+--ARQUITECTURA ACTUAL DEL PROYECTO (INCOMPLETO)--
+-------------------------------------------------
 ```mermaid
 flowchart LR
   subgraph Clients ["Clientes"]
@@ -67,55 +67,4 @@ flowchart TB
 
   Search -- "consulta perfiles (ORM)" --> Profiles
   Appointments -- "lee especialidad/rol" --> Profiles
-```
-
-
-
-```mermaid
-
-flowchart LR
-  %% === Clientes ===
-  subgraph Clientes
-    Mobile["App móvil<br/>Ionic/Angular"]
-    Admin["Panel Admin Web<br/>(opcional)"]
-  end
-
-  %% === Backend API ===
-  subgraph API["Backend API - Django REST"]
-    direction TB
-    Auth["Auth & Usuarios<br/>JWT (SimpleJWT), CORS"]
-    Profiles["Perfiles<br/>Paciente / Profesional / Organización"]
-    Catalog["Catálogo<br/>Especialidades (slug/label)"]
-    Search["Búsqueda de profesionales<br/>filtros/orden"]
-    App["Citas (Appointments)<br/>CRUD, Busy (horarios), reglas"]
-    Valid["Validaciones<br/>solapamientos, duración, modalidad"]
-    Files["Archivos<br/>certificados, CV (URL)"]
-    Notify["Notificaciones<br/>(email opcional)"]
-  end
-
-  %% === Datos & Plataforma ===
-  subgraph Datos["Datos & Plataforma"]
-    DB[("PostgreSQL<br/>Supabase")]
-    Storage[("Object Storage<br/>Supabase buckets / S3")]
-    SMTP[("SMTP / Email<br/>(opcional)")]
-  end
-
-  %% === Flujos cliente <-> API ===
-  Mobile -->|HTTPS / JSON| API
-  Admin  -->|HTTPS / JSON| API
-
-  %% === Dependencias internas de la API (quién usa a quién) ===
-  Catalog --> Profiles
-  Search  --> Profiles
-  App     --> Profiles
-  App     --> Valid
-  Auth    --> Profiles
-  Auth    --> App
-  Auth    --> Search
-
-  %% === API <-> Datos/Plataforma ===
-  API -->|ORM| DB
-  Files --> Storage
-  Notify --> SMTP
-
 ```
