@@ -25,36 +25,35 @@ export class RegisterPage implements OnInit {
   ngOnInit() {
     this.registerForm = this.fb.group({
       role: ['paciente', Validators.required],
-      first_name: ['', Validators.required],
-      last_name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      first_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      last_name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      email:      ['', [Validators.required, Validators.email]],
+      password:   ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   register() {
-    if (!this.registerForm.valid) return;
+    if (this.registerForm.invalid) return;
 
-    const payload = this.registerForm.value;
+    const { role, first_name, last_name, email, password } = this.registerForm.getRawValue();
+    const payload = { role, first_name, last_name, email, password };
 
     this.auth.register(payload).subscribe({
       next: () => {
-        this.auth.login({ username: payload.email, password: payload.password }).subscribe({
-          next: (resp) => {
-            localStorage.setItem('access', resp.access);
-            localStorage.setItem('refresh', resp.refresh);
-            const role = resp?.user?.role || payload.role;
-            if (role) localStorage.setItem('role', role);
+        this.auth.login({ email, password }).subscribe({
+          next: () => {
+            const r = localStorage.getItem('user_role') ?? role;
+            if (r) localStorage.setItem('role', r);
 
             this.router.navigate(['/profile-setup']);
           },
-          error: () => this.router.navigate(['/login'])
+          error: () => this.router.navigate(['/login']),
         });
       },
       error: (err) => {
         this.errorMessage = 'Error en el registro';
         console.error(err);
-      }
+      },
     });
   }
 }
