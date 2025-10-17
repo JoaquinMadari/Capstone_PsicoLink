@@ -207,7 +207,7 @@ class Appointment(models.Model):
                 name='appointment_prof_overlap',
                 expressions=[
                     (F('time_range'), '&&'), # El operador '&&' verifica solapamiento en rangos
-                    (F('professional'), '='), # La exclusión solo aplica si el 'professional' es el mismo
+                    (F('professional'), '='),
                 ],
                 condition=models.Q(status='scheduled') # Solo aplica a citas activas
             )
