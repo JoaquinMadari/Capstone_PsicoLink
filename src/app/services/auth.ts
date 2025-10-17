@@ -14,11 +14,11 @@ export class Auth {
 
   // ---------- AUTH ----------
   register(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register/`, data);
+    return this.http.post(`${this.apiUrl}/auth/register/`, data);
   }
 
   login(data: { username: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login/`, data).pipe(
+    return this.http.post(`${this.apiUrl}/auth/login/`, data).pipe(
       tap((response: any) => {
         // GUARDAR LOS TOKENS DESPUÉS DEL LOGIN EXITOSO
         if (response.access) {
@@ -39,7 +39,6 @@ export class Auth {
   // ---------- NUEVOS MÉTODOS PARA PROFILE-SETUP ----------
   
   getCurrentUserRole(): Observable<string | null> {
-    // Por ejemplo, obtenemos el rol desde localStorage
     const role = localStorage.getItem('user_role'); 
     return of(role); // Observable simulado
   }
