@@ -181,8 +181,6 @@ class OrganizacionProfileSerializer(serializers.ModelSerializer):
 #--------------------------------------------
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    email = serializers.EmailField(required=False)
-
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -190,8 +188,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
-        if not attrs.get('username') and attrs.get('email'):
-            attrs['username'] = attrs['email']
         data = super().validate(attrs)
         data['user'] = {'role': self.user.role}
         return data

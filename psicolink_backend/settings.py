@@ -123,15 +123,17 @@ WSGI_APPLICATION = 'psicolink_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
-        'OPTIONS': {
-            'sslmode': 'require',
-            }
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config('DB_NAME', default='postgres'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT', cast=int, default=6543),
+            'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
+            'DISABLE_SERVER_SIDE_CURSORS': True,
+            'OPTIONS': {
+                'sslmode': 'require',   # Obligatorio con Supabase
+            },
         },
         
         
