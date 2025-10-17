@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
-  private apiUrl = 'http://localhost:8000/api/auth'; // cambia a la URL de Render en despliegue
+  private apiUrl = environment.API_URL;
 
   constructor(private http: HttpClient) {}
 
@@ -33,7 +34,6 @@ export class Auth {
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    // añadir una redirección a la página de login si quieres
   }
 
   // ---------- NUEVOS MÉTODOS PARA PROFILE-SETUP ----------
