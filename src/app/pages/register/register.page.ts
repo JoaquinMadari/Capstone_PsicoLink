@@ -13,7 +13,8 @@ import { IonicModule } from '@ionic/angular';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,IonicModule,RouterModule,IonicModule]//, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonLabel, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle]
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,IonicModule,RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
+  IonItem, IonLabel, IonInput, IonSegment, IonSegmentButton, IonButton ]
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;

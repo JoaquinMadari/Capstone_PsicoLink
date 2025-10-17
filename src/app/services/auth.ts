@@ -17,16 +17,12 @@ export class Auth {
     return this.http.post(`${this.apiUrl}/auth/register/`, data);
   }
 
-  login(data: { username: string; password: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login/`, data).pipe(
-      tap((response: any) => {
-        // GUARDAR LOS TOKENS DESPUÉS DEL LOGIN EXITOSO
-        if (response.access) {
-          localStorage.setItem('access_token', response.access);
-          if (response.refresh) {
-            localStorage.setItem('refresh_token', response.refresh);
-          }
-        }
+  login(payload: { email: string; password: string }) {
+    return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
+      tap((res: any) => {
+        if (res.access) localStorage.setItem('access_token', res.access);
+        if (res.refresh) localStorage.setItem('refresh_token', res.refresh);
+        if (res.role) localStorage.setItem('user_role', res.role);
       })
     );
   }
