@@ -2,32 +2,43 @@ from rest_framework import serializers
 from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile, Specialty
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.validators import UniqueValidator
 
 
 from django.utils import timezone
 from django.conf import settings
 from .models import Appointment
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from datetime import timedelta
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(
+            queryset=CustomUser.objects.all(),
+            message="Este email ya está registrado."
+        )]
+    )
+    
     class Meta:
         model = CustomUser
         fields = ('email', 'password', 'role', 'first_name', 'last_name') 
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(
-            username=validated_data['email'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            role=validated_data['role'],
-            first_name=validated_data.get('first_name', ''), 
-            last_name=validated_data.get('last_name', '')
-        )
-        return user
+        try:
+            user = CustomUser.objects.create_user(
+                username=validated_data['email'],
+                email=validated_data['email'],
+                password=validated_data['password'],
+                role=validated_data['role'],
+                first_name=validated_data.get('first_name', ''), 
+                last_name=validated_data.get('last_name', '')
+            )
+            return user
+        except IntegrityError:
+            raise serializers.ValidationError({"email": "Este email ya está registrado."})
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
@@ -170,25 +181,19 @@ class OrganizacionProfileSerializer(serializers.ModelSerializer):
 #--------------------------------------------
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    #Extiende el serializer de JWT para incluir el rol del usuario en la respuesta.
+    email = serializers.EmailField(required=False)
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
-        # Añade el campo 'role' al payload del token
-        token['role'] = user.role 
-
+        token['role'] = user.role
         return token
 
     def validate(self, attrs):
-        # Llama a la validación base (que obtiene los tokens)
+        if not attrs.get('username') and attrs.get('email'):
+            attrs['username'] = attrs['email']
         data = super().validate(attrs)
-
-        # Añade el campo 'role' a la respuesta JSON del login
-        data['user'] = {
-            'role': self.user.role
-        }
-        
+        data['user'] = {'role': self.user.role}
         return data
 
 
