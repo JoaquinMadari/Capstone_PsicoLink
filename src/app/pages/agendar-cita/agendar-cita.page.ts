@@ -247,7 +247,6 @@ export class AgendarCitaPage implements OnInit {
       next: (res) => {
         this.busyPro = res.professional.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
         this.busyPatient = res.patient.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
-        // 🔹 PATCH: llenar busyTimes para que el test pase
         this.busyTimes = res.professional.map(x => {
         const d = new Date(x.start);
         return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
