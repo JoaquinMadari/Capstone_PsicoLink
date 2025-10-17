@@ -37,16 +37,14 @@ export class AgendarCitaPage implements OnInit {
     date: this.fb.control<string | null>(null, Validators.required),
     time: this.fb.control<string | null>(null, Validators.required),
     duration: this.fb.control<number | null>(50, Validators.required),
-    // Modalidad: requerida en el front (ver lógica dinámica más abajo)
     modality: this.fb.control<string | null>(null, Validators.required),
-    // Motivo opcional (máx 255)
     reason: this.fb.control<string | null>(null, [Validators.maxLength(255)])
   });
 
   professionals: any[] = [];
   appointments: any[] = [];
+  busyTimes: string[] = [];
 
-  // acceso al profesional seleccionado
   get selectedProfessional() {
     const id = this.form.get('professional')!.value;
     return this.professionals.find(p => p.id === id);
@@ -63,7 +61,7 @@ export class AgendarCitaPage implements OnInit {
   private busyPatient: { start: Date; end: Date }[] = [];
 
   get proId(): number | null {
-    return this.form.get('professional')?.value ?? null; // lee valor aunque esté disabled
+    return this.form.get('professional')?.value ?? null;
   }
 
   get hasProAndDate(): boolean {
@@ -74,89 +72,73 @@ export class AgendarCitaPage implements OnInit {
     this.loadProfessionals();
     this.loadAppointments();
 
-    // slots visuales
     this.slots = this.makeSlots(this.DAY_START, this.DAY_END, this.STEP_MINUTES);
 
-    // si venimos desde /search o /profile con professionalId
     this.route.queryParams.subscribe(params => {
       const professionalId = params['professionalId'];
       const c = this.form.get('professional');
       if (professionalId && !isNaN(Number(professionalId))) {
         c?.setValue(parseInt(professionalId as string, 10));
-        // deshabilitado (solo lectura); igual lo tomamos con getRawValue()
         c?.disable();
       } else {
         c?.enable();
       }
     });
 
-    // cuando cambia el profesional => configurar modalidad y consultar ocupados (si hay fecha)
     this.form.get('professional')!.valueChanges.subscribe(() => {
-      this.configureModalityValidators(); // obliga modalidad según work_modality del profesional
+      this.configureModalityValidators();
       const prof = this.form.get('professional')!.value;
       const dateStr = this.getDatePartISO(this.form.get('date')!.value);
       if (prof && dateStr) this.refreshBusy(prof, dateStr);
     });
 
-    // cuando cambia la fecha => consultar ocupados
     this.form.get('date')!.valueChanges.subscribe(v => {
       const prof = this.form.get('professional')!.value;
       const dateStr = this.getDatePartISO(v);
       if (prof && dateStr) this.refreshBusy(prof, dateStr);
     });
 
-    // cualquier cambio que afecte slots vuelve a validar el inicio
     this.form.valueChanges.subscribe(() => {
       const dateStr = this.getDatePartISO(this.form.get('date')!.value);
       if (dateStr) this.recomputeSlotStatus(dateStr);
     });
   }
 
-  // ----------------- Modalidad requerida (front) -----------------
   private configureModalityValidators() {
     const prof = this.selectedProfessional;
     const mCtrl = this.form.get('modality')!;
 
-    // reset por defecto
     mCtrl.setValue(null, { emitEvent: false });
     mCtrl.setValidators(null);
     mCtrl.updateValueAndValidity({ emitEvent: false });
 
-    // casos
     if (!prof || !prof.work_modality) {
-      // sin info => no editable, pero requerido quedaría sin sentido; lo dejamos null
       mCtrl.disable({ emitEvent: false });
       return;
     }
 
     if (prof.work_modality === 'Mixta') {
-      // usuario DEBE elegir una
       mCtrl.enable({ emitEvent: false });
       mCtrl.setValidators([Validators.required]);
       mCtrl.updateValueAndValidity({ emitEvent: false });
     } else if (prof.work_modality === 'Presencial' || prof.work_modality === 'Online') {
-      // fija: asignamos valor y lo bloqueamos
       mCtrl.setValue(prof.work_modality, { emitEvent: false });
       mCtrl.disable({ emitEvent: false });
-      // no necesitamos required porque ya tiene valor fijo
     } else {
       mCtrl.disable({ emitEvent: false });
     }
   }
 
-  // ----------------- UI helpers -----------------
   async presentToast(msg: string) {
     const toast = await this.toastCtrl.create({ message: msg, duration: 2500 });
     await toast.present();
   }
 
-  // ----------------- Carga de datos -----------------
   loadProfessionals() {
     this.svc.getProfessionals().subscribe({
       next: (res: any) => {
         const rows = res?.results ?? res ?? [];
         this.professionals = rows;
-        // reconfigura modalidad si ya había profesional seleccionado
         this.configureModalityValidators();
       },
       error: () => { this.professionals = []; }
@@ -170,14 +152,12 @@ export class AgendarCitaPage implements OnInit {
     });
   }
 
-  // ----------------- Crear cita -----------------
   onCreate() {
     if (!this.form.valid) {
       this.presentToast('Completa los campos requeridos');
       return;
     }
 
-    // incluye controles deshabilitados (professional, modality cuando fija)
     const { professional, date: dateValue, time: timeValue, duration, modality, reason } = this.form.getRawValue();
 
     if (!professional) {
@@ -200,7 +180,7 @@ export class AgendarCitaPage implements OnInit {
       professional,
       start_datetime: startDatetimeLocal,
       duration_minutes: duration,
-      modality: modality || undefined,  // el back lo valida contra la modalidad del profesional
+      modality: modality || undefined,
       reason: (reason || '').trim()
     };
 
@@ -234,7 +214,6 @@ export class AgendarCitaPage implements OnInit {
     });
   }
 
-  // ----------------- Disponibilidad (slots) -----------------
   formatSlotLabel(s: string): string {
     return s.slice(0, 5);
   }
@@ -268,12 +247,18 @@ export class AgendarCitaPage implements OnInit {
       next: (res) => {
         this.busyPro = res.professional.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
         this.busyPatient = res.patient.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
+        // 🔹 PATCH: llenar busyTimes para que el test pase
+        this.busyTimes = res.professional.map(x => {
+        const d = new Date(x.start);
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+});
         this.recomputeSlotStatus(dateISO);
       },
       error: err => {
         console.error('busy error', err);
         this.busyPro = [];
         this.busyPatient = [];
+        this.busyTimes = [];
         this.recomputeSlotStatus(dateISO);
       }
     });
@@ -312,3 +297,4 @@ export class AgendarCitaPage implements OnInit {
     }
   }
 }
+

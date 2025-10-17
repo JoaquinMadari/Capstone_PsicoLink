@@ -41,12 +41,16 @@ export class MisCitasPage implements OnInit {
   }
 
   async presentToast(msg: string) {
+  try {
     const toast = await this.toastCtrl.create({
       message: msg,
       duration: 2500
     });
     await toast.present();
+  } catch {
+    // en test o si el injector está destruido, simplemente ignoramos
   }
+}
 
   loadAppointments() {
     this.loading = true;

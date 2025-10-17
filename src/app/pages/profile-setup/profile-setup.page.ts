@@ -182,30 +182,49 @@ export class ProfileSetupPage implements OnInit {
      =========================== */
 
   saveProfessional() {
-    this.proForm.markAllAsTouched();
-    if (!this.proForm.valid) return;
+  console.log('saveProfessional called');  // log inicial
 
-    const raw = this.proForm.value;
-    const payload: any = {
-      ...raw,
-      rut: normalizeRut(raw.rut || ''),
-      phone: normalizePhoneCL(raw.phone || ''),
-      experience_years:
-        raw.experience_years === '' || raw.experience_years === null || raw.experience_years === undefined
-          ? null
-          : Number(raw.experience_years)
-    };
+  this.proForm.markAllAsTouched();
 
-    // si no es "otro", no enviar specialty_other
-    if (payload.specialty !== 'otro') {
-      delete payload.specialty_other;
-    }
-
-    this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
-      next: () => this.router.navigate(['/home']),
-      error: (err) => console.error('Error guardando perfil profesional', err)
+  // revisar validez del formulario
+  if (!this.proForm.valid) {
+    console.log('Form invalid, errors per control:');
+    Object.keys(this.proForm.controls).forEach(key => {
+      console.log(key, this.proForm.controls[key].errors);
     });
+    return;
   }
+
+  console.log('Form valid, proceeding');
+
+  const raw = this.proForm.value;
+  const payload: any = {
+    ...raw,
+    rut: normalizeRut(raw.rut || ''),
+    phone: normalizePhoneCL(raw.phone || ''),
+    experience_years:
+      raw.experience_years === '' || raw.experience_years === null || raw.experience_years === undefined
+        ? null
+        : Number(raw.experience_years)
+  };
+
+  // si no es "otro", no enviar specialty_other
+  if (payload.specialty !== 'otro') {
+    delete payload.specialty_other;
+  }
+
+  console.log('About to call POST with payload:', payload);
+
+  // usar this['http'] para que spy funcione
+  this['http'].post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
+    next: () => {
+      console.log('POST success, navigating home');
+      this.router.navigate(['/home']);
+    },
+    error: (err) => console.error('Error guardando perfil profesional', err)
+  });
+}
+
 
   savePatient() {
     this.paForm.markAllAsTouched();

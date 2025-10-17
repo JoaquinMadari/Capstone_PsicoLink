@@ -23,7 +23,6 @@ describe('LoginPage', () => {
       ],
       providers: [
         { provide: Auth, useValue: authSpy },
-        // Este es el truco: le decimos a Angular que use un ActivatedRoute "fake"
         {
           provide: ActivatedRoute,
           useValue: {
@@ -44,11 +43,19 @@ describe('LoginPage', () => {
   });
 
   it('should login successfully using form', () => {
-    component.loginForm.setValue({ username: 'test', password: '123456' });
-    component.login(); // suponiendo que este es el método que llamas
-    expect(authSpy.login).toHaveBeenCalledWith({ username: 'test', password: '123456' });
+  // patchValue asegura que no da error si agregas más campos en el formGroup
+  component.loginForm.patchValue({ 
+    email: 'test@example.com', 
+    password: '123456' 
   });
+
+  component.login();
+
+  // Auth.login espera {username, password}, LoginPage hace el mapping
+  expect(authSpy.login).toHaveBeenCalledWith({ username: 'test@example.com', password: '123456' });
+}); 
 });
+
 
 
 
