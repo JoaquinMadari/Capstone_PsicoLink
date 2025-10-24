@@ -20,12 +20,6 @@ from datetime import timedelta
 
 MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# 👇 AGREGADO (forzar carga manual del .env, 100% seguro)
-env_path = BASE_DIR / ".env"
-config = Config(RepositoryEnv(env_path))
 
 
 # Quick-start development settings - unsuitable for production
