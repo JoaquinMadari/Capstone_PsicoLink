@@ -17,7 +17,8 @@ from decouple import config
 from datetime import timedelta
 
 
-
+MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
+print("TOKEN_MP ===>", MP_ACCESS_TOKEN)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dzjw*a--g8b%gtenq!)f53&35$@p+!_lcoq-!zw7m6otpxdm^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'api',
+    'payments',
     'django_filters',
     'django.contrib.postgres',
 ]
@@ -129,7 +131,7 @@ DATABASES = {
             'PASSWORD': config('DB_PASSWORD'),
             'HOST': config('DB_HOST'),
             'PORT': config('DB_PORT', cast=int, default=6543),
-            'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
+            #'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
             'DISABLE_SERVER_SIDE_CURSORS': True,
             'OPTIONS': {
                 'sslmode': 'require',   # Obligatorio con Supabase
