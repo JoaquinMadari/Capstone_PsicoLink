@@ -10,16 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-
 import sys
 from pathlib import Path
-from decouple import config
+from decouple import config, Config, RepositoryEnv  # ← AGREGADO AQUÍ
 from datetime import timedelta
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 👇 AGREGADO (forzar carga manual del .env, 100% seguro)
+env_path = BASE_DIR / ".env"
+config = Config(RepositoryEnv(env_path))
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dzjw*a--g8b%gtenq!)f53&35$@p+!_lcoq-!zw7m6otpxdm^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -226,3 +227,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#ZOOM LOCAL TEST
+ZOOM_CLIENT_ID = config("ZOOM_CLIENT_ID")
+ZOOM_CLIENT_SECRET = config("ZOOM_CLIENT_SECRET")
+ZOOM_REDIRECT_URI = config("ZOOM_REDIRECT_URI")

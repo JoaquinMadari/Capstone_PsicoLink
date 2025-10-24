@@ -166,9 +166,15 @@ class Appointment(models.Model):
     modality = models.CharField(max_length=20, choices=MODALITY_CHOICES, blank=True, null=True)
     reason = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
+    # 🆕 Campos para la integración con Zoom
+    zoom_meeting_id = models.CharField(max_length=100, blank=True, null=True)
+    zoom_join_url = models.URLField(blank=True, null=True)
+    zoom_start_url = models.URLField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
     time_range = DateTimeRangeField(null=True, blank=True)
+
 
     @property
     def end_datetime(self):
