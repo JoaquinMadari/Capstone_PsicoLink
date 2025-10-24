@@ -15,6 +15,11 @@ from pathlib import Path
 from decouple import config, Config, RepositoryEnv  # ← AGREGADO AQUÍ
 from datetime import timedelta
 
+
+
+
+MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -51,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'api',
+    'payments',
     'django_filters',
     'django.contrib.postgres',
 ]
@@ -130,7 +136,7 @@ DATABASES = {
             'PASSWORD': config('DB_PASSWORD'),
             'HOST': config('DB_HOST'),
             'PORT': config('DB_PORT', cast=int, default=6543),
-            'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
+            #'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
             'DISABLE_SERVER_SIDE_CURSORS': True,
             'OPTIONS': {
                 'sslmode': 'require',   # Obligatorio con Supabase
