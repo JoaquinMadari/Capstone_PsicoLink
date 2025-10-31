@@ -20,10 +20,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             message="Este email ya está registrado."
         )]
     )
+    supabase_uid = serializers.UUIDField(read_only=True, allow_null=True)
     
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'role', 'first_name', 'last_name') 
+        fields = ('email', 'password', 'role', 'first_name', 'last_name', 'supabase_uid') 
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -42,10 +43,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
+    supabase_uid = serializers.UUIDField(read_only=True, allow_null=True)
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'role', 'first_name', 'last_name', 'full_name')
+        fields = ('id', 'username', 'email', 'role', 'first_name', 'last_name', 'full_name','supabase_uid')
 
     def get_full_name(self, obj):
         name = (obj.get_full_name() or '').strip()
@@ -185,11 +187,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['role'] = user.role
+        token['supabase_uid'] = str(user.supabase_uid) if user.supabase_uid else None
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['user'] = {'role': self.user.role}
+        data['user'] = {
+            'role': self.user.role,
+            'supabase_uid': str(self.user.supabase_uid) if self.user.supabase_uid else None
+            }
         return data
 
 

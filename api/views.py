@@ -4,6 +4,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import CustomUser, Appointment, PsicologoProfile
+from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer, AppointmentSerializer,
+    PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
+    ProfessionalSearchSerializer)
+
+
+from rest_framework import viewsets, permissions, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
@@ -12,15 +20,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from datetime import datetime, date, time as dtime, timedelta
 
-from .models import CustomUser, Appointment, PsicologoProfile
-from .serializers import (
-    PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer,
-    AppointmentSerializer, PsicologoProfileSerializer, PacienteProfileSerializer,
-    OrganizacionProfileSerializer, ProfessionalSearchSerializer
-)
 
 from api.zoom_service import create_meeting
 
+from django.db import transaction
+from integrations.supabase_sync import ensure_supabase_user 
+
+import logging
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 # -----------------------
 # Register y Specialty
@@ -29,6 +36,58 @@ class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        raw_password = ser.validated_data.get("password")
+        role = ser.validated_data.get("role")
+
+        with transaction.atomic():
+            user: CustomUser = ser.save()  # crea en Django
+
+            try:
+                uid = ensure_supabase_user(email=user.email, password=raw_password, role=role)
+            except Exception as e:
+                transaction.set_rollback(True)
+                return Response(
+                    {"detail": f"Registro en Supabase falló: {str(e)}"},
+                    status=status.HTTP_502_BAD_GATEWAY
+                )
+
+            user.supabase_uid = uid  # uid debe ser un UUID string válido
+            user.save(update_fields=["supabase_uid"])
+
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+    
+
+class LoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        #Emite los tokens de Django (valida user/pass)
+        resp = super().post(request, *args, **kwargs)
+
+        #Repara / provisiona Supabase en el mismo request
+        try:
+            email = request.data.get('email')
+            password = request.data.get('password')
+            if email and password:
+                user = CustomUser.objects.get(email=email)
+
+                uid = user.supabase_uid
+                # Crea si falta, o re-sincroniza password si ya existe
+                new_uid = ensure_supabase_user(email=user.email, password=password, role=user.role)
+
+                if uid != new_uid:
+                    user.supabase_uid = new_uid
+                    user.save(update_fields=["supabase_uid"])
+        except Exception as e:
+            logging.exception("Supabase sync on login failed: %s", e)
+
+        return resp
+
 
 class SpecialtyListView(APIView):
     permission_classes = [AllowAny]
@@ -96,8 +155,8 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.filter(professional=user).select_related('patient', 'professional')
         return Appointment.objects.filter(patient=user).select_related('patient', 'professional')
 
-    def perform_create(self, serializer):
-        """Crea cita y genera reunión Zoom automáticamente"""
+    def perform_create(self, serializer):        
+       # Crea cita y genera reunión Zoom automáticamente.
         appointment = serializer.save()
         
         # Guardamos rol profesional
@@ -123,8 +182,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         appointment.save(update_fields=['professional_role', 'zoom_meeting_id', 'zoom_join_url', 'zoom_start_url'])
 
+        try:
+         spec = appointment.professional.psicologoprofile.specialty
+         if appointment.professional_role != spec:
+             appointment.professional_role = spec
+             appointment.save(update_fields=['professional_role'])
+        except PsicologoProfile.DoesNotExist:
+            pass
 
     def create(self, request, *args, **kwargs):
+        #Redefinimos create() para devolver información más útil tras crear la cita.
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

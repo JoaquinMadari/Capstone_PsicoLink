@@ -8,6 +8,9 @@ from django.db.models import F
 from datetime import timedelta
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+
+import uuid
+
 #-------------------------------------------------------------------
 # ----- AQUI SE EMPIEZAN A DEFINIR LOS PERFILES DE LOS USUARIOS ----
 #-------------------------------------------------------------------
@@ -39,6 +42,8 @@ class CustomUser(AbstractUser):
 
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
+
+    supabase_uid = models.UUIDField(null=True, blank=True, unique=True)
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()

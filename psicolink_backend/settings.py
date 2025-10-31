@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from decouple import config, Config, RepositoryEnv  # ← AGREGADO AQUÍ
 from datetime import timedelta
-
+import os
 
 
 
@@ -189,10 +189,10 @@ SIMPLE_JWT = {
     
     # El Refresh Token (usado para obtener nuevos Access Tokens)
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7), 
-
-    # (El resto de la configuración de SIMPLE_JWT)
-    # ...
 }
+
+SUPABASE_URL = config("SUPABASE_URL", default="")
+SUPABASE_SERVICE_ROLE = config("SUPABASE_SERVICE_ROLE", default="")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
