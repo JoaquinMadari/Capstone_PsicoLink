@@ -1,0 +1,32 @@
+<ion-tabs>
+  <ion-router-outlet></ion-router-outlet>
+
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button
+      tab="home"
+      [routerLink]="['/tabs','home']"
+      routerDirection="root"
+      aria-label="Inicio">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="messages"
+      [routerLink]="['/tabs','messages']"
+      routerDirection="root"
+      aria-label="Chats">
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      <ion-label>Chats</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button
+      tab="account"
+      [routerLink]="['/tabs','account']"
+      routerDirection="root"
+      aria-label="Cuenta">
+      <ion-icon name="person-circle-outline"></ion-icon>
+      <ion-label>Cuenta</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

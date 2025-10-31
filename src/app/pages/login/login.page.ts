@@ -5,8 +5,18 @@ import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonItem, IonLabel, IonInput, IonButton
+  IonItem, IonLabel, IonInput, IonButton, IonSpinner
 } from '@ionic/angular/standalone'
+import { firstValueFrom } from 'rxjs';
+
+
+function normalizeEmail(v: unknown): string {
+  return String(v ?? '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim()
+    .toLowerCase();
+}
 
 @Component({
   selector: 'app-login',
@@ -15,7 +25,7 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, Io
   standalone: true,
 
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, 
-    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton]
+    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSpinner]
 
 
 })
@@ -23,11 +33,12 @@ export class LoginPage implements OnInit {
 
   loginForm!: FormGroup;
   errorMessage: string = '';
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: Auth,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -37,21 +48,27 @@ export class LoginPage implements OnInit {
     });
   }
 
-  login() {
-    if (!this.loginForm.valid) return;
-    const { email, password } = this.loginForm.value;
+  async login() {
+  if (this.loginForm.invalid || this.loading) return;
+  this.loading = true;
+  this.errorMessage = '';
 
-    this.authService.login({ email, password }).subscribe({
-      next: (resp) => {
-        localStorage.setItem('access', resp.access);
-        localStorage.setItem('refresh', resp.refresh);
-        const role = resp?.user?.role || null;
-        if (role) localStorage.setItem('role', role);
-        this.router.navigate(['/home']);
-      },
-      error: () => {
-        this.errorMessage = 'Usuario o contraseña incorrectos';
-      },
-    });
+  //tomar valores del form
+  const { email, password } = this.loginForm.value;
+
+  //normalizar email
+  const emailNorm = normalizeEmail(email);
+
+  //reflejar en el form (para que el input quede “limpio”)
+  this.loginForm.patchValue({ email: emailNorm }, { emitEvent: false });
+
+  try {
+    await firstValueFrom(this.authService.login({ email: emailNorm, password }));
+    this.router.navigate(['/tabs/home']);
+  } catch {
+    this.errorMessage = 'Usuario o contraseña incorrectos';
+  } finally {
+    this.loading = false;
   }
+}
 }

@@ -1,0 +1,6 @@
+.msg { display: flex; padding: 6px 10px; }
+.msg.mine { justify-content: flex-end; }
+.bubble { max-width: 70%; padding: 8px 12px; border-radius: 14px; background: #2b2b2b; color: #fff; }
+.msg.mine .bubble { background: #4a90e2; }
+.meta { font-size: 11px; opacity: .8; margin-top: 4px; }
+.typing { padding: 8px 12px; font-size: 13px; opacity: .8; }

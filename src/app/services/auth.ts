@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, of, from } from 'rxjs';
+import { tap, mergeMap, map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ChatSupabase } from './chat-supabase';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class Auth {
-  private apiUrl = environment.API_URL;
+  private apiUrl = (environment.API_URL || '').replace(/\/$/, '');
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private chatSb: ChatSupabase) {}
 
   // ---------- AUTH ----------
   register(data: any): Observable<any> {
@@ -18,31 +17,43 @@ export class Auth {
   }
 
   login(payload: { email: string; password: string }) {
+    //Login en Django (JWT), Intento de signIn en Supabase
     return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
       tap((res: any) => {
-        if (res.access) localStorage.setItem('access_token', res.access);
-        if (res.refresh) localStorage.setItem('refresh_token', res.refresh);
-        if (res.role) localStorage.setItem('user_role', res.role);
-      })
+        // Guarda SIEMPRE con estas claves
+        if (res.access)  localStorage.setItem('access',  res.access);
+        if (res.refresh) localStorage.setItem('refresh', res.refresh);
+        const role = res?.user?.role ?? res?.role ?? null;
+        if (role) localStorage.setItem('role', role);
+      }),
+      mergeMap((res: any) =>
+        from(this.chatSb.signIn(payload.email, payload.password)).pipe(
+          catchError(err => {
+            console.warn('Supabase sign-in falló:', err?.message || err);
+            return of(null);
+          }),
+          map(() => res)
+        )
+      )
     );
   }
 
-  logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+  async logout(): Promise<void> {
+    // Cierra sesión en Supabase
+    try { await this.chatSb.supabaseSignOut(); } catch (e) { console.warn('supabase signOut:', e); }
+
+    // Limpia TODAS las variantes que se usaron antes
+    ['access','refresh','role','access_token','refresh_token','user_role'].forEach(k =>
+      localStorage.removeItem(k)
+    );
   }
 
-  // ---------- NUEVOS MÉTODOS PARA PROFILE-SETUP ----------
-  
+  // ---------- Helpers ----------
   getCurrentUserRole(): Observable<string | null> {
-    const role = localStorage.getItem('user_role'); 
-    return of(role); // Observable simulado
+    return of(localStorage.getItem('role'));
   }
 
   completeProfile(data: any): Observable<any> {
-    // Envía los datos del perfil al backend
     return this.http.post(`${this.apiUrl}/profile/setup/`, data);
   }
 }
-
-
