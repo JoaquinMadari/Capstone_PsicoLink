@@ -15,14 +15,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from datetime import datetime, date, time as dtime, timedelta
 
 
 from api.zoom_service import create_meeting
-from datetime import timedelta
 from django.utils import timezone
 from api.zoom_service import refresh_zoom_token
 

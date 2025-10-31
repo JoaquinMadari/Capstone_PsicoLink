@@ -44,9 +44,9 @@ def zoom_callback(request):
     """
     code = request.GET.get("code")
     # asignamos un valor por defecto de user_id para pruebas locales
-    state = request.GET.get("state")
-    if not state:
-        return Response({"error": "Faltó el parámetro state"}, status=400)
+    state = request.GET.get("state") or "46"  # reemplaza 46 por tu ID de usuario de prueba
+    if not code:
+        return Response({"error": "Faltan parámetros: code"}, status=400)
 
 
     try:
