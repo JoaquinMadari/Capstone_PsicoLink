@@ -234,9 +234,13 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'patient', 'professional', 'professional_detail',
             'professional_role', 'start_datetime', 'duration_minutes',
-            'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at'
+            'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at',
+            # 🔥 AÑADIR ESTOS:
+            'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id'
         )
-        read_only_fields = ('created_at', 'end_datetime', 'professional_role')
+        read_only_fields = ('created_at', 'end_datetime', 'professional_role', 
+                            'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id')
+
 
     def get_end_datetime(self, obj):
         return obj.end_datetime

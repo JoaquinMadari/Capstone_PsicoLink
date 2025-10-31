@@ -22,6 +22,9 @@ from datetime import datetime, date, time as dtime, timedelta
 
 
 from api.zoom_service import create_meeting
+from datetime import timedelta
+from django.utils import timezone
+from api.zoom_service import refresh_zoom_token
 
 from django.db import transaction
 from integrations.supabase_sync import ensure_supabase_user 
@@ -158,28 +161,53 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):        
        # Crea cita y genera reunión Zoom automáticamente.
         appointment = serializer.save()
-        
-        # Guardamos rol profesional
+
+    # Guardamos rol profesional
         if appointment.professional:
             appointment.professional_role = getattr(appointment.professional, 'role', 'desconocido')
 
-        # Generar reunión Zoom
+        # 🔹 Crear reunión Zoom
         try:
-            start_time = appointment.start_datetime.astimezone(timezone.utc)
+            # Convertir fecha a ISO 8601 UTC
+            start_time = appointment.start_datetime.astimezone(timezone.utc).isoformat()
+
+            # 🔹 Obtener perfil del profesional
+            profile = appointment.professional.psicologoprofile
+
+            # 🔹 Verificar si el token existe y no expiró
+         # Debes crear esta función
+
+            if not profile.zoom_access_token or not profile.zoom_token_expires_at or profile.zoom_token_expires_at < timezone.now():
+            # Refrescar token usando refresh_token
+                new_tokens = refresh_zoom_token(profile.zoom_refresh_token)
+                profile.zoom_access_token = new_tokens['access_token']
+                profile.zoom_refresh_token = new_tokens.get('refresh_token', profile.zoom_refresh_token)
+                profile.zoom_token_expires_at = timezone.now() + timedelta(seconds=new_tokens['expires_in'])
+                profile.save(update_fields=['zoom_access_token', 'zoom_refresh_token', 'zoom_token_expires_at'])
+
+            ACCESS_TOKEN = profile.zoom_access_token
+
+            # 🔹 Llamada a create_meeting
             zoom_data = create_meeting(
+            access_token=ACCESS_TOKEN,
+            user_id="me",  # token del psicólogo
             topic=f"Cita con {appointment.professional.get_full_name()}",
             start_time=start_time,
-            duration_minutes=appointment.duration_minutes
-            )
+            duration=appointment.duration_minutes
+        )
 
-        # ✅ Guardar en los campos reales
+            # 🔹 Guardar en el modelo
             appointment.zoom_meeting_id = zoom_data.get("id")
             appointment.zoom_join_url = zoom_data.get("join_url")
             appointment.zoom_start_url = zoom_data.get("start_url")
 
+            print("Zoom meeting creada:", zoom_data)
+            print("Zoom join URL guardada:", appointment.zoom_join_url)
+
         except Exception as e:
             print(f"⚠️ Error al crear reunión Zoom: {e}")
 
+        # Guardar campos en la base de datos
         appointment.save(update_fields=['professional_role', 'zoom_meeting_id', 'zoom_join_url', 'zoom_start_url'])
 
         try:
@@ -190,14 +218,25 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         except PsicologoProfile.DoesNotExist:
             pass
 
+
+
+
     def create(self, request, *args, **kwargs):
         #Redefinimos create() para devolver información más útil tras crear la cita.
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         appointment = serializer.instance
+
+        # Serializamos la cita
         response_data = AppointmentSerializer(appointment, context={'request': request}).data
+
+        # ✅ Agregamos los URLs de Zoom explícitamente
+        response_data['zoom_join_url'] = appointment.zoom_join_url
+        response_data['zoom_start_url'] = appointment.zoom_start_url
+
         return Response(response_data, status=status.HTTP_201_CREATED)
+
 
     @action(detail=False, methods=['get'], url_path='busy', permission_classes=[permissions.IsAuthenticated])
     def busy(self, request):

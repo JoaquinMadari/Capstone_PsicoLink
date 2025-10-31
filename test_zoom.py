@@ -1,35 +1,20 @@
-# test_zoom.py
-import os
-from datetime import datetime, timedelta
-from api.zoom_service import create_meeting
-from decouple import config
+# zoom_auth_test.py
+from urllib.parse import urlencode
 
-def main():
-    # Obtiene el token OAuth del .env
-    zoom_token = config("ZOOM_OAUTH_TOKEN", default=None)
-    if not zoom_token:
-        print("❌ No se encontró el token de Zoom. Revisa tu archivo .env")
-        return
+CLIENT_ID = "0gPv_XsHTTOqedgAU4IBNQ"  # tu client_id de Zoom
+REDIRECT_URI = "http://localhost:8000/api/zoom/oauth/callback/"
+SCOPE = "meeting:read:admin meeting:write:admin"
 
-    # Programar la reunión para dentro de 5 minutos (UTC)
-    start_time = (datetime.utcnow() + timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+params = {
+    "response_type": "code",
+    "client_id": CLIENT_ID,
+    "redirect_uri": REDIRECT_URI,
+    "scope": SCOPE,
+    "state": "psicolink"
+}
 
-    # Crear reunión de prueba
-    meeting = create_meeting(
-        access_token=zoom_token,
-        topic="Prueba de conexión Zoom API",
-        start_time=start_time,
-        duration=30
-    )
+url = f"https://zoom.us/oauth/authorize?{urlencode(params)}"
+print("URL de autorización de Zoom:")
+print(url)
 
-    # Verificación del resultado
-    if meeting:
-        print("✅ Reunión creada correctamente:")
-        print("ID de reunión:", meeting.get("id"))
-        print("Link para unirse:", meeting.get("join_url"))
-    else:
-        print("❌ No se pudo crear la reunión.")
-
-if __name__ == "__main__":
-    main()
 
