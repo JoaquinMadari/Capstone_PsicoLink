@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { Router } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
 IonButton, IonButtons} from '@ionic/angular/standalone'
+import { Auth } from 'src/app/services/auth';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -12,28 +13,18 @@ IonButton, IonButtons} from '@ionic/angular/standalone'
   standalone: true,
 
 imports: [CommonModule,IonHeader, IonToolbar, IonTitle, IonContent, 
-    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonButtons]
+    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonButtons, RouterModule]
 
 })
 export class HomePage implements OnInit {
+  userName = 'Usuario';
 
-  userName: string = 'Usuario'; // aquí puedes asignar el nombre real desde tu servicio/auth
+  constructor(private router: Router, private authService: Auth) {}
 
-  constructor(private router: Router) {}
+  ngOnInit() {}
 
-  ngOnInit() {
-    // Aquí podrías cargar el nombre del usuario logueado desde tu servicio de autenticación
-  }
-
-  goTo(route: string) {
-    console.log(`Navegar a: ${route}`);
-    // Navegación: ajustar las rutas reales de tu app
-    this.router.navigate([`/${route}`]);
-  }
-
-  logout() {
-    console.log('Cerrar sesión');
-    // Aquí va tu lógica de logout (limpiar token, etc.)
+  async onLogout() {
+    await this.authService.logout();
     this.router.navigate(['/login']);
   }
 

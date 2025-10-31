@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Mi perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label>
+        <h2>Rol</h2>
+        <p>{{ role || '—' }}</p>
+      </ion-label>
+    </ion-item>
+    <!-- agrega más datos si quieres -->
+  </ion-list>
+
+  <div class="ion-padding">
+    <ion-button expand="block" color="medium" (click)="logout()">Cerrar sesión</ion-button>
+  </div>
+</ion-content>

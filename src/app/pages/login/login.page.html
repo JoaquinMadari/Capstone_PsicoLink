@@ -15,7 +15,7 @@
       <form [formGroup]="loginForm">
         <ion-item>
           <ion-label position="floating">Correo electrónico</ion-label>
-          <ion-input type="email" formControlName="email"></ion-input>
+          <ion-input type="email" formControlName="email" autocomplete="email" autocapitalize="off" autocorrect="off" inputmode="email"></ion-input>
         </ion-item>
         <div class="validation-errors"
              [class.visible]="loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)">
@@ -33,8 +33,9 @@
           <div *ngIf="loginForm.get('password')?.hasError('minlength')">*Mínimo 6 caracteres.</div>
         </div>
 
-        <ion-button expand="block" class="ion-margin-top" (click)="login()" [disabled]="!loginForm.valid">
-          Ingresar
+        <ion-button [disabled]="loading || loginForm.invalid" (click)="login()">
+          <ion-spinner *ngIf="loading" name="lines-small"></ion-spinner>
+          <span *ngIf="!loading">Ingresar</span>
         </ion-button>
 
         <p class="ion-text-center ion-padding-top">

@@ -7,6 +7,8 @@ import { Router, RouterModule } from '@angular/router';
 import { SearchService } from '../../services/search';
 import { Catalog } from 'src/app/services/catalog';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
+import { ToastController } from '@ionic/angular';
+
 
 interface SpecialtyOption {
   value: string;
@@ -41,7 +43,7 @@ export class SearchPage implements OnInit {
 
   specialties: SpecialtyOption[] = [];
 
-  constructor() {
+  constructor(private toastCtrl: ToastController) {
     this.searchForm = this.fb.group({
       query: [''],
       specialty: ['']
@@ -103,7 +105,7 @@ export class SearchPage implements OnInit {
 
   goToAgendarFromList(event: Event, professionalId: number) {
     event.stopPropagation();
-    this.router.navigate(['/Agendar'], { queryParams: { professionalId } });
+    this.router.navigate(['/tabs/Agendar'], { queryParams: { professionalId } });
   }
 
 
@@ -114,5 +116,22 @@ export class SearchPage implements OnInit {
   }
 
   trackByPro = (_: number, p: any) => p?.id ?? _;
+
+
+
+  async startChat(event: Event, otherUid?: string) {
+    event.stopPropagation();
+    if (!otherUid) {
+      const t = await this.toastCtrl.create({
+        message: 'Este profesional aún no tiene chat disponible.',
+        duration: 2000,
+        color: 'medium'
+      });
+      await t.present();
+      return;
+    }
+    // Ruta recomendada: /chat/:otherUid
+    this.router.navigate(['/chat', otherUid]);
+  }
 
 }

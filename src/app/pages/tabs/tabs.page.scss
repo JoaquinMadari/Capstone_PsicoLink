@@ -1,0 +1,27 @@
+/* NO TOCAR, CON ESTO SE ARREGLA EL PROBLEMA DE TABS SOBREPONIENDOSE SOBRE LAS OTRAS VISTAS*/
+
+ion-tabs > ion-router-outlet:not([tabs]) {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none; /* clave: no intercepta taps */
+}
+
+/* Si alguna vez llega a mostrar una página, vuelve a habilitar eventos para esa página */
+ion-tabs > ion-router-outlet:not([tabs]) .ion-page:not(.ion-page-hidden) {
+  pointer-events: auto;
+}
+
+/* El outlet real de los tabs debe estar por encima del superior deshabilitado */
+ion-tabs > ion-router-outlet[tabs],
+ion-tabs .tabs-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* La barra de tabs: deja que Ionic calcule offsets; no uses position: fixed aquí */
+ion-tab-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}

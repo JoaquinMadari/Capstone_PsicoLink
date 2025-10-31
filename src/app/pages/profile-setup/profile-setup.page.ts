@@ -7,6 +7,8 @@ import { Catalog, SpecialtyOption } from 'src/app/services/catalog';
 import { environment } from 'src/environments/environment';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea } from '@ionic/angular/standalone';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+
 
 /* ===========================
    VALIDADORES
@@ -90,7 +92,7 @@ function normalizePhoneCL(raw: string): string {
     IonHeader, IonToolbar, IonTitle, IonContent, IonCard,
     IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
     IonItem, IonLabel, IonInput, IonButton, IonSelectOption,
-    IonToggle, IonSelect, IonTextarea
+    IonToggle, IonSelect, IonTextarea,RouterModule
   ]
 })
 export class ProfileSetupPage implements OnInit {
@@ -219,7 +221,7 @@ export class ProfileSetupPage implements OnInit {
   this['http'].post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
     next: () => {
       console.log('POST success, navigating home');
-      this.router.navigate(['/home']);
+      this.router.navigate(['/tabs/home']);
     },
     error: (err) => console.error('Error guardando perfil profesional', err)
   });
@@ -238,7 +240,7 @@ export class ProfileSetupPage implements OnInit {
     };
 
     this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
-      next: () => this.router.navigate(['/home']),
+      next: () => this.router.navigate(['/tabs/home']),
       error: (err) => console.error('Error guardando perfil paciente', err)
     });
   }

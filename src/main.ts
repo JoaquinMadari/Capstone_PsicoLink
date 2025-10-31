@@ -11,13 +11,18 @@ import { registerLocaleData } from '@angular/common';
 import localeEsCl from '@angular/common/locales/es-CL';
 import { LOCALE_ID } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { personCircle, personCircleOutline, call, documentText } from 'ionicons/icons';
+import { personCircle, personCircleOutline, call, documentText, homeOutline, chatbubblesOutline,personOutline,calendarOutline,settingsOutline, } from 'ionicons/icons';
 
 addIcons({
   personCircle,
   personCircleOutline,
   call,
-  documentText
+  documentText,
+  homeOutline,
+  chatbubblesOutline,
+  personOutline,
+  calendarOutline,
+  settingsOutline,
 });
 
 
