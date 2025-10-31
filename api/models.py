@@ -108,6 +108,12 @@ class PsicologoProfile(BaseProfile):
     cases_attended = models.IntegerField(default=0, editable=False)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00, editable=False)
 
+    # --- Integración con Zoom ---
+    zoom_access_token = models.TextField(blank=True, null=True)
+    zoom_refresh_token = models.TextField(blank=True, null=True)
+    zoom_token_expires_at = models.DateTimeField(blank=True, null=True)
+
+
 
 class PacienteProfile(BaseProfile):
     # Aquí van los campos OBLIGATORIOS y OPCIONALES del paciente
@@ -174,8 +180,9 @@ class Appointment(models.Model):
 
     # 🆕 Campos para la integración con Zoom
     zoom_meeting_id = models.CharField(max_length=100, blank=True, null=True)
-    zoom_join_url = models.URLField(blank=True, null=True)
-    zoom_start_url = models.URLField(blank=True, null=True)
+    zoom_join_url = models.TextField(blank=True, null=True)
+    zoom_start_url = models.TextField(blank=True, null=True)
+
 
     created_at = models.DateTimeField(auto_now_add=True)
     time_range = DateTimeRangeField(null=True, blank=True)

@@ -1,5 +1,5 @@
 # api/zoom_service.py
-import os
+from django.conf import settings
 import requests
 from urllib.parse import urlencode
 
@@ -7,9 +7,10 @@ ZOOM_AUTH_URL = "https://zoom.us/oauth/authorize"
 ZOOM_TOKEN_URL = "https://zoom.us/oauth/token"
 ZOOM_CREATE_MEETING_URL = "https://api.zoom.us/v2/users/{user_id}/meetings"
 
-CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
-REDIRECT_URI = os.environ.get("ZOOM_REDIRECT_URI")
+# ✅ Variables cargadas directamente desde settings.py
+CLIENT_ID = settings.ZOOM_CLIENT_ID
+CLIENT_SECRET = settings.ZOOM_CLIENT_SECRET
+REDIRECT_URI = settings.ZOOM_REDIRECT_URI
 
 def build_authorize_url(state="psicolink_state", response_type="code", scope="meeting:read:admin meeting:write:admin"):
     params = {
@@ -53,7 +54,7 @@ def create_meeting(access_token, user_id="me", topic="Reunión prueba", start_ti
         "topic": topic,
         "type": 2,             # 2 = scheduled meeting
         "duration": duration,
-        # "start_time": start_time,
+        "start_time": start_time,
         "settings": {
             "join_before_host": False,
             "approval_type": 0
@@ -62,6 +63,25 @@ def create_meeting(access_token, user_id="me", topic="Reunión prueba", start_ti
     resp = requests.post(url, headers=headers, json=body)
     resp.raise_for_status()
     return resp.json()
+
+def refresh_zoom_token(refresh_token):
+    """
+    Refresca el access token de Zoom usando refresh_token.
+    Retorna un dict con: access_token, expires_in, refresh_token (opcional)
+    """
+    from base64 import b64encode
+    basic = b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {basic}"
+    }
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token
+    }
+    resp = requests.post(ZOOM_TOKEN_URL, headers=headers, data=data)
+    resp.raise_for_status()
+    return resp.json()
+
 
 
 

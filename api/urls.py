@@ -24,7 +24,10 @@ urlpatterns = [
     path('profile/setup/', ProfileSetupView.as_view(), name='profile_setup'),
     path('search/', ProfesionalSearchView.as_view(), name='profesional-search'),
     path('professionals/<int:user_id>/', ProfessionalDetailView.as_view(), name='professional-detail'),
-    path("zoom/connect/", zoom_connect),
-    path("zoom/oauth/callback/", zoom_callback),
+    path("zoom/connect/", zoom_connect, name="zoom_connect"),
+    path("zoom/oauth/callback/", zoom_callback, name="zoom_callback"),
+
+
 ]
+
 

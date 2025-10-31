@@ -16,9 +16,8 @@ from decouple import config, Config, RepositoryEnv  # ← AGREGADO AQUÍ
 from datetime import timedelta
 import os
 
-
-
 MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
+
 
 
 
@@ -34,7 +33,8 @@ DEBUG = False
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'backend-psicolink.onrender.com',]
+    'backend-psicolink.onrender.com',
+    ]
 
 
 # Application definition
@@ -232,3 +232,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ZOOM_CLIENT_ID = config("ZOOM_CLIENT_ID")
 ZOOM_CLIENT_SECRET = config("ZOOM_CLIENT_SECRET")
 ZOOM_REDIRECT_URI = config("ZOOM_REDIRECT_URI")
+
+
