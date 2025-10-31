@@ -22,6 +22,8 @@ from datetime import datetime, date, time as dtime, timedelta
 
 from api.zoom_service import create_meeting
 from django.utils import timezone
+from datetime import timezone as dt_timezone
+
 from api.zoom_service import refresh_zoom_token
 
 from django.db import transaction
@@ -167,7 +169,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         # 🔹 Crear reunión Zoom
         try:
             # Convertir fecha a ISO 8601 UTC
-            start_time = appointment.start_datetime.astimezone(timezone.utc).isoformat()
+
+            #start_time = appointment.start_datetime.astimezone(timezone.utc).isoformat()
+            start_time = appointment.start_datetime.astimezone(dt_timezone.utc).isoformat()
 
             # 🔹 Obtener perfil del profesional
             profile = appointment.professional.psicologoprofile

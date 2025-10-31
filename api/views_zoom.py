@@ -8,6 +8,8 @@ import requests
 from datetime import datetime, timedelta
 import urllib.parse
 from rest_framework.permissions import AllowAny
+from django.utils import timezone
+
 # -----------------------
 # Zoom OAuth (User-managed)
 # -----------------------
@@ -72,7 +74,9 @@ def zoom_callback(request):
     profile.zoom_refresh_token = data.get("refresh_token")
     expires_in = data.get("expires_in")
     if expires_in:
-        profile.zoom_token_expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        #profile.zoom_token_expires_at = dt_timezone.utcnow() + timedelta(seconds=expires_in)
+        profile.zoom_token_expires_at = timezone.now() + timedelta(seconds=expires_in)
+
     profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
 
     return Response({"message": "Zoom conectado correctamente"})
