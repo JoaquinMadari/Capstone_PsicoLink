@@ -105,7 +105,7 @@ export class SearchPage implements OnInit {
 
   goToAgendarFromList(event: Event, professionalId: number) {
     event.stopPropagation();
-    this.router.navigate(['/tabs/Agendar'], { queryParams: { professionalId } });
+    this.router.navigate(['/Agendar'], { queryParams: { professionalId } });
   }
 
 

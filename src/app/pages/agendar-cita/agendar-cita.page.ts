@@ -177,13 +177,13 @@ export class AgendarCitaPage implements OnInit {
 
     const datePart = date.split('T')[0];
     const timePart = time.split(':').slice(0, 2).join(':');
-    // ✅ Convertir a UTC y enviar en ISO 8601 estándar
+    //Convertir a UTC y enviar en ISO 8601 estándar
     const local = new Date(`${datePart}T${timePart}:00`);
     const startDatetimeUTC = local.toISOString();
 
     const payload: any = {
     professional,
-    start_datetime: startDatetimeUTC,  // ✅ Correcto, con "Z" al final
+    start_datetime: startDatetimeUTC,  //Correcto, con "Z" al final
     duration_minutes: duration,
     modality: modality || undefined,
     reason: (reason || '').trim()
@@ -250,51 +250,101 @@ export class AgendarCitaPage implements OnInit {
     if (Array.isArray(msg)) msg = msg[0];
     this.presentToast(msg);
   }
-});
-
-
-  }
-
-  /* ... (todo el resto de tus métodos SIGUE IGUAL, NO LO TOQUÉ) ... */
+  });
+} //FIN DEL ONCREATE
 
 cancel(id: number) {
-  // sin cambios
-  return;
+    this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
+      next: () => {
+        this.presentToast('Cita cancelada');
+        this.loadAppointments();
+      },
+      error: () => this.presentToast('No se pudo cancelar')
+    });
+  }
+
+  formatSlotLabel(s: string): string {
+    return s.slice(0, 5);
+  }
+
+  makeSlots(startHHMM: string, endHHMM: string, stepMin: number): string[] {
+    const res: string[] = [];
+    const [sh, sm] = startHHMM.split(':').map(Number);
+    const [eh, em] = endHHMM.split(':').map(Number);
+    let cur = new Date();
+    cur.setHours(sh, sm, 0, 0);
+    const end = new Date(cur);
+    end.setHours(eh, em, 0, 0);
+
+    while (cur <= end) {
+      const hh = String(cur.getHours()).padStart(2, '0');
+      const mm = String(cur.getMinutes()).padStart(2, '0');
+      res.push(`${hh}:${mm}:00`);
+      cur = new Date(cur.getTime() + stepMin * 60000);
+    }
+    return res;
+  }
+
+  getDatePartISO(val: any): string | null {
+    if (!val) return null;
+    const iso = String(val);
+    return iso.split('T')[0] || null;
+  }
+
+  refreshBusy(professionalId: number, dateISO: string) {
+    this.svc.getBusy(professionalId, dateISO).subscribe({
+      next: (res) => {
+        this.busyPro = res.professional.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
+        this.busyPatient = res.patient.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
+        this.busyTimes = res.professional.map(x => {
+        const d = new Date(x.start);
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        });
+        this.recomputeSlotStatus(dateISO);
+      },
+      error: err => {
+        console.error('busy error', err);
+        this.busyPro = [];
+        this.busyPatient = [];
+        this.busyTimes = [];
+        this.recomputeSlotStatus(dateISO);
+      }
+    });
+  }
+
+  recomputeSlotStatus(dateISO: string) {
+    const map: Record<string, 'free'|'pro'|'patient'|'both'> = {};
+    for (const s of this.slots) {
+      const start = new Date(`${dateISO}T${s}`);
+      const end   = new Date(start.getTime() + this.STEP_MINUTES * 60000);
+      const hitPro = this.overlapsAny(start, end, this.busyPro);
+      const hitPa  = this.overlapsAny(start, end, this.busyPatient);
+      map[s] = (hitPro && hitPa) ? 'both' : (hitPro ? 'pro' : (hitPa ? 'patient' : 'free'));
+    }
+    this.slotStatus = map;
+  }
+
+  isStartDisabled(s: string): boolean {
+    const dur = Number(this.form.get('duration')!.value) || 0;
+    const dateISO = this.getDatePartISO(this.form.get('date')!.value);
+    if (!dateISO || dur <= 0) return true;
+
+    const start = new Date(`${dateISO}T${s}`);
+    const end   = new Date(start.getTime() + dur * 60000);
+    return this.overlapsAny(start, end, [...this.busyPro, ...this.busyPatient]);
+  }
+
+  overlapsAny(aStart: Date, aEnd: Date, intervals: {start: Date; end: Date;}[]): boolean {
+    return intervals.some(iv => (aStart < iv.end) && (aEnd > iv.start));
+  }
+
+  selectTime(s: string) {
+    if (!this.isStartDisabled(s)) {
+      this.form.get('time')!.setValue(s);
+      this.presentToast(`Seleccionaste ${this.formatSlotLabel(s)}`);
+    }
+  }
 }
 
-formatSlotLabel(s: string): string {
-  return s.slice(0, 5);
-}
-
-makeSlots(startHHMM: string, endHHMM: string, stepMin: number): string[] {
-  // sin cambios, pero cuerpo válido
-  return [];
-}
-
-getDatePartISO(val: any): string | null {
-  return val ? String(val).split('T')[0] : null;
-}
-
-refreshBusy(professionalId: number, dateISO: string) {
-  // sin cambios
-}
-
-recomputeSlotStatus(dateISO: string) {
-  // sin cambios
-}
-
-isStartDisabled(s: string): boolean {
-  return false; // o tu lógica real
-}
-
-overlapsAny(aStart: Date, aEnd: Date, intervals: {start: Date; end: Date;}[]): boolean {
-  return false; // o tu lógica real
-}
-
-selectTime(s: string) {
-  // sin cambios
-}
-
-}
 
 
