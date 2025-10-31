@@ -173,7 +173,7 @@ export class ProfileSetupPage implements OnInit {
   }
 
   private authHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access');
+    const token = localStorage.getItem('access_token');
     let h = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) h = h.set('Authorization', `Bearer ${token}`);
     return h;
@@ -183,31 +183,30 @@ export class ProfileSetupPage implements OnInit {
      SUBMITS (normalizando datos)
      =========================== */
 
-  saveProfessional() {
-  console.log('saveProfessional called');  // log inicial
+     saveProfessional() {
+    console.log('saveProfessional called');
 
-  this.proForm.markAllAsTouched();
+    this.proForm.markAllAsTouched();
 
-  // revisar validez del formulario
-  if (!this.proForm.valid) {
-    console.log('Form invalid, errors per control:');
-    Object.keys(this.proForm.controls).forEach(key => {
-      console.log(key, this.proForm.controls[key].errors);
-    });
-    return;
-  }
+    if (!this.proForm.valid) {
+      console.log('Form invalid, errors per control:');
+      Object.keys(this.proForm.controls).forEach(key => {
+        console.log(key, this.proForm.controls[key].errors);
+      });
+      return;
+    }
 
-  console.log('Form valid, proceeding');
-
-  const raw = this.proForm.value;
-  const payload: any = {
-    ...raw,
-    rut: normalizeRut(raw.rut || ''),
-    phone: normalizePhoneCL(raw.phone || ''),
-    experience_years:
-      raw.experience_years === '' || raw.experience_years === null || raw.experience_years === undefined
-        ? null
-        : Number(raw.experience_years)
+    console.log('Form valid, proceeding');
+    
+    const raw = this.proForm.value;
+    const payload: any = {
+      ...raw,
+      rut: normalizeRut(raw.rut || ''),
+      phone: normalizePhoneCL(raw.phone || ''),
+      experience_years:
+        raw.experience_years === '' || raw.experience_years === null || raw.experience_years === undefined
+          ? null
+          : Number(raw.experience_years)
   };
 
   // si no es "otro", no enviar specialty_other
