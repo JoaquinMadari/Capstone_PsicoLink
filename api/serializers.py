@@ -221,26 +221,41 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    patient = UserSerializer(read_only=True)
+    
+    # --- CAMBIOS AQUÍ ---
+    # 1. 'patient' y 'professional' ahora son 'PrimaryKeyRelatedField'.
+    #    Esto permite que el Webhook envíe los IDs.
+    patient = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role__in=['paciente', 'organizacion']), # Permite pacientes u organizaciones
+        required=False # Lo haremos requerido en el validate/create
+    )
     professional = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.filter(role='profesional'),
         required=True
     )
+    
+    # 2. Mantenemos los 'details' para que puedas LEER la info
+    #    del usuario (como lo tenías antes).
+    patient_detail = UserSerializer(source='patient', read_only=True)
     professional_detail = UserSerializer(source='professional', read_only=True)
+    # --- FIN DE LOS CAMBIOS DE CAMPO ---
+    
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = (
-            'id', 'patient', 'professional', 'professional_detail',
+            'id', 
+            'patient',  # Campo de escritura (ID)
+            'patient_detail', # Campo de lectura (Objeto)
+            'professional', # Campo de escritura (ID)
+            'professional_detail', # Campo de lectura (Objeto)
             'professional_role', 'start_datetime', 'duration_minutes',
             'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at',
             # 🔥 AÑADIR ESTOS:
             'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id'
         )
-        read_only_fields = ('created_at', 'end_datetime', 'professional_role', 
-                            'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id')
-
+        read_only_fields = ('created_at', 'end_datetime', 'professional_role', 'patient_detail', 'professional_detail')
 
     def get_end_datetime(self, obj):
         return obj.end_datetime
@@ -302,12 +317,32 @@ class AppointmentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'modality': "Valor inválido. Usa 'Presencial' u 'Online'."})
         else:
             pass
+        
+        # --- ¡¡AQUÍ ESTÁ EL ARREGLO PARA EL ERROR "name 'end' is not defined"!! ---
+        # Esta línea faltaba y es necesaria para la validación de solapamiento.
+        end = start + timedelta(minutes=duration)
+        # --- FIN DEL ARREGLO ---
 
         # Solapamientos
+        
+        # --- LÓGICA DE PACIENTE MODIFICADA ---
+        # 3. Hacemos que la validación de solapamiento del paciente
+        #    funcione tanto para el webhook como para la vista normal.
         request = self.context.get('request')
-        patient = request.user if request and request.user.is_authenticated else None
-        patient = data.get('patient') or patient
-        end = start + timedelta(minutes=duration)
+        
+        # Primero intenta obtener 'patient' de los datos (Webhook)
+        patient = data.get('patient') 
+        
+        if not patient and request and request.user.is_authenticated:
+            # Si no, lo obtiene del request (Vista normal)
+            patient = request.user
+        
+        if not patient:
+            # Si no hay paciente ni en el data ni en el request, es un error
+            # (a menos que estés actualizando y no cambiando el paciente)
+            if not self.instance:
+                raise serializers.ValidationError("No se pudo determinar el paciente.")
+        # --- FIN LÓGICA DE PACIENTE ---
 
         if patient:
             qs = Appointment.objects.filter(patient=patient, status='scheduled')
@@ -326,10 +361,22 @@ class AppointmentSerializer(serializers.ModelSerializer):
     
     # --- Creación / Update ---
     def create(self, validated_data):
+        
+        # --- LÓGICA DE CREATE MODIFICADA ---
+        # 4. Hacemos que la creación funcione en ambos escenarios.
         request = self.context.get('request')
-        with transaction.atomic():
+        
+        # Si 'patient' no vino en los datos (Webhook), 
+        # lo tomamos del request (Vista normal).
+        if 'patient' not in validated_data:
             if request and request.user and request.user.is_authenticated:
                 validated_data['patient'] = request.user
+            else:
+                # Esto no debería pasar si la validación funcionó, pero por si acaso.
+                raise serializers.ValidationError({"patient": "No se proveyó un paciente."})
+        # --- FIN LÓGICA DE CREATE ---
+
+        with transaction.atomic():
             professional = validated_data.get('professional')
             if professional:
                 try:
@@ -342,7 +389,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         with transaction.atomic():
             return super().update(instance, validated_data)
-    
+        
 
 
 class ProfessionalSearchSerializer(UserSerializer):

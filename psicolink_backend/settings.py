@@ -17,8 +17,8 @@ from datetime import timedelta
 import os
 
 MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
-
-
+WEBHOOK_URL_BASE = config("WEBHOOK_URL_BASE")
+FRONTEND_URL = config("FRONTEND_URL")
 
 
 # Quick-start development settings - unsuitable for production
@@ -28,13 +28,13 @@ MP_ACCESS_TOKEN = config("MP_ACCESS_TOKEN")
 SECRET_KEY = 'django-insecure-dzjw*a--g8b%gtenq!)f53&35$@p+!_lcoq-!zw7m6otpxdm^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'backend-psicolink.onrender.com',
-    ]
+    'alva-arched-cathy.ngrok-free.dev']
 
 
 # Application definition
