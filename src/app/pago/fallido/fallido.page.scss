@@ -1,0 +1,71 @@
+/* #274C77; Blue Nova */
+/* #C5D5E4; Skipping Stones */
+/* #A7C7E7; Renew Blue*/
+
+ion-header, ion-toolbar {
+  --background: #274C77;
+  --color: #ffffff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #ffffff;
+}
+
+ion-card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #274C77;
+}
+
+ion-card-subtitle {
+  color: #6C757D;
+}
+
+ion-item {
+  --background: transparent;
+  --highlight-color-focused: #A7C7E7;
+  color: #274472; /*Aqui se cambia el color del texto*/
+}
+
+ion-label {
+  color: #274C77;
+}
+
+ion-input {
+  color: #1A1A1A;
+}
+
+.validation-errors {
+  min-height: 20px;
+  font-size: 0.85rem;
+  color: #E57373;
+  margin-top: 4px;
+  visibility: hidden;
+}
+
+.validation-errors.visible {
+  visibility: visible;
+}
+
+ion-button {
+  --background: #274C77;
+  --background-hover: #1E3A5F;
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: 600;
+}
+
+a {
+  color: #A7C7E7;
+  font-weight: 500;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

@@ -39,6 +39,52 @@ export const routes: Routes = [
 
   // compat (rutas viejas → nuevas fuera de tabs)
   { path: 'Agendar', redirectTo: 'agendar', pathMatch: 'full' },
+  {
+    path: 'Agendar',
+    loadComponent: () => import('./pages/agendar-cita/agendar-cita.page').then( m => m.AgendarCitaPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente'] }
+  },
+
+
+  {
+    path: 'search',
+    loadComponent: () => import('./pages/search/search.page').then( m => m.SearchPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente'] }
+  },
+  {
+    path: 'soporte',
+    loadComponent: () =>
+      import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
+  },
+  {
+    path: 'mis-citas',
+    loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage)
+  },
+  {
+    path: 'profile-setup',
+    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage),
+    canActivate: [roleGuard],
+    data: { roles: ['paciente', 'profesional'] }
+  },
+  {
+    path: 'profile/:id',
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+  },
+  {
+    path: 'exitoso',
+    loadComponent: () => import('./pago/exitoso/exitoso.page').then( m => m.ExitosoPage)
+  },
+  {
+    path: 'fallido',
+    loadComponent: () => import('./pago/fallido/fallido.page').then( m => m.FallidoPage)
+  },
+  {
+    path: 'pendiente',
+    loadComponent: () => import('./pago/pendiente/pendiente.page').then( m => m.PendientePage)
+  },
+
 
   // fallback
   { path: '**', redirectTo: 'tabs/home' },
