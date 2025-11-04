@@ -36,7 +36,7 @@
   <ng-container *ngIf="!loading && !error && data as d">
     <ion-card>
       <ion-card-header>
-        <ion-card-title>{{ d.user?.full_name || d.user?.username }}</ion-card-title>
+        <ion-card-title>{{ d.user.full_name || d.user.username }}</ion-card-title>
         <ion-card-subtitle>
           {{ d.specialty }} • {{ d.work_modality }}
         </ion-card-subtitle>
@@ -47,7 +47,7 @@
           <ion-item>
             <ion-label>
               <h3>Contacto</h3>
-              <p>Email: {{ d.user?.email }}</p>
+              <p>Email: {{ d.user.email }}</p>
               <p>Teléfono: <a (click)="callPhone(d.phone)">{{ d.phone }}</a></p>
             </ion-label>
           </ion-item>

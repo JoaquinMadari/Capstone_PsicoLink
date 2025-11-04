@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent,  IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { hourglassOutline } from 'ionicons/icons';
@@ -12,7 +12,7 @@ import { Subscription, interval } from 'rxjs';
   templateUrl: './pendiente.page.html',
   styleUrls: ['./pendiente.page.scss'],
   standalone: true,
-  imports: [IonSpinner, IonCardContent, IonCardTitle, IonCardHeader, IonCard, IonIcon, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [ IonCardContent, IonCardTitle, IonCardHeader, IonCard, IonIcon, IonButton, IonContent,  CommonModule, FormsModule]
 })
 export class PendientePage implements OnInit, OnDestroy {
   countdown = 10; // Damos más tiempo para que lea

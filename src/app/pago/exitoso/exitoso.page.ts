@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router'; // 1. Importar Router
 import {
-  IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardTitle,
-  IonCardContent, IonButton, IonIcon, IonButtons, IonBackButton
+  IonContent, IonCard, IonCardHeader, IonCardTitle,
+  IonCardContent, IonButton, IonIcon
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline } from 'ionicons/icons';
@@ -16,8 +16,8 @@ import { checkmarkCircleOutline } from 'ionicons/icons';
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterLink,
-    IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardTitle,
-    IonCardContent, IonButton, IonIcon, IonButtons, IonBackButton
+    IonContent, IonCard, IonCardHeader, IonCardTitle,
+    IonCardContent, IonButton, IonIcon
   ]
 })
 export class ExitosoPage {
