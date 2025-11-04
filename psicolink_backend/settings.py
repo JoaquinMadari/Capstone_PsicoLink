@@ -28,13 +28,12 @@ FRONTEND_URL = config("FRONTEND_URL")
 SECRET_KEY = 'django-insecure-dzjw*a--g8b%gtenq!)f53&35$@p+!_lcoq-!zw7m6otpxdm^5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'backend-psicolink.onrender.com',
-    'alva-arched-cathy.ngrok-free.dev']
+    'backend-psicolink.onrender.com']
 
 
 # Application definition
@@ -79,6 +78,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100", # Para desarrollo local de Ionic
     "http://127.0.0.1:8100",
     "https://capstone-psicolink.onrender.com", 
+    "https://capstone-psicolink-1.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -95,7 +95,8 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8100",
-    "https://capstone-psicolink.onrender.com", 
+    "https://capstone-psicolink.onrender.com",
+    "https://capstone-psicolink-1.onrender.com", 
 ]
 
 ROOT_URLCONF = 'psicolink_backend.urls'
