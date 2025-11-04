@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButtons, IonButton
+  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Auth } from 'src/app/services/auth';
@@ -11,7 +11,7 @@ import { Auth } from 'src/app/services/auth';
   templateUrl: './account.page.html',
   styleUrls: ['./account.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButtons, IonButton],
+  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton],
 })
 
 export class AccountPage {

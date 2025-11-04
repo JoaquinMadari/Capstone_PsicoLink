@@ -1,23 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastController, AlertController } from '@ionic/angular';
-// --- AÑADIDO ---
-import { ToastController, LoadingController } from '@ionic/angular'; 
-// --- FIN AÑADIDO ---
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+    ToastController, // Consolidado
+    AlertController, // Consolidado
+    LoadingController // Consolidado
+} from '@ionic/angular';
 import { AppointmentService } from 'src/app/services/appointment';
 import {
     IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime,
     IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle
 } from '@ionic/angular/standalone';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router'; // Consolidado
 import { HttpClientModule } from '@angular/common/http';
-// --- AÑADIDO ---
-// Asegúrate de que la ruta a tu servicio es correcta
-import { MercadoPago as MercadopagoService } from 'src/app/mercado-pago'; 
-// --- FIN AÑADIDO ---
+import { MercadoPago as MercadopagoService } from  'src/app/services/mercado-pago'; // Asumo que esta ruta es correcta
 
 @Component({
     selector: 'app-agendar-cita',
@@ -30,33 +27,23 @@ import { MercadoPago as MercadopagoService } from 'src/app/mercado-pago';
         IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime,
         IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle,
         HttpClientModule
-        // --- MODIFICADO ---
-        // Quitamos 'MercadoPago' de aquí, no es un módulo ni un componente
     ]
 })
 export class AgendarCitaPage implements OnInit {
 
-  constructor(
-    private fb: FormBuilder,
-    private svc: AppointmentService,
-    private toastCtrl: ToastController,
-    private alertCtrl: AlertController,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+    // 💡 CONSTRUCTOR CONSOLIDADO: Incluye todas las inyecciones necesarias,
+    // incluyendo las nuevas para Mercado Pago y LoadingController,
+    // además del AlertController y el Router.
     constructor(
         private fb: FormBuilder,
         private svc: AppointmentService,
         private toastCtrl: ToastController,
+        private alertCtrl: AlertController, // Necesario para la alerta de Zoom/Mis Citas
+        private router: Router, // Necesario para navegar a /mis-citas
         private route: ActivatedRoute,
-        // --- AÑADIDO ---
-        private mpService: MercadopagoService,
-        private loadingCtrl: LoadingController
-        // --- FIN AÑADIDO ---
+        private mpService: MercadopagoService, // Nueva inyección
+        private loadingCtrl: LoadingController // Nueva inyección
     ) {}
-
-    // ... (todo tu código existente: form, professionals, slots, ngOnInit, etc. se mantiene igual) ...
-    // ... (loadProfessionals, loadAppointments, etc. todo igual) ...
 
     // --------- Form ----------
     form = this.fb.group({
@@ -80,7 +67,7 @@ export class AgendarCitaPage implements OnInit {
     // --------- Slots / disponibilidad ----------
     STEP_MINUTES = 30;
     DAY_START = '08:00';
-    DAY_END   = '20:00';
+    DAY_END    = '20:00';
 
     slots: string[] = []; // 'HH:MM:00'
     slotStatus: Record<string, 'free' | 'pro' | 'patient' | 'both'> = {};
@@ -95,6 +82,8 @@ export class AgendarCitaPage implements OnInit {
         return !!(this.proId && this.form.get('date')?.value);
     }
 
+    // El resto de ngOnInit y otros métodos (configureModalityValidators, presentToast, loadProfessionals, loadAppointments)
+    // se mantienen correctos y sin cambios.
     ngOnInit() {
         this.loadProfessionals();
         this.loadAppointments();
@@ -179,25 +168,18 @@ export class AgendarCitaPage implements OnInit {
         });
     }
 
-  // ✅ AQUÍ VIENE EL CAMBIO CLAVE
-  onCreate() {
-    if (!this.form.valid) {
-      this.presentToast('Completa los campos requeridos');
-      return;
-    }
-    // --- MODIFICADO ---
-    // Esta es la nueva función que llamará tu botón "Agendar y Pagar"
+    // 💰 FUNCIÓN CENTRAL: Llama a Mercado Pago.
+    // Esto reemplaza la antigua función onCreate.
+    // **Asegúrate de cambiar el (click) en tu HTML a iniciarPago()**
     async iniciarPago() {
-        // 1. Validar el formulario (misma lógica que tenías)
         if (!this.form.valid) {
-            this.form.markAllAsTouched(); // Muestra los errores
+            this.form.markAllAsTouched();
             this.presentToast('Completa los campos requeridos');
             return;
         }
 
         const { professional, date: dateValue, time: timeValue, duration, modality, reason } = this.form.getRawValue();
 
-        // 2. Validaciones de datos (misma lógica)
         if (!professional) {
             this.presentToast('Debes seleccionar un profesional.');
             return;
@@ -210,49 +192,34 @@ export class AgendarCitaPage implements OnInit {
             return;
         }
 
-    const datePart = date.split('T')[0];
-    const timePart = time.split(':').slice(0, 2).join(':');
-    //Convertir a UTC y enviar en ISO 8601 estándar
-    const local = new Date(`${datePart}T${timePart}:00`);
-    const startDatetimeUTC = local.toISOString();
-        // 3. Mostrar "Cargando..."
+        // 1. Calcular la fecha/hora de inicio en formato ISO para el backend
+        const datePart = date.split('T')[0];
+        const timePart = time.split(':').slice(0, 2).join(':');
+        const local = new Date(`${datePart}T${timePart}:00`);
+        // Ojo: Si el backend espera UTC, asegúrate de que use local.toISOString()
+        // Si espera la hora local, usa el formato 'YYYY-MM-DDTHH:MM:SS'
+        const startDatetimeBackend = local.toISOString(); // Recomendado: UTC/ISO para el backend
+
         const loading = await this.loadingCtrl.create({
             message: 'Conectando con Mercado Pago...',
         });
         await loading.present();
 
-        // 4. Construir el payload (mismo que tenías para createAppointment)
-        // Tu backend (Django) recibirá esto para crear la PREFERENCIA.
-        const datePart = date.split('T')[0];
-        const timePart = time.split(':').slice(0, 2).join(':');
-        const startDatetimeLocal = `${datePart}T${timePart}:00`;
-
-    const payload: any = {
-    professional,
-    start_datetime: startDatetimeUTC,  //Correcto, con "Z" al final
-    duration_minutes: duration,
-    modality: modality || undefined,
-    reason: (reason || '').trim()
-    };
-
         const payload: any = {
             professional,
-            start_datetime: startDatetimeLocal,
+            start_datetime: startDatetimeBackend,
             duration_minutes: duration,
             modality: modality || undefined,
             reason: (reason || '').trim()
-            // NOTA: Tu backend (Django) debe calcular el precio
-            // basado en el ID del profesional al recibir este payload.
         };
 
-        // 5. Llamar al servicio de Mercado Pago (Fase 2)
+        // 2. Llamar al servicio de Mercado Pago
         this.mpService.crearPreferencia(payload).subscribe({
             next: (respuesta) => {
                 loading.dismiss();
                 console.log('Preferencia recibida:', respuesta);
 
                 if (respuesta.init_point) {
-                    // 6. Redirigir a Mercado Pago
                     window.location.href = respuesta.init_point;
                 } else {
                     this.presentToast('Error: No se pudo obtener el link de pago.');
@@ -261,118 +228,13 @@ export class AgendarCitaPage implements OnInit {
             error: (error) => {
                 loading.dismiss();
                 console.error('Error al crear la preferencia:', error);
-                
-                // 🚨 POSIBLE ERROR DE CORS:
-                // Si ves un error de CORS en la consola del navegador,
-                // debes configurar 'django-cors-headers' en tu backend (Django).
-                
                 this.presentToast('Error al conectar con el servidor de pago.');
             }
         });
     }
 
-    /*
-    // --- MODIFICADO ---
-    // Esta función se reemplaza por 'iniciarPago'.
-    // La lógica de 'createAppointment' ahora debe vivir en tu Webhook de Django (Fase 3),
-    // después de que el pago sea aprobado.
-    onCreate() {
-        if (!this.form.valid) {
-            this.presentToast('Completa los campos requeridos');
-            return;
-        }
-
-        const { professional, date: dateValue, time: timeValue, duration, modality, reason } = this.form.getRawValue();
-
-        // ... (validaciones) ...
-
-        const payload: any = { ... };
-
-    this.svc.createAppointment(payload).subscribe({
-  next: async (response: any) => {
-    console.log('📦 RESPUESTA COMPLETA DEL BACKEND:', response);
-
-    // Intentar acceder a la URL en varias posibles formas
-    const zoomUrl =
-      response?.zoom_join_url ||
-      response?.data?.zoom_join_url ||
-      response?.appointment?.zoom_join_url;
-
-    await this.presentToast('Cita agendada correctamente ✅');
-
-    // Si no hay URL Zoom, mostrar alerta simple
-    if (!zoomUrl) {
-      const alert = await this.alertCtrl.create({
-        header: 'Cita agendada',
-        message: 'La cita se ha creado, pero no se recibió enlace de Zoom.',
-        buttons: [{ text: 'Ir a Mis Citas', handler: () => this.router.navigate(['/mis-citas']) }]
-      });
-      await alert.present();
-      this.loadAppointments();
-      return;
-    }
-
-    // Si sí hay Zoom URL
-    const alert = await this.alertCtrl.create({
-      header: 'Cita agendada',
-      message: 'Tu cita ya está lista en Zoom.<br><br>¿Deseas unirte ahora?',
-      buttons: [
-        {
-          text: 'Unirme ahora',
-          handler: () => {
-            console.log('ZOOM URL QUE LLEGÓ:', zoomUrl);
-            window.open(zoomUrl, '_blank');
-          }
-        },
-        {
-          text: 'Ir a Mis Citas',
-          handler: () => this.router.navigate(['/mis-citas'])
-        }
-      ]
-    });
-    await alert.present();
-    this.loadAppointments();
-  },
-
-  error: (err) => {
-    console.error('❌ ERROR DEL BACKEND:', err);
-    const e = err?.error || {};
-    let msg =
-      e.professional?.[0] ||
-      e.start_datetime?.[0] ||
-      e.duration_minutes?.[0] ||
-      e.modality?.[0] ||
-      e.non_field_errors?.[0] ||
-      e.detail ||
-      'Error al agendar la cita. Revise los datos.';
-    if (Array.isArray(msg)) msg = msg[0];
-    this.presentToast(msg);
-  }
-  });
-} //FIN DEL ONCREATE
-        this.svc.createAppointment(payload).subscribe({
-            next: () => {
-                this.presentToast('Cita agendada correctamente');
-                this.loadAppointments();
-            },
-            error: (err) => {
-                // ... (manejo de error) ...
-            }
-        });
-    }
-    */
-
-cancel(id: number) {
-    this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
-      next: () => {
-        this.presentToast('Cita cancelada');
-        this.loadAppointments();
-      },
-      error: () => this.presentToast('No se pudo cancelar')
-    });
-  }
+    // ❌ FUNCIÓN CANCEL CONSOLIDADA: Se elimina la duplicación.
     cancel(id: number) {
-        // ... (esta función se mantiene igual) ...
         this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
             next: () => {
                 this.presentToast('Cita cancelada');
@@ -381,9 +243,9 @@ cancel(id: number) {
             error: () => this.presentToast('No se pudo cancelar')
         });
     }
+    
+    // ⏰ MÉTODOS DE MANEJO DE SLOTS: Se consolidan y se corrigen los errores de sintaxis (que eran efectos de la duplicación).
 
-    // ... (todo el resto de tu código de lógica de slots se mantiene igual) ...
-    // ... (formatSlotLabel, makeSlots, getDatePartISO, refreshBusy, etc.) ...
     formatSlotLabel(s: string): string {
         return s.slice(0, 5);
     }
@@ -412,26 +274,6 @@ cancel(id: number) {
         return iso.split('T')[0] || null;
     }
 
-  refreshBusy(professionalId: number, dateISO: string) {
-    this.svc.getBusy(professionalId, dateISO).subscribe({
-      next: (res) => {
-        this.busyPro = res.professional.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
-        this.busyPatient = res.patient.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
-        this.busyTimes = res.professional.map(x => {
-        const d = new Date(x.start);
-        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        });
-        this.recomputeSlotStatus(dateISO);
-      },
-      error: err => {
-        console.error('busy error', err);
-        this.busyPro = [];
-        this.busyPatient = [];
-        this.busyTimes = [];
-        this.recomputeSlotStatus(dateISO);
-      }
-    });
-  }
     refreshBusy(professionalId: number, dateISO: string) {
         this.svc.getBusy(professionalId, dateISO).subscribe({
             next: (res) => {
@@ -486,6 +328,3 @@ cancel(id: number) {
         }
     }
 }
-
-
-

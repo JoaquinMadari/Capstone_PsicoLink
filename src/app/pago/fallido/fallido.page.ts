@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent,  } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { closeCircleOutline } from 'ionicons/icons';
@@ -12,7 +12,7 @@ import { Subscription, interval } from 'rxjs';
   templateUrl: './fallido.page.html',
   styleUrls: ['./fallido.page.scss'],
   standalone: true,
-  imports: [IonSpinner, IonCardContent, IonCardTitle, IonCardHeader, IonCard, IonIcon, IonButton, IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonCardContent, IonCardTitle, IonCardHeader, IonCard, IonIcon, IonButton, IonContent, CommonModule, FormsModule]
 })
 export class FallidoPage implements OnInit, OnDestroy {
   countdown = 5;
