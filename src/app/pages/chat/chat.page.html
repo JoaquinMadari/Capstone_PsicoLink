@@ -1,29 +1,34 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Chat</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="backFallback"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ otherName || 'Chat' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div *ngFor="let m of messages" [class.mine]="isMine(m)" class="msg">
-    <div class="bubble">
-      {{ m.body }}
-      <div class="meta">{{ m.created_at | date:'shortTime' }}</div>
+<ion-content fullscreen class="ion-padding">
+  <div class="messages">
+    <div *ngFor="let m of messages" class="msg" [class.mine]="isMine(m)" [class.other]="!isMine(m)">
+      <div class="bubble">
+        <div class="body">{{ m.body }}</div>
+        <div class="meta">{{ m.created_at | date:'shortTime' }}</div>
+      </div>
     </div>
-  </div>
 
-  <div *ngIf="typingUsers.length" class="typing">
-    escribiendo...
+    <div *ngIf="typingUsers.length" class="typing">Escribiendo…</div>
   </div>
 </ion-content>
 
 <ion-footer>
-  <ion-toolbar>
-    <ion-input placeholder="Escribe un mensaje..."
-               [value]="input"
-               (ionInput)="onInputChange($any($event.target).value)"></ion-input>
-    <ion-buttons slot="end">
-      <ion-button (click)="send()">Enviar</ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+  <div class="composer">
+    <ion-input
+      class="composer-input"
+      placeholder="Escribe un mensaje…"
+      [value]="input"
+      (ionInput)="onInputChange($event.detail.value || '')"
+      (keyup.enter)="send()">
+    </ion-input>
+    <ion-button (click)="send()">Enviar</ion-button>
+  </div>
 </ion-footer>

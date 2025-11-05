@@ -67,6 +67,6 @@ export class ProfilePage implements OnInit {
   bookAppointment() {
     if (!this.data?.user?.id) return;
     // Ajusta a tu ruta real para agendamiento
-    this.router.navigate(['/tabs/Agendar'], { queryParams: { professionalId: this.data.user.id } });
+    this.router.navigate(['/Agendar'], { queryParams: { professionalId: this.data.user.id } });
   }
 }

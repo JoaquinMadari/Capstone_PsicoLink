@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonRefresher, IonRefresherContent, IonList,
-  IonItem, IonLabel, IonNote
+import {
+  IonContent, IonHeader, IonTitle, IonToolbar,
+  IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonNote
 } from '@ionic/angular/standalone';
+import { Router, RouterModule } from '@angular/router';
 import { ChatSupabase } from 'src/app/services/chat-supabase';
-import { Router } from '@angular/router';
-
 
 type ConvItem = {
   id: string;
@@ -21,8 +21,10 @@ type ConvItem = {
   templateUrl: './messages.page.html',
   styleUrls: ['./messages.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, 
-    IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonNote]
+  imports: [
+    IonContent, RouterModule, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule,
+    IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonNote
+  ]
 })
 export class MessagesPage implements OnInit {
   me = '';
@@ -40,36 +42,47 @@ export class MessagesPage implements OnInit {
     this.loading = true;
 
     try {
-      const uid = await this.chat.getUidOrNull();
-      if (!uid) {
-        this.me = '';
+      //sesión supabase
+      this.me = (await this.chat.getUidOrNull()) || '';
+      if (!this.me) {
         this.items = [];
         return;
       }
 
-      this.me = uid;
-
+      //conversaciones del usuario
       const convs = await this.chat.listConversations();
-      const pairs = convs.map((c: any) => ({
+      if (!convs?.length) {
+        this.items = [];
+        return;
+      }
+
+      const pairs = convs.map(c => ({
         id: c.id,
         otherUid: c.user1 === this.me ? c.user2 : c.user1,
       }));
 
-      const uniq = Array.from(new Set(pairs.map(p => p.otherUid)));
-      const profs = await this.chat.profileBasics(uniq);
-      const nameById = new Map(profs.map((p: any) => [p.id, p.full_name || '(Sin nombre)']));
+      //nombres en batch (tabla profiles).
+      const uniqUids = Array.from(new Set(pairs.map(p => p.otherUid)));
+      const profs = await this.chat.profileBasics(uniqUids).catch(() => []);
+      const nameById = new Map<string, string>(
+        (profs || []).map((p: any) => [p.id, p.full_name || '(Sin nombre)'])
+      );
 
-      this.items = [];
-      for (const p of pairs) {
-        const last = await this.chat.lastMessage(p.id);
-        this.items.push({
-          id: p.id,
-          otherUid: p.otherUid,
-          otherName: nameById.get(p.otherUid) || '',
-          lastBody: last?.body ?? '—',
-          lastAt: last?.created_at
-        });
-      }
+      const lastArr = await Promise.all(pairs.map(p => this.chat.lastMessage(p.id).catch(() => null)));
+
+      //construir lista y ordenar por último mensaje
+      const items: ConvItem[] = pairs.map((p, i) => ({
+        id: p.id,
+        otherUid: p.otherUid,
+        otherName: nameById.get(p.otherUid) || p.otherUid.slice(0, 8),
+        lastBody: lastArr[i]?.body ?? '—',
+        lastAt: lastArr[i]?.created_at
+      }));
+
+      this.items = items.sort((a, b) =>
+        (new Date(b.lastAt || 0).getTime()) - (new Date(a.lastAt || 0).getTime())
+      );
+
     } catch (err: any) {
       console.warn('Messages load error:', err?.message || err);
       this.items = [];
@@ -80,10 +93,12 @@ export class MessagesPage implements OnInit {
   }
 
   open(item: ConvItem) {
-    this.router.navigate(['/chat', item.otherUid]);
+    this.router.navigate(['/chat/with', item.otherUid], { state: { from: '/tabs/messages' } });
   }
 
   async refresh(ev: any) {
     await this.load(ev);
   }
+
+  trackByConv = (_: number, it: ConvItem) => it.id;
 }

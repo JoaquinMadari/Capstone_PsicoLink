@@ -1,2 +1,40 @@
-ion-item h2 { font-weight: 600; }
-ion-item p { opacity: .8; }
+/* Paleta */
+$blue-nova:   #274C77;
+$stones:      #C5D5E4;
+$renew-blue:  #A7C7E7;
+$ink:         #1A1A1A;
+$white:       #ffffff;
+
+ion-header, ion-toolbar {
+  --background: #274C77;
+  --color: #ffffff;
+}
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-list {
+  background: transparent;
+  padding: 8px;
+}
+
+ion-item {
+  --background: #ffffff;
+  --padding-start: 14px;
+  --inner-padding-end: 14px;
+  margin: 8px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+ion-label h2 {
+  color: $blue-nova;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+ion-label p {
+  color: #274472; /* tu nota en otras páginas */
+}
+ion-note {
+  color: rgba(0,0,0,0.6);
+}

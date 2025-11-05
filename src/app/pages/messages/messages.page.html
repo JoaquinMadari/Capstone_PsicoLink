@@ -10,12 +10,15 @@
   </ion-refresher>
 
   <ion-list>
-    <ion-item *ngFor="let it of items" button (click)="open(it)">
+    <ion-item
+      *ngFor="let m of items; trackBy: trackByConv"
+      button
+      (click)="open(m)">
       <ion-label>
-        <h2>{{ it.otherName }}</h2>
-        <p>{{ it.lastBody }}</p>
+        <h2>{{ m.otherName }}</h2>
+        <p>{{ m.lastBody }}</p>
       </ion-label>
-      <ion-note slot="end">{{ it.lastAt | date:'short' }}</ion-note>
+      <ion-note slot="end" *ngIf="m.lastAt as t">{{ t | date:'short' }}</ion-note>
     </ion-item>
 
     <ion-item *ngIf="!items.length && !loading">

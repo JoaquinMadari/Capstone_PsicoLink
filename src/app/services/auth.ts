@@ -17,14 +17,19 @@ export class Auth {
   }
 
   login(payload: { email: string; password: string }) {
-    //Login en Django (JWT), Intento de signIn en Supabase
     return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
       tap((res: any) => {
-        // Guarda SIEMPRE con estas claves
         if (res.access)  localStorage.setItem('access',  res.access);
         if (res.refresh) localStorage.setItem('refresh', res.refresh);
+
         const role = res?.user?.role ?? res?.role ?? null;
-        if (role) localStorage.setItem('role', role);
+        if (role) {
+          localStorage.setItem('role', role);
+          localStorage.setItem('user_role', role);
+        }
+
+        const sbUid = res?.user?.supabase_uid ?? null;
+        if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
       }),
       mergeMap((res: any) =>
         from(this.chatSb.signIn(payload.email, payload.password)).pipe(
@@ -39,18 +44,16 @@ export class Auth {
   }
 
   async logout(): Promise<void> {
-    // Cierra sesión en Supabase
     try { await this.chatSb.supabaseSignOut(); } catch (e) { console.warn('supabase signOut:', e); }
-
-    // Limpia TODAS las variantes que se usaron antes
-    ['access','refresh','role','access_token','refresh_token','user_role'].forEach(k =>
-      localStorage.removeItem(k)
-    );
+    [
+      'access', 'refresh', 'role', 'user_role',
+      'access_token', 'refresh_token', 'sb_uid'
+    ].forEach(k => localStorage.removeItem(k));
   }
 
   // ---------- Helpers ----------
   getCurrentUserRole(): Observable<string | null> {
-    return of(localStorage.getItem('role'));
+    return of(localStorage.getItem('role') ?? localStorage.getItem('user_role'));
   }
 
   completeProfile(data: any): Observable<any> {
