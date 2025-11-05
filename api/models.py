@@ -55,6 +55,7 @@ class CustomUser(AbstractUser):
     # Hace que email sea el campo de identificación principal
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # username sigue siendo requerido pero no para login
+    
 class BaseProfile(models.Model):
     # Campos comunes
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
@@ -178,7 +179,7 @@ class Appointment(models.Model):
     reason = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
 
-    # 🆕 Campos para la integración con Zoom
+    #Campos para la integración con Zoom
     zoom_meeting_id = models.CharField(max_length=100, blank=True, null=True)
     zoom_join_url = models.TextField(blank=True, null=True)
     zoom_start_url = models.TextField(blank=True, null=True)
