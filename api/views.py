@@ -27,10 +27,11 @@ from datetime import timezone as dt_timezone
 from api.zoom_service import refresh_zoom_token
 
 from django.db import transaction
-from integrations.supabase_sync import ensure_supabase_user 
 
 import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+from integrations.supabase_sync import ensure_supabase_user
 
 # -----------------------
 # Register y Specialty
@@ -46,12 +47,20 @@ class RegisterView(generics.CreateAPIView):
 
         raw_password = ser.validated_data.get("password")
         role = ser.validated_data.get("role")
+        first_name  = ser.validated_data.get("first_name", "")
+        last_name   = ser.validated_data.get("last_name", "")
 
         with transaction.atomic():
             user: CustomUser = ser.save()  # crea en Django
 
             try:
-                uid = ensure_supabase_user(email=user.email, password=raw_password, role=role)
+                uid = ensure_supabase_user(
+                    email=user.email,
+                    password=raw_password,
+                    role=role,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
             except Exception as e:
                 transaction.set_rollback(True)
                 return Response(
@@ -59,35 +68,49 @@ class RegisterView(generics.CreateAPIView):
                     status=status.HTTP_502_BAD_GATEWAY
                 )
 
-            user.supabase_uid = uid  # uid debe ser un UUID string válido
+            user.supabase_uid = uid
             user.save(update_fields=["supabase_uid"])
 
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
     
 
+logger = logging.getLogger(__name__)
+
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        #Emite los tokens de Django (valida user/pass)
         resp = super().post(request, *args, **kwargs)
 
-        #Repara / provisiona Supabase en el mismo request
         try:
             email = request.data.get('email')
             password = request.data.get('password')
-            if email and password:
-                user = CustomUser.objects.get(email=email)
+            if not (email and password):
+                return resp
 
-                uid = user.supabase_uid
-                # Crea si falta, o re-sincroniza password si ya existe
-                new_uid = ensure_supabase_user(email=user.email, password=password, role=user.role)
+            user = CustomUser.objects.get(email=email)
 
-                if uid != new_uid:
+            if not user.supabase_uid:
+                new_uid = ensure_supabase_user(
+                    email=user.email,
+                    password=password,
+                    role=user.role,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                )
+                # Evitar colisiones si ese uid ya está enlazado a otra fila
+                clash = CustomUser.objects.filter(supabase_uid=new_uid).exclude(pk=user.pk).first()
+                if clash:
+                    logger.warning(
+                        "Supabase UID %s ya enlazado a pk=%s (%s). Omitiendo relink para pk=%s (%s).",
+                        new_uid, clash.pk, clash.email, user.pk, user.email
+                    )
+                else:
                     user.supabase_uid = new_uid
                     user.save(update_fields=["supabase_uid"])
+
         except Exception as e:
-            logging.exception("Supabase sync on login failed: %s", e)
+            logger.exception("Supabase sync on login failed: %s", e)
 
         return resp
 
