@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../environments/environment';
 import { HttpHeaders } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ export class MercadoPago {
 
   // 🔴 ¡OJO! Esta es la URL de tu backend.
   // Ajusta el endpoint a como lo tengas en urls.py
-  private backendUrl = 'http://localhost:8000/payments/create-preference/'; 
+  private backendUrl = environment.MP_URL;
 
   constructor(private http: HttpClient) { }
 
