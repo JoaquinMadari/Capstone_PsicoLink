@@ -118,7 +118,6 @@ export class SearchPage implements OnInit {
   trackByPro = (_: number, p: any) => p?.id ?? _;
 
 
-
   async startChat(event: Event, otherUid?: string) {
     event.stopPropagation();
     if (!otherUid) {
@@ -130,8 +129,7 @@ export class SearchPage implements OnInit {
       await t.present();
       return;
     }
-    // Ruta recomendada: /chat/:otherUid
-    this.router.navigate(['/chat', otherUid]);
+    this.router.navigate( ['/chat/with', otherUid],{ state: { from: '/tabs/search' } });
   }
 
 }

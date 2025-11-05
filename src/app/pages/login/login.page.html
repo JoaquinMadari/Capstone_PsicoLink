@@ -33,10 +33,12 @@
           <div *ngIf="loginForm.get('password')?.hasError('minlength')">*Mínimo 6 caracteres.</div>
         </div>
 
-        <ion-button [disabled]="loading || loginForm.invalid" (click)="login()">
-          <ion-spinner *ngIf="loading" name="lines-small"></ion-spinner>
-          <span *ngIf="!loading">Ingresar</span>
-        </ion-button>
+        <div class="ion-text-center ion-padding-top"> 
+          <ion-button [disabled]="loading || loginForm.invalid" (click)="login()">
+            <ion-spinner *ngIf="loading" name="lines-small"></ion-spinner>
+            <span *ngIf="!loading">Ingresar</span>
+          </ion-button>
+        </div>
 
         <p class="ion-text-center ion-padding-top">
           <a routerLink="/register">Crea tu cuenta</a>

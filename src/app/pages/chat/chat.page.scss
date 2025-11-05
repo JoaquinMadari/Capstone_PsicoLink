@@ -1,6 +1,113 @@
-.msg { display: flex; padding: 6px 10px; }
-.msg.mine { justify-content: flex-end; }
-.bubble { max-width: 70%; padding: 8px 12px; border-radius: 14px; background: #2b2b2b; color: #fff; }
-.msg.mine .bubble { background: #4a90e2; }
-.meta { font-size: 11px; opacity: .8; margin-top: 4px; }
-.typing { padding: 8px 12px; font-size: 13px; opacity: .8; }
+/* Paleta consistente */
+$blue-nova:   #274C77;
+$stones:      #C5D5E4;
+$renew-blue:  #A7C7E7;
+$ink:         #1A1A1A;
+$white:       #ffffff;
+
+/* Header/Toolbar */
+ion-header, ion-toolbar {
+  --background: #274C77;
+  --color: #ffffff;
+}
+
+/* Fondo */
+ion-content {
+  --background: #C5D5E4;
+}
+
+/* Contenedor de mensajes */
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 90px; // espacio para el footer
+}
+
+/* Cada mensaje */
+.msg {
+  display: flex;
+  max-width: 92%;
+}
+
+/* >>> Invertido:
+   - TUS mensajes (mine) a la IZQUIERDA
+   - Los que recibes (other) a la DERECHA */
+.msg.mine {
+  justify-content: flex-start;
+  align-self: flex-start;
+}
+.msg.other {
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+
+/* Burbujas */
+.bubble {
+  position: relative;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  min-width: 44px;
+  max-width: min(720px, 90vw);
+  word-break: break-word;
+}
+
+/* Estilos de color por emisor (coherente con la inversión) */
+.msg.mine .bubble {
+  background: $white;
+  border: 1px solid $blue-nova;
+  color: $blue-nova;
+}
+.msg.other .bubble {
+  background: $renew-blue;
+  color: $ink;
+}
+
+/* texto y meta */
+.body { white-space: pre-wrap; line-height: 1.35; }
+.meta {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.75;
+  text-align: right;
+}
+
+/* indicador typing */
+.typing {
+  align-self: center;
+  background: rgba(255,255,255,0.7);
+  color: $blue-nova;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Composer (footer) */
+ion-footer {
+  --background: #ffffff;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.composer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+}
+.composer-input {
+  flex: 1;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  color: $ink;
+}
+ion-button {
+  --background: #274C77;
+  --background-hover: #1E3A5F;
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: 600;
+}
