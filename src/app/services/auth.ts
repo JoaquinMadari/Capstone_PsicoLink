@@ -17,9 +17,11 @@ export class Auth {
   }
 
   login(payload: { email: string; password: string }) {
+    // Login en Django (JWT), intento de signIn en Supabase
     return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
       tap((res: any) => {
-        if (res.access)  localStorage.setItem('access',  res.access);
+        // Guarda tokens y rol
+        if (res.access) localStorage.setItem('access', res.access);
         if (res.refresh) localStorage.setItem('refresh', res.refresh);
 
         const role = res?.user?.role ?? res?.role ?? null;
@@ -44,11 +46,15 @@ export class Auth {
   }
 
   async logout(): Promise<void> {
-    try { await this.chatSb.supabaseSignOut(); } catch (e) { console.warn('supabase signOut:', e); }
-    [
-      'access', 'refresh', 'role', 'user_role',
-      'access_token', 'refresh_token', 'sb_uid'
-    ].forEach(k => localStorage.removeItem(k));
+    try {
+      await this.chatSb.supabaseSignOut();
+    } catch (e) {
+      console.warn('supabase signOut:', e);
+    }
+
+    // Limpia todo
+    ['access', 'refresh', 'role', 'access_token', 'refresh_token', 'user_role', 'user_id']
+      .forEach(k => localStorage.removeItem(k));
   }
 
   // ---------- Helpers ----------

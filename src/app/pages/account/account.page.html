@@ -12,10 +12,23 @@
         <p>{{ role || '—' }}</p>
       </ion-label>
     </ion-item>
-    <!-- agrega más datos si quieres -->
   </ion-list>
 
   <div class="ion-padding">
-    <ion-button expand="block" color="medium" (click)="logout()">Cerrar sesión</ion-button>
+
+    <!-- 👇 Botón solo para profesionales -->
+    <ion-button
+      *ngIf="role === 'profesional'"
+      expand="block"
+      color="primary"
+      (click)="connectZoom()">
+      Conectar con Zoom
+    </ion-button>
+
+    <ion-button expand="block" color="medium" (click)="logout()">
+      Cerrar sesión
+    </ion-button>
   </div>
 </ion-content>
+
+
