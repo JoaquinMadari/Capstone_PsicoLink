@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import urllib.parse
 from rest_framework.permissions import AllowAny
 from django.utils import timezone
+from django.shortcuts import redirect
 
 # -----------------------
 # Zoom OAuth (User-managed)
@@ -79,7 +80,8 @@ def zoom_callback(request):
 
     profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
 
-    return Response({"message": "Zoom conectado correctamente"})
+    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:8100")
+    return redirect(f"{frontend_url}/zoom/success")
 
 
 

@@ -9,6 +9,8 @@ from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetai
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
     ProfessionalSearchSerializer)
 
+from api.zoom_service import create_meeting_for_professional
+from datetime import timezone as dt_timezone
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
@@ -18,16 +20,11 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from datetime import datetime, date, time as dtime, timedelta
-
-
-from api.zoom_service import create_meeting
 from django.utils import timezone
 from datetime import timezone as dt_timezone
-
 from api.zoom_service import refresh_zoom_token
-
 from django.db import transaction
-
+from integrations.supabase_sync import ensure_supabase_user 
 import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -80,7 +77,9 @@ class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        # Emite los tokens de Django (valida user/pass)
         resp = super().post(request, *args, **kwargs)
+        data = resp.data.copy()
 
         try:
             email = request.data.get('email')
@@ -112,7 +111,8 @@ class LoginView(TokenObtainPairView):
         except Exception as e:
             logger.exception("Supabase sync on login failed: %s", e)
 
-        return resp
+        # Devolvemos tokens + datos de usuario
+        return Response(data, status=resp.status_code)
 
 
 class SpecialtyListView(APIView):
@@ -181,67 +181,52 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.filter(professional=user).select_related('patient', 'professional')
         return Appointment.objects.filter(patient=user).select_related('patient', 'professional')
 
-    def perform_create(self, serializer):        
-       # Crea cita y genera reunión Zoom automáticamente.
+    def perform_create(self, serializer):
         appointment = serializer.save()
 
-    # Guardamos rol profesional
+        # Guardar el rol del profesional
         if appointment.professional:
             appointment.professional_role = getattr(appointment.professional, 'role', 'desconocido')
 
-        # 🔹 Crear reunión Zoom
+        # Crear reunión Zoom si la cita es online
+        if appointment.modality and appointment.modality.lower() == "online":
+            try:
+                start_time = appointment.start_datetime.astimezone(dt_timezone.utc).isoformat()
+                profile = appointment.professional.psicologoprofile
+
+                if not profile.zoom_access_token or not profile.zoom_refresh_token:
+                    print(f"⚠️ Profesional {profile.user.email} no tiene Zoom conectado.")
+                else:
+                    zoom_data = create_meeting_for_professional(
+                    profile,
+                    topic=f"Cita con {appointment.patient.get_full_name()}",
+                    start_time=start_time,
+                    duration=appointment.duration_minutes
+                )
+
+                if zoom_data:
+                    appointment.zoom_meeting_id = zoom_data.get("id")
+                    appointment.zoom_join_url = zoom_data.get("join_url")
+                    appointment.zoom_start_url = zoom_data.get("start_url")
+                    print(f"✅ Reunión Zoom creada correctamente para {appointment.professional}")
+
+            except Exception as e:
+                print(f"⚠️ Error al crear reunión Zoom: {e}")
+
+
+        appointment.save(update_fields=[
+            'professional_role', 'zoom_meeting_id', 'zoom_join_url', 'zoom_start_url'
+    ])
+
+    # Ajuste final del rol
         try:
-            # Convertir fecha a ISO 8601 UTC
-
-            #start_time = appointment.start_datetime.astimezone(timezone.utc).isoformat()
-            start_time = appointment.start_datetime.astimezone(dt_timezone.utc).isoformat()
-
-            # 🔹 Obtener perfil del profesional
-            profile = appointment.professional.psicologoprofile
-
-            # 🔹 Verificar si el token existe y no expiró
-         # Debes crear esta función
-
-            if not profile.zoom_access_token or not profile.zoom_token_expires_at or profile.zoom_token_expires_at < timezone.now():
-            # Refrescar token usando refresh_token
-                new_tokens = refresh_zoom_token(profile.zoom_refresh_token)
-                profile.zoom_access_token = new_tokens['access_token']
-                profile.zoom_refresh_token = new_tokens.get('refresh_token', profile.zoom_refresh_token)
-                profile.zoom_token_expires_at = timezone.now() + timedelta(seconds=new_tokens['expires_in'])
-                profile.save(update_fields=['zoom_access_token', 'zoom_refresh_token', 'zoom_token_expires_at'])
-
-            ACCESS_TOKEN = profile.zoom_access_token
-
-            # 🔹 Llamada a create_meeting
-            zoom_data = create_meeting(
-            access_token=ACCESS_TOKEN,
-            user_id="me",  # token del psicólogo
-            topic=f"Cita con {appointment.professional.get_full_name()}",
-            start_time=start_time,
-            duration=appointment.duration_minutes
-        )
-
-            # 🔹 Guardar en el modelo
-            appointment.zoom_meeting_id = zoom_data.get("id")
-            appointment.zoom_join_url = zoom_data.get("join_url")
-            appointment.zoom_start_url = zoom_data.get("start_url")
-
-            print("Zoom meeting creada:", zoom_data)
-            print("Zoom join URL guardada:", appointment.zoom_join_url)
-
-        except Exception as e:
-            print(f"⚠️ Error al crear reunión Zoom: {e}")
-
-        # Guardar campos en la base de datos
-        appointment.save(update_fields=['professional_role', 'zoom_meeting_id', 'zoom_join_url', 'zoom_start_url'])
-
-        try:
-         spec = appointment.professional.psicologoprofile.specialty
-         if appointment.professional_role != spec:
-             appointment.professional_role = spec
-             appointment.save(update_fields=['professional_role'])
-        except PsicologoProfile.DoesNotExist:
+            spec = appointment.professional.psicologoprofile.specialty
+            if appointment.professional_role != spec:
+                appointment.professional_role = spec
+                appointment.save(update_fields=['professional_role'])
+        except Exception:
             pass
+
 
 
 

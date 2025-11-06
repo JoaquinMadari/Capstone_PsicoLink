@@ -1,86 +1,104 @@
-# api/zoom_service.py
-from django.conf import settings
 import requests
-from urllib.parse import urlencode
+from datetime import datetime, timedelta, timezone
+from decouple import config
 
-ZOOM_AUTH_URL = "https://zoom.us/oauth/authorize"
-ZOOM_TOKEN_URL = "https://zoom.us/oauth/token"
-ZOOM_CREATE_MEETING_URL = "https://api.zoom.us/v2/users/{user_id}/meetings"
+ZOOM_API_BASE_URL = "https://api.zoom.us/v2"
+ZOOM_CLIENT_ID = config("ZOOM_CLIENT_ID")
+ZOOM_CLIENT_SECRET = config("ZOOM_CLIENT_SECRET")
+ZOOM_REDIRECT_URI = config("ZOOM_REDIRECT_URI")
 
-# ✅ Variables cargadas directamente desde settings.py
-CLIENT_ID = settings.ZOOM_CLIENT_ID
-CLIENT_SECRET = settings.ZOOM_CLIENT_SECRET
-REDIRECT_URI = settings.ZOOM_REDIRECT_URI
 
-def build_authorize_url(state="psicolink_state", response_type="code", scope="meeting:read:admin meeting:write:admin"):
-    params = {
-        "response_type": response_type,
-        "client_id": CLIENT_ID,
-        "redirect_uri": REDIRECT_URI,
-        "state": state,
-        "scope": scope
-    }
-    return f"{ZOOM_AUTH_URL}?{urlencode(params)}"
-
-def exchange_code_for_token(code):
+def refresh_zoom_token(professional_profile):
     """
-    Intercambia el code por access_token. Zoom pide Authorization: Basic base64(client_id:client_secret)
+    Refresca el token de acceso de Zoom usando el refresh_token guardado.
     """
-    from base64 import b64encode
-    basic = b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-    headers = {
-        "Authorization": f"Basic {basic}"
-    }
+    print(f"♻️ Intentando refrescar token de Zoom para {professional_profile.user.email}...")
+
+    token_url = "https://zoom.us/oauth/token"
+    auth = (ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET)
+
     data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI
+        "grant_type": "refresh_token",
+        "refresh_token": professional_profile.zoom_refresh_token
     }
-    resp = requests.post(ZOOM_TOKEN_URL, headers=headers, data=data)
-    resp.raise_for_status()
-    return resp.json()  # contiene access_token, refresh_token, expires_in, etc.
 
-def create_meeting(access_token, user_id="me", topic="Reunión prueba", start_time=None, duration=30):
+    response = requests.post(token_url, auth=auth, data=data)
+
+    if response.status_code == 200:
+        token_data = response.json()
+
+        professional_profile.zoom_access_token = token_data.get("access_token")
+        professional_profile.zoom_refresh_token = token_data.get("refresh_token")
+        professional_profile.zoom_token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600))
+        professional_profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
+
+        print("✅ Token de Zoom actualizado correctamente.")
+        return professional_profile.zoom_access_token
+
+    else:
+        print(f"❌ Error al refrescar token de Zoom: {response.status_code} - {response.text}")
+        raise Exception("No se pudo refrescar el token de Zoom.")
+
+
+def create_zoom_meeting(access_token, topic, start_time, duration=60):
     """
-    Crea reunión para user_id (puede ser "me" si el token es de usuario).
-    start_time en formato ISO 8601 (opcional).
+    Crea una reunión en Zoom usando el token de acceso.
     """
-    url = ZOOM_CREATE_MEETING_URL.format(user_id=user_id)
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
-    }
-    body = {
+    url = f"{ZOOM_API_BASE_URL}/users/me/meetings"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    payload = {
         "topic": topic,
-        "type": 2,             # 2 = scheduled meeting
-        "duration": duration,
+        "type": 2,
         "start_time": start_time,
+        "duration": duration,
+        "timezone": "America/Santiago",
         "settings": {
             "join_before_host": False,
+            "waiting_room": True,
+            "mute_upon_entry": True,
             "approval_type": 0
         }
     }
-    resp = requests.post(url, headers=headers, json=body)
-    resp.raise_for_status()
-    return resp.json()
 
-def refresh_zoom_token(refresh_token):
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 201:
+        print("✅ Reunión Zoom creada con éxito.")
+        return response.json()
+    elif response.status_code == 401:
+        print(f"⚠️ Error 401 - Token inválido o expirado.")
+        raise Exception("Token expirado o inválido.")
+    else:
+        print(f"❌ Error al crear reunión Zoom: {response.status_code} - {response.text}")
+        raise Exception("Error al crear reunión Zoom.")
+
+
+def create_meeting_for_professional(professional_profile, topic, start_time, duration=60):
     """
-    Refresca el access token de Zoom usando refresh_token.
-    Retorna un dict con: access_token, expires_in, refresh_token (opcional)
+    Crea una reunión Zoom para un profesional, refrescando el token si es necesario.
     """
-    from base64 import b64encode
-    basic = b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-    headers = {
-        "Authorization": f"Basic {basic}"
-    }
-    data = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token
-    }
-    resp = requests.post(ZOOM_TOKEN_URL, headers=headers, data=data)
-    resp.raise_for_status()
-    return resp.json()
+    try:
+        # Verificar expiración
+        if not professional_profile.zoom_access_token:
+            raise Exception("El profesional no tiene token de Zoom configurado.")
+
+        if professional_profile.zoom_token_expires_at and professional_profile.zoom_token_expires_at < datetime.now(timezone.utc):
+            print("⏰ Token expirado. Refrescando...")
+            refresh_zoom_token(professional_profile)
+
+        # Intentar crear la reunión
+        try:
+            return create_zoom_meeting(professional_profile.zoom_access_token, topic, start_time, duration)
+        except Exception as e:
+            if "Token expirado" in str(e):
+                refresh_zoom_token(professional_profile)
+                return create_zoom_meeting(professional_profile.zoom_access_token, topic, start_time, duration)
+            raise e
+
+    except Exception as e:
+        print(f"❌ No se pudo crear reunión para {professional_profile.user.email}: {e}")
+        raise
+
 
 
 
