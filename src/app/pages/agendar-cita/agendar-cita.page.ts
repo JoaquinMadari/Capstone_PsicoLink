@@ -1,20 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-    ToastController, // Consolidado
-    AlertController, // Consolidado
-    LoadingController // Consolidado
-} from '@ionic/angular';
 import { AppointmentService } from 'src/app/services/appointment';
-import {
-    IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime,
-    IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle
-} from '@ionic/angular/standalone';
-import { ActivatedRoute, Router } from '@angular/router'; // Consolidado
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { MercadoPago as MercadopagoService } from  'src/app/services/mercado-pago'; // Asumo que esta ruta es correcta
+import { MercadoPago as MercadopagoService } from 'src/app/services/mercado-pago';
+
+// 💡 ¡CORRECCIÓN IMPORTANTE! (Para el error t.setFocus)
+// Todos los controladores y componentes de Ionic deben importarse
+// desde '@ionic/angular/standalone' en un componente standalone.
+import {
+    ToastController,
+    AlertController,
+    LoadingController,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonButton,
+    IonButtons,
+    IonBackButton,
+    IonLabel,
+    IonItem,
+    IonList,
+    IonSelectOption,
+    IonSelect,
+    IonInput,
+    IonDatetime,
+    IonRow,
+    IonCol,
+    IonChip,
+    IonGrid,
+    IonCardSubtitle
+} from '@ionic/angular/standalone';
 
 @Component({
     selector: 'app-agendar-cita',
@@ -22,18 +44,14 @@ import { MercadoPago as MercadopagoService } from  'src/app/services/mercado-pag
     styleUrls: ['./agendar-cita.page.scss'],
     standalone: true,
     imports: [
-        CommonModule, FormsModule, ReactiveFormsModule,
+        CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule,
         IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
         IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime,
-        IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle,
-        HttpClientModule
+        IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle
     ]
 })
 export class AgendarCitaPage implements OnInit {
 
-    // 💡 CONSTRUCTOR CONSOLIDADO: Incluye todas las inyecciones necesarias,
-    // incluyendo las nuevas para Mercado Pago y LoadingController,
-    // además del AlertController y el Router.
     constructor(
         private fb: FormBuilder,
         private svc: AppointmentService,
@@ -41,9 +59,9 @@ export class AgendarCitaPage implements OnInit {
         private alertCtrl: AlertController, // Necesario para la alerta de Zoom/Mis Citas
         private router: Router, // Necesario para navegar a /mis-citas
         private route: ActivatedRoute,
-        private mpService: MercadopagoService, // Nueva inyección
-        private loadingCtrl: LoadingController // Nueva inyección
-    ) {}
+        private mpService: MercadopagoService, // Inyección de Mercado Pago
+        private loadingCtrl: LoadingController  // Inyección de Loading
+    ) { }
 
     // --------- Form ----------
     form = this.fb.group({
@@ -67,7 +85,7 @@ export class AgendarCitaPage implements OnInit {
     // --------- Slots / disponibilidad ----------
     STEP_MINUTES = 30;
     DAY_START = '08:00';
-    DAY_END    = '20:00';
+    DAY_END = '20:00';
 
     slots: string[] = []; // 'HH:MM:00'
     slotStatus: Record<string, 'free' | 'pro' | 'patient' | 'both'> = {};
@@ -82,8 +100,6 @@ export class AgendarCitaPage implements OnInit {
         return !!(this.proId && this.form.get('date')?.value);
     }
 
-    // El resto de ngOnInit y otros métodos (configureModalityValidators, presentToast, loadProfessionals, loadAppointments)
-    // se mantienen correctos y sin cambios.
     ngOnInit() {
         this.loadProfessionals();
         this.loadAppointments();
@@ -146,7 +162,7 @@ export class AgendarCitaPage implements OnInit {
     }
 
     async presentToast(msg: string) {
-        const toast = await this.toastCtrl.create({ message: msg, duration: 2500 });
+        const toast = await this.toastCtrl.create({ message: msg, duration: 2500, position: 'top' });
         await toast.present();
     }
 
@@ -169,8 +185,6 @@ export class AgendarCitaPage implements OnInit {
     }
 
     // 💰 FUNCIÓN CENTRAL: Llama a Mercado Pago.
-    // Esto reemplaza la antigua función onCreate.
-    // **Asegúrate de cambiar el (click) en tu HTML a iniciarPago()**
     async iniciarPago() {
         if (!this.form.valid) {
             this.form.markAllAsTouched();
@@ -188,17 +202,14 @@ export class AgendarCitaPage implements OnInit {
         const date = (dateValue ?? '') as string;
         const time = (timeValue ?? '') as string;
         if (!date || !time) {
-            this.presentToast('Por favor selecciona la fecha y hora.');
+            this.presentToast('Por favor selecciona la fecha y hora desde la grilla de disponibilidad.');
             return;
         }
 
-        // 1. Calcular la fecha/hora de inicio en formato ISO para el backend
         const datePart = date.split('T')[0];
         const timePart = time.split(':').slice(0, 2).join(':');
-        const local = new Date(`${datePart}T${timePart}:00`);
-        // Ojo: Si el backend espera UTC, asegúrate de que use local.toISOString()
-        // Si espera la hora local, usa el formato 'YYYY-MM-DDTHH:MM:SS'
-        const startDatetimeBackend = local.toISOString(); // Recomendado: UTC/ISO para el backend
+        // Formato ISO 8601 (YYYY-MM-DDTHH:MM:SS) esperado por el backend
+        const startDatetimeBackend = `${datePart}T${timePart}:00`;
 
         const loading = await this.loadingCtrl.create({
             message: 'Conectando con Mercado Pago...',
@@ -220,6 +231,7 @@ export class AgendarCitaPage implements OnInit {
                 console.log('Preferencia recibida:', respuesta);
 
                 if (respuesta.init_point) {
+                    // Redirige al checkout de MP
                     window.location.href = respuesta.init_point;
                 } else {
                     this.presentToast('Error: No se pudo obtener el link de pago.');
@@ -228,12 +240,11 @@ export class AgendarCitaPage implements OnInit {
             error: (error) => {
                 loading.dismiss();
                 console.error('Error al crear la preferencia:', error);
-                this.presentToast('Error al conectar con el servidor de pago.');
+                this.presentToast('Error al conectar con el servidor de pago. Revisa tu conexión.');
             }
         });
     }
 
-    // ❌ FUNCIÓN CANCEL CONSOLIDADA: Se elimina la duplicación.
     cancel(id: number) {
         this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
             next: () => {
@@ -243,8 +254,8 @@ export class AgendarCitaPage implements OnInit {
             error: () => this.presentToast('No se pudo cancelar')
         });
     }
-    
-    // ⏰ MÉTODOS DE MANEJO DE SLOTS: Se consolidan y se corrigen los errores de sintaxis (que eran efectos de la duplicación).
+
+    // ⏰ MÉTODOS DE MANEJO DE SLOTS:
 
     formatSlotLabel(s: string): string {
         return s.slice(0, 5);
