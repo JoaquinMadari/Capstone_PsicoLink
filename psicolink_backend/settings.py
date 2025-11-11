@@ -194,6 +194,7 @@ SIMPLE_JWT = {
 
 SUPABASE_URL = config("SUPABASE_URL", default="")
 SUPABASE_SERVICE_ROLE = config("SUPABASE_SERVICE_ROLE", default="")
+SUPABASE_ANON_KEY = config("SUPABASE_ANON_KEY", default="")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
