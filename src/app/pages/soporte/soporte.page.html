@@ -1,7 +1,11 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+      <ion-back-button
+        [defaultHref]="backHref"
+        routerDirection="back"
+        (click)="onBackClick()">
+      </ion-back-button>
     </ion-buttons>
     <ion-title>Soporte</ion-title>
   </ion-toolbar>

@@ -1,7 +1,10 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button [defaultHref]="backFallback"></ion-back-button>
+      <!-- Botón de volver manual que llama handleBack -->
+      <ion-button (click)="handleBack()">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>{{ otherName || 'Chat' }}</ion-title>
   </ion-toolbar>

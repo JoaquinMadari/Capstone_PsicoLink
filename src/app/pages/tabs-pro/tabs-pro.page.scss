@@ -1,4 +1,4 @@
-/* NO TOCAR, CON ESTO SE ARREGLA EL PROBLEMA DE TABS SOBREPONIENDOSE SOBRE LAS OTRAS VISTAS*/
+/* ========== LAYOUT FIX (no tocar) ========== */
 ion-tabs > ion-router-outlet:not([tabs]) {
   position: absolute;
   inset: 0;
@@ -66,3 +66,5 @@ ion-tab-button {
     }
   }
 }
+
+

@@ -10,16 +10,41 @@ export const routes: Routes = [
   { path: 'login',    loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage) },
   { path: 'register', loadComponent: () => import('./pages/register/register.page').then(m => m.RegisterPage) },
 
-  // *** Tabs: SOLO las 3 pestañas principales ***
+  // *** Tabs paciente: SOLO las 3 pestañas principales ***
   {
     path: 'tabs',
+    canMatch: [roleGuard],
+    data: { roles: ['paciente'] },
     loadComponent: () => import('./pages/tabs/tabs.page').then(m => m.TabsPage),
     children: [
       { path: 'home',     loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage), canActivate: [roleGuard] },
       { path: 'messages', loadComponent: () => import('./pages/messages/messages.page').then(m => m.MessagesPage), canActivate: [roleGuard] },
       { path: 'account',  loadComponent: () => import('./pages/account/account.page').then(m => m.AccountPage), canActivate: [roleGuard] },
+      
+      { path: 'chat/with/:otherUid', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
+      { path: 'chat/conversation/:conversationId', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
+      
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
+  },
+
+  // *** Tabs profesional: SOLO las 4 pestañas principales ***
+  {
+    path: 'pro',
+    canActivate: [roleGuard],
+    data: { roles: ['profesional'] },
+    loadComponent: () => import('./pages/tabs-pro/tabs-pro.page').then(m => m.TabsProPage),
+    children: [
+      { path: 'home',      loadComponent: () => import('./pages/home-pro/home-pro.page').then(m => m.HomeProPage) },
+      { path: 'mis-citas', loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage) },
+      { path: 'messages',  loadComponent: () => import('./pages/messages/messages.page').then(m => m.MessagesPage) },
+      { path: 'account',   loadComponent: () => import('./pages/account/account.page').then(m => m.AccountPage) },
+
+      { path: 'chat/with/:otherUid', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
+      { path: 'chat/conversation/:conversationId', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
+
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+    ]
   },
 
   // *** Páginas fuera de tabs (sin barra) ***
@@ -32,11 +57,6 @@ export const routes: Routes = [
   { path: 'profile-setup', loadComponent: () => import('./pages/profile-setup/profile-setup.page').then(m => m.ProfileSetupPage) }, // fuera de tabs
   { path: 'profile/:id', loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage), canActivate: [roleGuard] },
 
-  // chat fuera de tabs
-  { path: 'chat/conversation/:conversationId', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage), canActivate: [roleGuard] },
-  { path: 'chat/with/:otherUid',               loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage), canActivate: [roleGuard] },
-  { path: 'chat',                               loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage), canActivate: [roleGuard] },
-
   // compat (rutas viejas → nuevas fuera de tabs)
   { path: 'Agendar', redirectTo: 'agendar', pathMatch: 'full' },
   {
@@ -45,7 +65,6 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['paciente'] }
   },
-
 
   {
     path: 'search',
@@ -85,8 +104,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pago/pendiente/pendiente.page').then( m => m.PendientePage)
   },
 
-
-  // fallback
-  { path: '**', redirectTo: 'tabs/home' },
+  // fallback (evita loop con guards si no hay sesión)
+  { path: '**', redirectTo: 'splash' },
 ];
 

@@ -1,23 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import {
-  ToastController,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
-  IonButtons,
-  IonBackButton,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent
-} from '@ionic/angular/standalone';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { ToastController, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonButtons, IonBackButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
 import { AppointmentService } from 'src/app/services/appointment';
+import { Router, NavigationStart } from '@angular/router';
+import { Subscription } from 'rxjs';
+
+type Role = 'paciente' | 'profesional' | 'organizacion' | 'admin';
 
 @Component({
   selector: 'app-mis-citas',
@@ -42,18 +30,38 @@ import { AppointmentService } from 'src/app/services/appointment';
     IonCardContent
   ]
 })
-export class MisCitasPage implements OnInit {
+export class MisCitasPage implements OnInit, OnDestroy {
 
   appointments: any[] = [];
   loading = false;
 
+  role: Role = 'paciente';
+  base = '/tabs';
+  backHref = '/tabs/home';
+
+  private routerSub?: Subscription;
+
   constructor(
     private svc: AppointmentService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private router: Router,
+    private location: Location,
   ) {}
 
   ngOnInit() {
+    this.resolveRoleAndBack();
     this.loadAppointments();
+
+    // Evita focus atrapado al navegar hacia atrás / entre outlets
+    this.routerSub = this.router.events.subscribe(ev => {
+      if (ev instanceof NavigationStart) {
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    try { this.routerSub?.unsubscribe(); } catch {}
   }
 
   async presentToast(msg: string) {
@@ -64,8 +72,25 @@ export class MisCitasPage implements OnInit {
       });
       await toast.present();
     } catch {
-      // en test o si el injector está destruido, simplemente ignoramos
     }
+  }
+
+  // Detecta rol y construye el home correcto (/tabs/home o /pro/home)
+  private resolveRoleAndBack() {
+    const r = (localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente') as Role;
+    this.role = r;
+    this.base = r === 'profesional' ? '/pro' : '/tabs';
+    this.backHref = `${this.base}/home`;
+
+    //leer 'from' desde el history state
+    const st = this.location.getState() as { from?: string };
+    const from = (typeof st?.from === 'string' && st.from.length) ? st.from : null;
+    if (from) this.backHref = from;
+  }
+
+  onBackClick() {
+    // defensa para accesibilidad y evitar focos en páginas ocultas
+    (document.activeElement as HTMLElement | null)?.blur?.();
   }
 
   loadAppointments() {

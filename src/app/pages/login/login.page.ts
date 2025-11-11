@@ -64,7 +64,13 @@ export class LoginPage implements OnInit {
 
   try {
     await firstValueFrom(this.authService.login({ email: emailNorm, password }));
-    this.router.navigate(['/tabs/home']);
+    const role = localStorage.getItem('user_role') || localStorage.getItem('role') || '';
+    if (role === 'profesional') {
+      this.router.navigate(['/pro/home']);
+    } else {
+      // Paciente
+      this.router.navigate(['/tabs/home']);
+    }
   } catch {
     this.errorMessage = 'Usuario o contraseña incorrectos';
   } finally {

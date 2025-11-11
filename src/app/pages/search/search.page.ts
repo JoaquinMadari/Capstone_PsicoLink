@@ -129,7 +129,15 @@ export class SearchPage implements OnInit {
       await t.present();
       return;
     }
-    this.router.navigate( ['/chat/with', otherUid],{ state: { from: '/tabs/search' } });
+
+    const role = localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente';
+    const base = role === 'profesional' ? '/pro' : '/tabs';
+
+    // IMPORTANTE: pasar from = '/search' porque search es top-level
+    this.router.navigate([base, 'chat', 'with', otherUid], {
+      state: { from: '/search' }
+    });
   }
+
 
 }
