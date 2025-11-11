@@ -28,7 +28,7 @@ from integrations.supabase_sync import ensure_supabase_user
 import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from integrations.supabase_sync import ensure_supabase_user
+from integrations.supabase_sync import ensure_supabase_user, get_supabase_session_tokens, SupabaseAdminError
 
 # -----------------------
 # Register y Specialty
@@ -43,7 +43,7 @@ class RegisterView(generics.CreateAPIView):
         ser.is_valid(raise_exception=True)
 
         raw_password = ser.validated_data.get("password")
-        role = ser.validated_data.get("role")
+        role        = ser.validated_data.get("role")
         first_name  = ser.validated_data.get("first_name", "")
         last_name   = ser.validated_data.get("last_name", "")
 
@@ -58,17 +58,24 @@ class RegisterView(generics.CreateAPIView):
                     first_name=first_name,
                     last_name=last_name,
                 )
-            except Exception as e:
-                transaction.set_rollback(True)
-                return Response(
-                    {"detail": f"Registro en Supabase falló: {str(e)}"},
-                    status=status.HTTP_502_BAD_GATEWAY
-                )
+                user.supabase_uid = uid
+                user.save(update_fields=["supabase_uid"])
 
-            user.supabase_uid = uid
-            user.save(update_fields=["supabase_uid"])
+            except SupabaseAdminError as e:
+                msg = str(e)
+                # Si es error de datos/duplicado → 400
+                if " 400 " in msg or " 409 " in msg or " 422 " in msg:
+                    transaction.set_rollback(True)
+                    return Response(
+                        {"detail": f"Registro en Supabase falló: {msg}"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                logging.warning("Supabase Admin 5xx al registrar %s: %s", user.email, msg)
 
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        data = UserSerializer(user).data
+        if not user.supabase_uid:
+            data["supabase_sync"] = "pending"
+        return Response(data, status=status.HTTP_201_CREATED)
     
 
 logger = logging.getLogger(__name__)
@@ -86,6 +93,12 @@ class LoginView(TokenObtainPairView):
             password = request.data.get('password')
             if not (email and password):
                 return resp
+            
+            supabase_tokens = get_supabase_session_tokens(email, password)
+        
+            if supabase_tokens:
+                resp.data['supabase_access_token'] = supabase_tokens['access_token']
+                resp.data['supabase_refresh_token'] = supabase_tokens['refresh_token']
 
             user = CustomUser.objects.get(email=email)
 
