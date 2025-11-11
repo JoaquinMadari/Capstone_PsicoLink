@@ -32,16 +32,13 @@ export class Auth {
 
         const sbUid = res?.user?.supabase_uid ?? null;
         if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
+
+        const sbAccessToken = res?.supabase_access_token ?? null;
+        const sbRefreshToken = res?.supabase_refresh_token ?? null;
+        if (sbAccessToken && sbRefreshToken) {
+          this.chatSb.setSession(sbAccessToken, sbRefreshToken);
+        }
       }),
-      mergeMap((res: any) =>
-        from(this.chatSb.signIn(payload.email, payload.password)).pipe(
-          catchError(err => {
-            console.warn('Supabase sign-in falló:', err?.message || err);
-            return of(null);
-          }),
-          map(() => res)
-        )
-      )
     );
   }
 

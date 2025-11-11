@@ -1,8 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router, NavigationStart } from '@angular/router';
 import { ProfessionalProfile, ProfessionalService } from '../../services/professional-service';
+import { Subscription } from 'rxjs';
+
+//codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+type Role = 'paciente' | 'profesional' | 'organizacion' | 'admin';
+
 
 @Component({
   selector: 'app-profile',
@@ -11,7 +16,7 @@ import { ProfessionalProfile, ProfessionalService } from '../../services/profess
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private svc = inject(ProfessionalService);
@@ -21,9 +26,28 @@ export class ProfilePage implements OnInit {
   error?: string;
   data?: ProfessionalProfile;
 
+  //codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+  role: Role = 'paciente';
+  base = '/tabs';
+  backHref = '/tabs/home';
+  private routerSub?: Subscription;
+  constructor(
+      private location: Location,
+    ) {}
+  
+
   viewerRole: 'profesional' | 'paciente' | 'organizacion' | 'admin' | undefined;
 
   ngOnInit(): void {
+    this.resolveRoleAndBack(); //codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+
+    // Evita focus atrapado al navegar (previene crash en back)
+    this.routerSub = this.router.events.subscribe(ev => {
+      if (ev instanceof NavigationStart) {
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      }
+    });
+    
     // Rol del usuario logueado
     const roleLS = localStorage.getItem('role');
     this.viewerRole = (roleLS as any) || undefined;
@@ -51,6 +75,33 @@ export class ProfilePage implements OnInit {
     });
   }
 
+
+  //codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+  ngOnDestroy(): void {
+    try { this.routerSub?.unsubscribe(); } catch {}
+  }
+
+  //codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+  private resolveRoleAndBack() {
+    const r = (localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente') as Role;
+    this.role = r;
+    this.base = r === 'profesional' ? '/pro' : '/tabs';
+    this.backHref = `${this.base}/home`;
+
+    //leer 'from' desde el history state
+    const st = this.location.getState() as { from?: string };
+    const from = (typeof st?.from === 'string' && st.from.length) ? st.from : null;
+    if (from) this.backHref = from;
+  }
+
+  //codigo replicado para devolvernos a la page anterior correctamente (post-pro/tabs)
+  onBackClick() {
+    // defensa para accesibilidad y evitar focos en páginas ocultas
+    (document.activeElement as HTMLElement | null)?.blur?.();
+  }
+
+
+
   isPatientView(): boolean {
     return this.viewerRole === 'paciente';
   }
@@ -66,7 +117,6 @@ export class ProfilePage implements OnInit {
 
   bookAppointment() {
     if (!this.data?.user?.id) return;
-    // Ajusta a tu ruta real para agendamiento
     this.router.navigate(['/Agendar'], { queryParams: { professionalId: this.data.user.id } });
   }
 }

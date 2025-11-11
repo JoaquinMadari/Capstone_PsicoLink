@@ -172,32 +172,29 @@ export class ProfileSetupPage implements OnInit {
     });
   }
 
+  /* Obtener credenciales y preparar rol para navegar segun este */
   private authHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access_token');
+    const token =
+      localStorage.getItem('access') ||
+      localStorage.getItem('access_token');
     let h = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) h = h.set('Authorization', `Bearer ${token}`);
     return h;
+  }
+
+  private roleBase(): '/pro' | '/tabs' {
+    const r = localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente';
+    return r === 'profesional' ? '/pro' : '/tabs';
   }
 
   /* ===========================
      SUBMITS (normalizando datos)
      =========================== */
 
-     saveProfessional() {
-    console.log('saveProfessional called');
-
+  saveProfessional() {
     this.proForm.markAllAsTouched();
+    if (!this.proForm.valid) return;
 
-    if (!this.proForm.valid) {
-      console.log('Form invalid, errors per control:');
-      Object.keys(this.proForm.controls).forEach(key => {
-        console.log(key, this.proForm.controls[key].errors);
-      });
-      return;
-    }
-
-    console.log('Form valid, proceeding');
-    
     const raw = this.proForm.value;
     const payload: any = {
       ...raw,
@@ -206,26 +203,15 @@ export class ProfileSetupPage implements OnInit {
       experience_years:
         raw.experience_years === '' || raw.experience_years === null || raw.experience_years === undefined
           ? null
-          : Number(raw.experience_years)
-  };
+          : Number(raw.experience_years),
+    };
+    if (payload.specialty !== 'otro') delete payload.specialty_other;
 
-  // si no es "otro", no enviar specialty_other
-  if (payload.specialty !== 'otro') {
-    delete payload.specialty_other;
+    this['http'].post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
+      next: () => this.router.navigate([this.roleBase(), 'home']), // home por rol
+      error: (err) => console.error('Error guardando perfil profesional', err)
+    });
   }
-
-  console.log('About to call POST with payload:', payload);
-
-  // usar this['http'] para que spy funcione
-  this['http'].post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
-    next: () => {
-      console.log('POST success, navigating home');
-      this.router.navigate(['/tabs/home']);
-    },
-    error: (err) => console.error('Error guardando perfil profesional', err)
-  });
-}
-
 
   savePatient() {
     this.paForm.markAllAsTouched();
@@ -235,11 +221,11 @@ export class ProfileSetupPage implements OnInit {
     const payload: any = {
       ...raw,
       rut: normalizeRut(raw.rut || ''),
-      phone: normalizePhoneCL(raw.phone || '')
+      phone: normalizePhoneCL(raw.phone || ''),
     };
 
     this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
-      next: () => this.router.navigate(['/tabs/home']),
+      next: () => this.router.navigate([this.roleBase(), 'home']), // home por rol
       error: (err) => console.error('Error guardando perfil paciente', err)
     });
   }

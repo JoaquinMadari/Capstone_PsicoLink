@@ -21,7 +21,7 @@
       <ion-note slot="end" *ngIf="m.lastAt as t">{{ t | date:'short' }}</ion-note>
     </ion-item>
 
-    <ion-item *ngIf="!items.length && !loading">
+    <ion-item *ngIf="!items.length && !loading" class="empty-state">
       <ion-label>No tienes conversaciones</ion-label>
     </ion-item>
   </ion-list>

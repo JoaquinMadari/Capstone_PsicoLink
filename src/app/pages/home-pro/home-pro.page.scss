@@ -1,0 +1,79 @@
+/* Paleta */
+$blue-nova:   #274C77;
+$stones:      #C5D5E4;
+$renew-blue:  #A7C7E7;
+$ink:         #1A1A1A;
+$white:       #ffffff;
+
+/* Header/Toolbar */
+ion-header, ion-toolbar {
+  --background: #274C77; /* $blue-nova */
+  --color: #ffffff;
+}
+
+/* Fondo */
+ion-content {
+  --background: #C5D5E4; /* $stones */
+}
+
+/* Tarjetas */
+ion-card {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Disponibilidad (toggle) */
+ion-toggle {
+  --handle-background: #ffffff;
+  --handle-background-checked: #ffffff;
+  --background: rgba(0,0,0,0.12);
+  --background-checked: rgba(39,76,119,0.45); /* $blue-nova con alpha */
+}
+
+/* KPI cards */
+ion-grid .ion-text-center h1 {
+  color: $blue-nova;
+  margin: 0 0 2px;
+  font-weight: 800;
+}
+ion-grid .ion-text-center small {
+  color: rgba(0,0,0,0.7);
+  font-weight: 600;
+}
+
+/* Lista de “Hoy: próximas citas” */
+ion-list[inset] {
+  background: transparent;
+}
+ion-item {
+  --background: #ffffff;
+  --padding-start: 14px;
+  --inner-padding-end: 14px;
+  margin: 8px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+ion-item ion-label h2 {
+  color: $blue-nova;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+ion-item ion-label p {
+  color: #274472; /* tono relacionado a $blue-nova */
+}
+
+ion-badge[color="success"] {
+  --background: #A7C7E7; /* $renew-blue */
+  --color: #1A1A1A;      /* $ink */
+}
+
+/* Botones primarios */
+ion-button {
+  --background: #274C77;
+  --background-hover: #1E3A5F;
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: 600;
+}

@@ -47,9 +47,7 @@
         fill="outline"
         size="small"
         [disabled]="!p?.supabase_uid"
-        [routerLink]="['/chat/with', p?.supabase_uid]"
-        [routerLink]="['/chat/with', p?.supabase_uid]"
-        (click)="$event.stopPropagation()">
+        (click)="startChat($event, p?.supabase_uid)">
         Chatear
       </ion-button>
 

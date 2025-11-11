@@ -1,0 +1,136 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Inicio (Profesional)</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goMessages()">
+        <ion-icon name="chatbubbles"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Disponibilidad -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Disponibilidad</ion-card-title>
+      <ion-card-subtitle>Controla si apareces en búsquedas</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-icon name="power" slot="start"></ion-icon>
+        <ion-label>
+          <h2>{{ isAvailable() ? 'Disponible' : 'Pausado' }}</h2>
+          <p *ngIf="isAvailable(); else paused">Tu perfil es visible y puedes recibir nuevas solicitudes.</p>
+          <ng-template #paused><p>No aparecerás en búsquedas hasta reactivar.</p></ng-template>
+        </ion-label>
+        <ion-toggle [checked]="isAvailable()" (ionChange)="onToggleAvailability($event)"></ion-toggle>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- KPIs -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="4">
+        <ion-card>
+          <ion-card-content class="ion-text-center">
+            <h1>{{ kpis.hoursToday | number:'1.0-1' }}</h1>
+            <small>Horas hoy</small>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="4">
+        <ion-card>
+          <ion-card-content class="ion-text-center">
+            <h1>{{ kpis.weekAppointments }}</h1>
+            <small>Citas semana</small>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="4">
+        <ion-card>
+          <ion-card-content class="ion-text-center">
+            <h1>{{ kpis.rating | number:'1.1-1' }}</h1>
+            <small>Rating</small>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Citas de hoy -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Hoy: próximas citas</ion-card-title>
+      <ion-card-subtitle>{{ upcoming.length }} en total</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-list inset="true">
+      <ion-item *ngFor="let c of upcoming" detail="true" [routerLink]="detalleLink(c)">
+        <ion-icon name="time" slot="start"></ion-icon>
+        <ion-label>
+          <h2>
+            {{ c.patient_detail?.first_name || 'Paciente' }}
+            {{ c.patient_detail?.last_name  || '' }}
+          </h2>
+          <p>
+            {{ c.start_datetime | date:'HH:mm' }}
+            -- {{ c.end_datetime   | date:'HH:mm' }}
+            · {{ c.modality || 'N/D' }}
+          </p>
+        </ion-label>
+        <ion-badge color="success" *ngIf="c.status === 'scheduled'">Agendada</ion-badge>
+      </ion-item>
+    </ion-list>
+
+    <ion-card-content>
+      <ion-button expand="block" fill="outline" (click)="goAgenda()">Ver agenda completa</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Solicitudes nuevas / pendientes -->
+  <ion-card *ngIf="pending.length">
+    <ion-card-header>
+      <ion-card-title>Solicitudes nuevas</ion-card-title>
+      <ion-card-subtitle>{{ pending.length }} pendientes</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-list inset="true">
+      <ion-item *ngFor="let r of pending" detail="true"
+                [routerLink]="['/pro/mis-citas']"
+                [queryParams]="{ tab: 'pendientes' }">
+        <ion-icon name="person-add" slot="start"></ion-icon>
+        <ion-label>
+          <h2>
+            {{ r.patient_detail?.first_name || 'Paciente' }}
+            {{ r.patient_detail?.last_name  || '' }}
+          </h2>
+          <p>Creada {{ r.created_at | date:'shortTime' }}</p>
+        </ion-label>
+        <ion-button size="small" fill="clear">Revisar</ion-button>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <!-- Soporte -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>¿Necesitas ayuda?</ion-card-title>
+      <ion-card-subtitle>Soporte y preguntas frecuentes</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button expand="block" (click)="goSupport()">Abrir Soporte</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-fab slot="fixed" horizontal="end" vertical="bottom">
+    <ion-fab-button (click)="goMessages()" aria-label="Mensajes">
+      <ion-icon name="chatbubbles"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

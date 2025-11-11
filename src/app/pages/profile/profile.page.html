@@ -1,7 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="Volver"></ion-back-button>
+      <ion-back-button
+        [defaultHref]="backHref"
+        routerDirection="back"
+        (click)="onBackClick()">
+      </ion-back-button>
     </ion-buttons>
     <ion-title>Perfil profesional</ion-title>
   </ion-toolbar>

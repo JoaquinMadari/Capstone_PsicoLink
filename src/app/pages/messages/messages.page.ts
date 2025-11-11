@@ -7,6 +7,8 @@ import {
 } from '@ionic/angular/standalone';
 import { Router, RouterModule } from '@angular/router';
 import { ChatSupabase } from 'src/app/services/chat-supabase';
+import { NavController } from '@ionic/angular';
+
 
 type ConvItem = {
   id: string;
@@ -31,7 +33,7 @@ export class MessagesPage implements OnInit {
   items: ConvItem[] = [];
   loading = false;
 
-  constructor(private chat: ChatSupabase, private router: Router) {}
+  constructor(private chat: ChatSupabase, private router: Router, private nav: NavController) {}
 
   async ngOnInit() {
     await this.load();
@@ -92,8 +94,17 @@ export class MessagesPage implements OnInit {
     }
   }
 
-  open(item: ConvItem) {
-    this.router.navigate(['/chat/with', item.otherUid], { state: { from: '/tabs/messages' } });
+  open(m: any) {
+    const role = localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente';
+    const base = role === 'profesional' ? '/pro' : '/tabs';
+
+    (document.activeElement as HTMLElement | null)?.blur?.();
+
+    //pasar state.from para que chat sepa a donde volver
+    this.nav.navigateForward([base, 'chat', 'with', m.otherUid], {
+      animationDirection: 'forward',
+      state: { from: `${base}/messages` }
+    });
   }
 
   async refresh(ev: any) {

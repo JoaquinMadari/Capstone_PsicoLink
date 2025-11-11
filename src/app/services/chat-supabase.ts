@@ -16,21 +16,22 @@ export class ChatSupabase {
   private sb: SupabaseClient;
   private msgChannel?: RealtimeChannel;
   private presenceChannel?: RealtimeChannel;
-  private signInInFlight?: Promise<any>;
 
   constructor(private supa: SupabaseService) {
     this.sb = supa.client;
   }
 
-  // 0) login Supabase
-  async signIn(email: string, password: string) {
-    if (this.signInInFlight) return this.signInInFlight;
-    this.signInInFlight = this.sb.auth.signInWithPassword({ email, password })
-      .finally(() => { this.signInInFlight = undefined; });
-    const { data, error } = await this.signInInFlight;
-    if (error) throw error;
-    return data.user;
-  }
+  async setSession(accessToken: string, refreshToken: string): Promise<void> {
+    const { error } = await this.sb.auth.setSession({ 
+        access_token: accessToken, 
+        refresh_token: refreshToken,
+    });
+    
+    if (error) {
+        console.error('Error al establecer la sesión de Supabase:', error);
+        throw error;
+    }
+}
 
   async hasSession(): Promise<boolean> {
     const { data } = await this.sb.auth.getSession();
