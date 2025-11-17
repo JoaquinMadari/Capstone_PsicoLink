@@ -1,0 +1,127 @@
+/*
+ * Estilos Globales de la Aplicación
+ * Define la paleta de colores principal (look & feel).
+ */
+
+/* --- 1. Cabecera y Contenido (Paleta Principal) --- */
+
+/* * Solo aplica el fondo azul a la cabecera principal de la página.
+ * Usamos 'ion-header > ion-toolbar' para ser específicos.
+ */
+ion-header > ion-toolbar {
+    --background: #274C77; /* Azul oscuro */
+    --color: #ffffff; /* Texto blanco */
+}
+
+ion-content {
+    --background: #C5D5E4; /* Azul claro/grisáceo para el fondo */
+}
+
+/* --- 2. Tarjetas (Cards) --- */
+ion-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    background: #fff;
+    margin-left: 0; // Asegura que ocupe todo el ancho en el padding
+    margin-right: 0;
+}
+
+ion-card-title {
+    color: #274472;
+    font-weight: 600;
+}
+
+/* --- 3. Listas e Items (Arreglo para "líneas negras" y "modo oscuro") --- */
+
+/*
+ * ¡IMPORTANTE!
+ * Hacemos que las listas y los items sean transparentes por defecto.
+ * Esto arregla:
+ * 1. Las "líneas negras" entre items (que era el fondo de la lista).
+ * 2. El fondo negro de la página de perfil (que era el 'dark mode').
+ * Usamos !important para anular (override) el 'dark mode' del navegador.
+ */
+ion-list {
+    background: transparent !important;
+    --ion-background-color: transparent !important;
+}
+
+ion-item {
+    --background: transparent !important;
+    --ion-background-color: transparent !important;
+    --inner-border-width: 0; // Quita la línea separadora interna
+    --highlight-color-focused: #619fdd; // Color al hacer clic
+}
+
+/* Estilos para los items de la lista de profesionales (los que tienen fondo blanco) */
+ion-list ion-item.custom-item-card {
+    --background: #f7fbff !important; /* Fondo blanco para las tarjetas de profe */
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+ion-item ion-label {
+    color: #274472; // Color de texto principal en items
+}
+
+/* --- 4. Barra de Búsqueda (en la página de búsqueda) --- */
+
+/*
+ * Hacemos que la toolbar de la búsqueda sea transparente
+ * para que se mezcle con el fondo ion-content.
+ * (Aplica a cualquier toolbar que esté *dentro* de ion-content)
+ */
+ion-content ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+}
+
+ion-searchbar {
+    --background: #ffffff; /* Fondo blanco */
+    --border-radius: 12px;
+    --box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* Sombra suave */
+    padding: 0 8px; // Ajusta el padding para que no se pegue a los bordes
+}
+
+
+/* --- 5. Estilos de Formularios (Inputs, Selects, Datetime) --- */
+
+ion-datetime {
+    --background: #f9fbfd;
+    --ion-text-color: #0a2540;
+    color: #0a2540;
+    border: 1px solid #cfd9e6;
+    border-radius: 12px;
+    padding: 10px;
+    margin: 8px 0 12px;
+}
+
+ion-input, ion-select, ion-select-option {
+    color: #0a2540;
+}
+
+
+/* --- 6. Botones --- */
+
+ion-button {
+    --background: #4A90E2; // Azul principal del botón
+    --color: #fff;
+    --border-radius: 10px; // Bordes redondeados
+    text-transform: none; // Quita las mayúsculas automáticas
+}
+
+/* Botón de Zoom (Primario) */
+ion-button[color="primary"] {
+    --background: #4A90E2;
+}
+
+/* Botón de Cerrar Sesión (Medio) */
+ion-button[color="medium"] {
+    --background: #b0b8c2;
+    --background-hover: #98a0aa;
+}

@@ -5,22 +5,55 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
+  <ion-card>
+  <ion-list *ngIf="!loading">
+
     <ion-item>
       <ion-label>
-        <h2>Rol</h2>
-        <p>{{ role || '—' }}</p>
+        <h2>{{ first_name }} {{ last_name }}</h2>
+        <p>Rol: {{ role || '—' }}</p>
       </ion-label>
     </ion-item>
-  </ion-list>
 
+    <ion-item lines="none">
+      <ion-label position="stacked">Correo</ion-label>
+      <ion-input [(ngModel)]="email" [readonly]="!editing" type="email"></ion-input>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-label position="stacked">Número de teléfono</ion-label>
+      <ion-input [(ngModel)]="phone" [readonly]="!editing" type="tel"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="role === 'profesional'" lines="none">
+    <ion-label position="stacked">Precio por sesión (CLP)</ion-label>
+    <ion-input
+      type="number"
+      [(ngModel)]="session_price"
+      [readonly]="!editing"
+    ></ion-input>
+    </ion-item>
+    <ion-item *ngIf="role === 'profesional'">
+      <ion-label>
+        <p>Especialidad: {{ specialty || '—' }}</p>
+      </ion-label>
+    </ion-item>
+
+  </ion-list>
+</ion-card>
   <div class="ion-padding">
 
-    <!-- 👇 Botón solo para profesionales -->
+    <ion-button expand="block" (click)="toggleEdit()">
+      {{ editing ? 'Cancelar' : 'Editar' }}
+    </ion-button>
+
+    <ion-button *ngIf="editing" expand="block" color="primary" (click)="saveChanges()">
+      Guardar cambios
+    </ion-button>
+
     <ion-button
       *ngIf="role === 'profesional'"
       expand="block"
-      color="primary"
+      color="secondary"
       (click)="connectZoom()">
       Conectar con Zoom
     </ion-button>
@@ -28,7 +61,8 @@
     <ion-button expand="block" color="medium" (click)="logout()">
       Cerrar sesión
     </ion-button>
+
   </div>
+
+  <ion-spinner *ngIf="loading"></ion-spinner>
 </ion-content>
-
-

@@ -27,6 +27,13 @@ export class Auth {
         const fullName = res?.user?.full_name || `${res?.user?.first_name || ''} ${res?.user?.last_name || ''}`.trim();
         if (fullName) localStorage.setItem('user_full_name', fullName);
         if (res?.user?.email) localStorage.setItem('user_email', res.user.email);
+  return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
+    tap((res: any) => {
+      console.log('Login response:', res); // 👀 Verifica la respuesta del backend
+
+      // Guardar tokens si existen
+      if (res.access) localStorage.setItem('access', res.access);
+      if (res.refresh) localStorage.setItem('refresh', res.refresh);
 
         const role = res?.user?.role ?? res?.role ?? null;
         if (role) {
@@ -36,18 +43,44 @@ export class Auth {
 
         const isStaff = res?.is_staff ?? res?.user?.is_staff ?? false;
         localStorage.setItem('user_is_staff', String(isStaff));
+      // Guardar rol
+      const role = res?.user?.role ?? res?.role ?? null;
+      if (role) {
+        localStorage.setItem('role', role);
+        localStorage.setItem('user_role', role);
+      }
 
-        const sbUid = res?.user?.supabase_uid ?? null;
-        if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
+      // Guardar Supabase UID si existe
+      const sbUid = res?.user?.supabase_uid ?? null;
+      if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
 
-        const sbAccessToken = res?.supabase_access_token ?? null;
-        const sbRefreshToken = res?.supabase_refresh_token ?? null;
-        if (sbAccessToken && sbRefreshToken) {
-          this.chatSb.setSession(sbAccessToken, sbRefreshToken);
-        }
-      }),
-    );
-  }
+      // ---------- GUARDAR USER_ID ----------
+      let userId = res?.user?.id ?? res?.id ?? null;
+
+      if (!userId && res?.user) {
+        // Si el backend no manda id, pero hay algún identificador alternativo
+        console.warn('No se encontró user.id en la respuesta', res.user);
+      }
+
+      if (userId) {
+        console.log('Guardando user_id en localStorage:', userId);
+        localStorage.setItem('user_id', String(userId));
+      } else {
+        console.warn('⚠️ user_id no guardado: backend no devolvió id');
+      }
+    }),
+    mergeMap((res: any) =>
+      from(this.chatSb.signIn(payload.email, payload.password)).pipe(
+        catchError(err => {
+          console.warn('Supabase sign-in falló:', err?.message || err);
+          return of(null);
+        }),
+        map(() => res)
+      )
+    )
+  );
+}
+
 
   async logout(): Promise<void> {
     try {
