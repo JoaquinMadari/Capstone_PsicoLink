@@ -1,0 +1,79 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ ticket ? 'Responder Ticket #' + ticket.id : 'Responder Ticket' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  
+  <div *ngIf="loading" class="ion-text-center ion-padding-top">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando ticket...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="ion-padding ion-text-center">
+    <ion-card color="danger">
+      <ion-card-content>
+        <p>{{ error }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ion-card *ngIf="ticket && !loading" class="ion-padding">
+    <ion-card-header>
+      <ion-card-title>Detalles del Ticket</ion-card-title>
+      <ion-note 
+        [color]="getStatusColor(ticket.status)" 
+        class="ion-margin-top ion-padding-horizontal ion-padding-vertical">
+        Estado Actual: {{ ticket.status | titlecase }}
+      </ion-note>
+    </ion-card-header>
+
+    <ion-card-content>
+      
+      <ion-item lines="none">
+        <ion-label>
+          <p><strong>Enviado por:</strong> {{ ticket.name }}</p>
+          <p><strong>Email:</strong> {{ ticket.email }}</p>
+          <p><strong>Asunto:</strong> {{ ticket.subject }}</p>
+          <p><strong>Fecha:</strong> {{ ticket.created_at | date:'medium' }}</p>
+        </ion-label>
+      </ion-item>
+
+      <h3 class="ion-padding-top">Mensaje Original:</h3>
+      <div class="message-display ion-padding-horizontal">
+        {{ ticket.message }}
+      </div>
+
+      <form [formGroup]="replyForm" (ngSubmit)="submitReply()">
+        <h3 class="ion-padding-top">Escribir Respuesta:</h3>
+
+        <ion-item class="ion-margin-top">
+          <ion-label position="stacked">Mensaje de Respuesta</ion-label>
+          <ion-textarea 
+            formControlName="respuesta" 
+            rows="8" 
+            placeholder="Escribe la respuesta detallada para el usuario...">
+          </ion-textarea>
+        </ion-item>
+        
+        <div *ngIf="replyForm.get('respuesta')?.invalid && replyForm.get('respuesta')?.touched" class="text-error ion-padding-start">
+          La respuesta debe tener al menos 10 caracteres.
+        </div>
+
+        <ion-button 
+          type="submit" 
+          expand="block" 
+          class="ion-margin-top"
+          [disabled]="replyForm.invalid || submitting">
+          <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+          <span *ngIf="!submitting">Enviar Respuesta y Cerrar Ticket</span>
+        </ion-button>
+      </form>
+      
+    </ion-card-content>
+  </ion-card>
+</ion-content>

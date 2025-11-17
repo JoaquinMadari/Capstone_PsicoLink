@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/users"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ user ? 'Usuario #' + user.id : 'Detalle de Usuario' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div *ngIf="loading" class="ion-text-center ion-padding-top">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando detalle...</p>
+  </div>
+
+  <ion-card *ngIf="error && !loading" color="danger">
+    <ion-card-content>{{ error }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="user && !loading">
+    <ion-card-header>
+      <ion-card-title>Administración de Usuario</ion-card-title>
+      <ion-note color="primary">Email: {{ user.email }}</ion-note>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>
+          <p><strong>Registro:</strong> {{ user.date_joined | date:'medium' }}</p>
+          <p><strong>Último Acceso:</strong> {{ user.last_login ? (user.last_login | date:'medium') : 'Nunca' }}</p>
+        </ion-label>
+      </ion-item>
+
+      <form [formGroup]="userForm" (ngSubmit)="submitUpdate()" class="ion-padding-top">
+        <ion-item>
+          <ion-label position="floating">Rol de Usuario</ion-label>
+          <ion-select formControlName="role" interface="popover">
+            <ion-select-option *ngFor="let role of roleOptions" [value]="role.value">
+              {{ role.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        
+        <ion-item class="ion-padding-vertical">
+          <ion-label>Estado (Activo/Inactivo)</ion-label>
+          <ion-toggle slot="end" formControlName="is_active" [color]="userForm.get('is_active')?.value ? 'success' : 'danger'">
+            {{ getStatusLabel(userForm.get('is_active')?.value) }}
+          </ion-toggle>
+        </ion-item>
+
+        <ion-button 
+          expand="block" 
+          type="submit" 
+          class="ion-margin-top"
+          [disabled]="userForm.invalid || submitting">
+          <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+          <span *ngIf="!submitting">Guardar Cambios</span>
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

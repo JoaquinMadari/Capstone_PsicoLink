@@ -21,14 +21,23 @@
       <ion-card-subtitle>Controla si apareces en búsquedas</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-item lines="none">
-        <ion-icon name="power" slot="start"></ion-icon>
+      <ion-item>
         <ion-label>
-          <h2>{{ isAvailable() ? 'Disponible' : 'Pausado' }}</h2>
-          <p *ngIf="isAvailable(); else paused">Tu perfil es visible y puedes recibir nuevas solicitudes.</p>
-          <ng-template #paused><p>No aparecerás en búsquedas hasta reactivar.</p></ng-template>
+          Disponible para agendar
+          <ion-note slot="end" [color]="isAvailable() ? 'success' : 'medium'">
+            {{ isAvailable() ? 'Activo' : 'En Pausa' }}
+          </ion-note>
         </ion-label>
-        <ion-toggle [checked]="isAvailable()" (ionChange)="onToggleAvailability($event)"></ion-toggle>
+          
+        <ion-toggle 
+          slot="end" 
+          [checked]="isAvailable()" 
+          (ionChange)="onToggleAvailability($event)"
+          [disabled]="loading || submittingAvailability" 
+          [color]="isAvailable() ? 'success' : 'medium'">
+        </ion-toggle>
+          
+        <ion-spinner *ngIf="submittingAvailability" name="crescent" color="primary"></ion-spinner>
       </ion-item>
     </ion-card-content>
   </ion-card>
@@ -36,7 +45,7 @@
   <!-- KPIs -->
   <ion-grid>
     <ion-row>
-      <ion-col size="4">
+      <ion-col size="6">
         <ion-card>
           <ion-card-content class="ion-text-center">
             <h1>{{ kpis.hoursToday | number:'1.0-1' }}</h1>
@@ -44,19 +53,11 @@
           </ion-card-content>
         </ion-card>
       </ion-col>
-      <ion-col size="4">
+      <ion-col size="6">
         <ion-card>
           <ion-card-content class="ion-text-center">
             <h1>{{ kpis.weekAppointments }}</h1>
             <small>Citas semana</small>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="4">
-        <ion-card>
-          <ion-card-content class="ion-text-center">
-            <h1>{{ kpis.rating | number:'1.1-1' }}</h1>
-            <small>Rating</small>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -71,7 +72,7 @@
     </ion-card-header>
 
     <ion-list inset="true">
-      <ion-item *ngFor="let c of upcoming" detail="true" [routerLink]="detalleLink(c)">
+      <ion-item *ngFor="let c of upcoming">
         <ion-icon name="time" slot="start"></ion-icon>
         <ion-label>
           <h2>

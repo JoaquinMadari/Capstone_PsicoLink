@@ -1,0 +1,46 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Panel de Administración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  
+  <ion-card class="welcome-card">
+    <ion-card-header>
+      <ion-card-title>Bienvenido, Administrador</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Utiliza los módulos de abajo para gestionar el sistema de soporte y usuarios.</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-grid class="ion-margin-top">
+    <ion-row>
+      
+      <ion-col size="6">
+        <ion-card routerLink="/admin/ticket-list" class="module-card" button>
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="ticket-outline" size="large"></ion-icon>
+            <ion-label class="ion-padding-top">Gestión de Tickets</ion-label>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      
+      <ion-col size="6">
+        <ion-card routerLink="/admin/users" class="module-card" button>
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="people-outline" size="large"></ion-icon>
+            <ion-label class="ion-padding-top">Gestión de Usuarios</ion-label>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -13,7 +13,6 @@ export class SearchService {
   constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): HttpHeaders {
-    // ... (Tu lógica para obtener el token JWT)
     const token = localStorage.getItem('access');
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) headers = headers.set('Authorization', `Bearer ${token}`);

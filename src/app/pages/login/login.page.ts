@@ -64,8 +64,11 @@ export class LoginPage implements OnInit {
 
   try {
     await firstValueFrom(this.authService.login({ email: emailNorm, password }));
+    const isStaff = localStorage.getItem('user_is_staff') === 'true';
     const role = localStorage.getItem('user_role') || localStorage.getItem('role') || '';
-    if (role === 'profesional') {
+    if (isStaff) {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (role === 'profesional') {
       this.router.navigate(['/pro/home']);
     } else {
       // Paciente

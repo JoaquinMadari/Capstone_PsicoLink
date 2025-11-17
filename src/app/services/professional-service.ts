@@ -88,4 +88,16 @@ export class ProfessionalService {
       })
     );
   }
+
+
+  getAvailabilityStatus(): Observable<{ is_available: boolean }> {
+    const url = `${API_URL}/pro/profile/availability/`;
+    return this.http.get<{ is_available: boolean }>(url, { headers: this.authHeaders() });
+  }
+
+  updateAvailability(isAvailable: boolean): Observable<any> {
+    const url = `${API_URL}/pro/profile/availability/`;
+    const payload = { is_available: isAvailable };
+    return this.http.patch(url, payload, { headers: this.authHeaders() });
+  }
 }
