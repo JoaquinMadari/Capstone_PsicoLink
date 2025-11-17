@@ -20,61 +20,99 @@
     <ion-card-content>
 
       <ion-list *ngIf="appointments.length > 0; else emptyState">
-        <ion-item *ngFor="let a of appointments">
-          <ion-label>
-            <h2>{{ a.start_datetime | date:'medium':'':'es-CL' }} ({{ a.duration_minutes }} min)</h2>
 
-            <!-- Mostrar nombre del profesional o paciente -->
-            <p>
+        <ion-item *ngFor="let a of appointments" class="appointment-item">
+
+          <ion-label>
+
+            <h2 class="appointment-datetime">
+              {{ a.start_datetime | date:'EEEE d \'de\' MMMM':'':'es-CL' }} — {{ a.start_datetime | date:'hh:mm a' }}
+            </h2>
+            <p>Duración: {{ a.duration_minutes }} min</p>
+
+
+            <p class="appointment-with">
               Con:
               {{ a.professional_detail?.full_name
-                 || (a.professional_detail?.first_name + ' ' + a.professional_detail?.last_name)
-                 || a.professional_detail?.email
-                 || 'Sin nombre disponible' }}
+                || (a.professional_detail?.first_name + ' ' + a.professional_detail?.last_name)
+                || a.professional_detail?.email
+                || 'Sin nombre disponible' }}
             </p>
 
-            <p>Estado: {{ a.status === 'cancelled' ? 'Cita cancelada' : a.status }}</p>
+            <!-- 🔥 Nuevo estado correcto -->
+            <p class="appointment-status">
+              Estado:
+
+              <!-- Cancelada -->
+              <ng-container *ngIf="a.status === 'cancelled'">
+                Cita cancelada
+              </ng-container>
+
+              <!-- No cancelada -->
+              <ng-container *ngIf="a.status !== 'cancelled'">
+
+                <!-- Finalizada -->
+                <span *ngIf="isPastAppointment(a); else scheduledState">
+                  Cita finalizada
+                </span>
+
+                <!-- Programada -->
+                <ng-template #scheduledState>
+                  Cita programada
+                </ng-template>
+
+              </ng-container>
+            </p>
+
           </ion-label>
 
-          <!-- Si la cita tiene enlace Zoom y no terminó -->
-          <ion-button
-            slot="end"
-            color="primary"
-            fill="outline"
-            *ngIf="a.zoom_join_url && !isPastAppointment(a) && a.status === 'scheduled'"
-            (click)="joinMeeting(a.zoom_join_url)">
-            Unirse
-          </ion-button>
+          <!-- CONTENEDOR RESPONSIVE DE BOTONES -->
+          <div class="appointment-actions">
 
-          <!-- Si la cita ya terminó -->
-          <ion-button
-            slot="end"
-            color="medium"
-            fill="outline"
-            *ngIf="isPastAppointment(a) && a.status !== 'cancelled'"
-            disabled="true">
-            Reunión finalizada
-          </ion-button>
+             <!-- ⭐ Botón NUEVO: Ver / Crear notas del profesional -->
+            <ion-button
+              *ngIf="role === 'profesional' && isPastAppointment(a) && a.status !== 'cancelled'"
+              (click)="goToNotas(a.id)">
+              Mis Notas
+            </ion-button>
 
-          <!-- Si la cita fue cancelada -->
-          <ion-button
-            slot="end"
-            color="danger"
-            fill="outline"
-            *ngIf="a.status === 'cancelled'"
-            disabled="true">
-            Cita cancelada
-          </ion-button>
 
-          <!-- Botón Cancelar (solo si está programada y no pasó) -->
-          <ion-button
-            slot="end"
-            color="danger"
-            *ngIf="a.status === 'scheduled' && !isPastAppointment(a)"
-            (click)="cancel(a.id)">
-            Cancelar
-          </ion-button>
+
+            <ion-button
+              color="primary"
+              fill="outline"
+              *ngIf="a.zoom_join_url && !isPastAppointment(a) && a.status === 'scheduled'"
+              (click)="joinMeeting(a.zoom_join_url)">
+              Unirse
+            </ion-button>
+
+            <ion-button
+              color="medium"
+              fill="outline"
+              *ngIf="isPastAppointment(a) && a.status !== 'cancelled'"
+              disabled="true">
+              Reunión finalizada
+            </ion-button>
+
+            <ion-button
+              color="danger"
+              fill="outline"
+              *ngIf="a.status === 'cancelled'"
+              disabled="true">
+              Cita cancelada
+            </ion-button>
+
+            <ion-button
+              color="danger"
+              *ngIf="a.status === 'scheduled' && !isPastAppointment(a)"
+              (click)="cancel(a.id)">
+              Cancelar
+            </ion-button>
+
+          </div>
+
         </ion-item>
+
       </ion-list>
 
       <ng-template #emptyState>

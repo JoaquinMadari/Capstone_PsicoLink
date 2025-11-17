@@ -8,6 +8,7 @@ ion-content {
   --background: #C5D5E4;
 }
 
+/* Tarjeta de bienvenida */
 .welcome-card {
   --background: #f8fbfd;
   border-radius: 14px;
@@ -30,6 +31,7 @@ ion-content {
   margin-top: 16px;
 }
 
+/* Tarjetas de acciones */
 .action-card {
   --background: #e0e5ec;
   border-radius: 12px;
@@ -38,6 +40,18 @@ ion-content {
   ion-card-title {
     color: #4A90E2;
     font-weight: 500;
+    font-size: 0.85rem; /* 📌 más pequeño y equilibrado */
+    line-height: 1.2;
+    word-wrap: break-word;
+    /* ⭐ Permite dos líneas PERO sin cortar palabras */
+    white-space: normal;
+    overflow-wrap: break-word;  /* Evita cortar palabras */
+    word-break: keep-all;       /* Mantiene las palabras unidas */
+
+    /* ⭐ Centrado visual */
+    text-align: center;
+    max-width: 110%;
+    margin: 0 auto;
   }
 
   &:hover {
@@ -47,3 +61,31 @@ ion-content {
     }
   }
 }
+
+/* Pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .welcome-card ion-card-title {
+    font-size: 0.85rem;
+  }
+
+  .action-card ion-card-title {
+    font-size: 0.75rem;
+  }
+
+  .quick-actions {
+    gap: 8px;
+  }
+}
+
+/* Pantallas medianas */
+@media (max-width: 480px) {
+  .welcome-card {
+    padding: 12px;
+  }
+
+  .action-card {
+    padding: 14px;
+  }
+}
+
+

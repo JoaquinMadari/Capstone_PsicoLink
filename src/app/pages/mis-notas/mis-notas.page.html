@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notas del Paciente</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- MOSTRAR NOTAS ANTERIORES -->
+  <ion-card *ngIf="hasNotas">
+    <ion-card-header>
+      <ion-card-title>Notas anteriores</ion-card-title>
+    </ion-card-header>
+
+    <ion-list>
+      <ion-item *ngFor="let nota of historialNotas">
+        <ion-label>
+          <p style="white-space: pre-line;">{{ nota.text }}</p>
+          <small style="color: gray;">{{ nota.fecha | date:'short' }}</small>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <!-- NUEVA NOTA -->
+  <ion-card *ngIf="isVisible">
+    <ion-card-header>
+      <ion-card-title>Notas de la sesión</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-textarea
+        auto-grow="true"
+        placeholder="Escribe aquí tus apuntes sobre esta sesión..."
+        [(ngModel)]="notes"
+        [disabled]="!canEdit">
+      </ion-textarea>
+
+      <ion-button 
+        expand="block" 
+        color="primary" 
+        class="save-btn"
+        (click)="guardarNotas()"
+        [disabled]="!canEdit">
+        Guardar Notas
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+
+
+
+

@@ -20,10 +20,8 @@ export const routes: Routes = [
       { path: 'home',     loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage), canActivate: [roleGuard] },
       { path: 'messages', loadComponent: () => import('./pages/messages/messages.page').then(m => m.MessagesPage), canActivate: [roleGuard] },
       { path: 'account',  loadComponent: () => import('./pages/account/account.page').then(m => m.AccountPage), canActivate: [roleGuard] },
-      
       { path: 'chat/with/:otherUid', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
       { path: 'chat/conversation/:conversationId', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
-      
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },
@@ -35,14 +33,12 @@ export const routes: Routes = [
     data: { roles: ['profesional'] },
     loadComponent: () => import('./pages/tabs-pro/tabs-pro.page').then(m => m.TabsProPage),
     children: [
-      { path: 'home',      loadComponent: () => import('./pages/home-pro/home-pro.page').then(m => m.HomeProPage) },
+      { path: 'home', loadComponent: () => import('./pages/home-pro/home-pro.page').then(m => m.HomeProPage) },
       { path: 'mis-citas', loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage) },
-      { path: 'messages',  loadComponent: () => import('./pages/messages/messages.page').then(m => m.MessagesPage) },
-      { path: 'account',   loadComponent: () => import('./pages/account/account.page').then(m => m.AccountPage) },
-
+      { path: 'messages', loadComponent: () => import('./pages/messages/messages.page').then(m => m.MessagesPage) },
+      { path: 'account', loadComponent: () => import('./pages/account/account.page').then(m => m.AccountPage) },
       { path: 'chat/with/:otherUid', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
       { path: 'chat/conversation/:conversationId', loadComponent: () => import('./pages/chat/chat.page').then(m => m.ChatPage) },
-
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
@@ -158,6 +154,12 @@ export const routes: Routes = [
   // fallback (evita loop con guards si no hay sesión)
   { path: '**', redirectTo: 'splash' },  
 
-  
+  // 🔹 Nueva ruta: Mis Notas
+  {
+    path: 'mis-notas/:id',
+    loadComponent: () => import('./pages/mis-notas/mis-notas.page').then(m => m.MisNotasPage),
+    canActivate: [roleGuard],
+    data: { roles: ['profesional'] }
+  },
 ];
 

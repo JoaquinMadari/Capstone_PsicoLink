@@ -24,11 +24,19 @@
         </div>
 
         <ion-item>
-          <ion-label position="floating">Contraseña</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input [type]="passwordFieldType" formControlName="password"></ion-input>
+        
+        <ion-icon 
+          [name]="passwordVisible ? 'eye-off-outline' : 'eye-outline'" 
+          slot="end" 
+          (click)="togglePasswordVisibility()"
+          class="password-toggle-icon"
+        ></ion-icon>
         </ion-item>
+
         <div class="validation-errors"
-             [class.visible]="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)">
+          [class.visible]="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)">
           <div *ngIf="loginForm.get('password')?.hasError('required')">*La contraseña es obligatoria.</div>
           <div *ngIf="loginForm.get('password')?.hasError('minlength')">*Mínimo 6 caracteres.</div>
         </div>

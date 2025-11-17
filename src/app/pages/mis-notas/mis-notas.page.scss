@@ -8,15 +8,16 @@ ion-content {
   --background: #C5D5E4;
 }
 
-/* 🩵 Tarjeta principal (Centro de Soporte) */
+/* 🩵 Tarjeta general */
 ion-card {
-  --background: #f8fbfd !important; /* Fondo claro */
+  --background: #f8fbfd !important;
   background: #f8fbfd !important;
   color: #000 !important;
   border-radius: 14px;
   box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* Encabezado y títulos */
 ion-card-header {
   background: transparent !important;
 }
@@ -31,36 +32,39 @@ ion-card-content {
   color: #000 !important;
 }
 
-/* ✏️ Campo de mensaje */
+/* Lista general */
+ion-list {
+  --background: transparent !important;
+  background: transparent !important;
+}
+
 ion-item {
   --background: #ffffff !important;
   border-radius: 10px;
-  margin: 12px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+  padding: 15px 15px;
 }
 
-ion-label {
-  font-weight: 600;
+/* Texto general en items */
+ion-label h2,
+ion-label p {
   color: #000 !important;
+}
+
+/* Mensajes centrados */
+p.ion-text-center {
+  color: #000 !important;
+  background: transparent !important;
+}
+
+
+.save-btn {
+  margin-top: 16px;
 }
 
 ion-textarea {
-  color: #000 !important;
-  font-size: 15px;
-  background: transparent;
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
-/* 🔘 Botón Enviar */
-ion-button {
-  --border-radius: 10px;
-  font-weight: 600;
-  margin: 12px;
-}
-
-
-.text-error {
-    color: var(--ion-color-danger);
-    font-size: 0.8rem;
-    padding-top: 4px;
-    padding-bottom: 8px;
-  }

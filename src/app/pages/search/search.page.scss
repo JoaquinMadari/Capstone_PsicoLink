@@ -127,3 +127,59 @@ ion-searchbar {
    */
   margin: 8px 16px; 
 }
+
+/* 🔍 SEARCHBAR RESPONSIVE */
+
+/* Quita restricciones del toolbar para que el search pueda adaptarse */
+ion-content ion-toolbar {
+  --background: transparent;
+  padding: 0 !important;
+  min-height: auto;
+}
+
+/* Tamaño base */
+ion-searchbar {
+  --background: #ffffff;
+  --color: #0a2540;
+  --placeholder-color: #8898aa;
+  --icon-color: #4A90E2;
+  --border-radius: 12px;
+  margin: 10px 16px;
+  width: calc(100% - 32px); /* asegura que nunca sobresalga */
+  height: 44px;             /* altura elegante estándar */
+  font-size: 0.95rem;
+}
+
+/* Ajuste interno del input del search */
+ion-searchbar .searchbar-input-container {
+  height: 100%;
+}
+
+ion-searchbar input {
+  font-size: 0.9rem !important;
+  padding-left: 36px !important; /* espacio para el ícono */
+}
+
+/* 📱 Pantallas pequeñas (iPhone SE, Android mini) */
+@media (max-width: 390px) {
+  ion-searchbar {
+    height: 40px;
+    font-size: 0.85rem;
+    margin: 8px 12px;
+    width: calc(100% - 24px);
+  }
+
+  ion-searchbar input {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* 📱 Pantallas muy pequeñas (<340px) */
+@media (max-width: 340px) {
+  ion-searchbar {
+    height: 36px;
+    font-size: 0.8rem;
+    margin: 6px 10px;
+    width: calc(100% - 20px);
+  }
+}

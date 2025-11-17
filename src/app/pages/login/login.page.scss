@@ -1,22 +1,30 @@
-/* #274C77; Blue Nova */
-/* #C5D5E4; Skipping Stones */
-/* #A7C7E7; Renew Blue*/
-
-ion-header, ion-toolbar {
+/* 🎨 Colores base */
+ion-header,
+ion-toolbar {
   --background: #274C77;
   --color: #ffffff;
 }
 
 ion-content {
   --background: #C5D5E4;
+
+  /* Centrado vertical elegante */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* 🧩 Card responsive */
 ion-card {
+  width: 100%;
+  max-width: 420px; /* Tamaño ideal para móviles y tablets */
+  margin: auto;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   background: #ffffff;
 }
 
+/* Titulos */
 ion-card-title {
   font-size: 1.4rem;
   font-weight: 600;
@@ -25,12 +33,14 @@ ion-card-title {
 
 ion-card-subtitle {
   color: #6C757D;
+  font-size: 0.95rem;
 }
 
+/* Inputs */
 ion-item {
   --background: transparent;
   --highlight-color-focused: #A7C7E7;
-  color: #274472; /*Aqui se cambia el color del texto*/
+  color: #274472;
 }
 
 ion-label {
@@ -41,6 +51,7 @@ ion-input {
   color: #1A1A1A;
 }
 
+/* Validaciones */
 .validation-errors {
   min-height: 20px;
   font-size: 0.85rem;
@@ -53,19 +64,70 @@ ion-input {
   visibility: visible;
 }
 
+/* Botón */
 ion-button {
   --background: #274C77;
   --background-hover: #1E3A5F;
   --color: #ffffff;
   --border-radius: 12px;
-  font-weight: 600;  
+  width: 100%; /* 🔥 Full width para mejor UX */
+  max-width: 300px;
+  margin: auto;
+  font-weight: 600;
 }
 
+/* Link */
 a {
   color: #A7C7E7;
   font-weight: 500;
   text-decoration: none;
 }
+
 a:hover {
   text-decoration: underline;
+}
+
+/* 📱 Breakpoints para pantallas más grandes */
+@media (min-width: 768px) {
+  ion-card {
+    max-width: 480px;
+  }
+
+  ion-card-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* 💻 Desktop (si PsicoLink va a web) */
+@media (min-width: 1024px) {
+  ion-content {
+    padding-top: 40px;
+  }
+
+  ion-card {
+    max-width: 500px;
+  }
+}
+
+/* 1. Estilos base del Icono (Ojo) */
+.password-toggle-icon {
+    font-size: 1.4rem; 
+    cursor: pointer;
+    color: #A7C7E7; // Usa un color que destaque un poco de tu paleta
+    // Propiedad para asegurar que el puntero cambie
+    pointer-events: auto; 
+    // 🔥 AJUSTE CLAVE: Mueve el icono 5px hacia abajo
+    margin-top: 35px;
+}
+
+/* 2. SOLUCIÓN CLAVE: Asegurar que el input respete el espacio del icono */
+ion-item {
+    // Al usar slot="end", el input debe ser consciente de que hay otro elemento
+    // Ionic generalmente maneja esto, pero a veces es necesario forzar un padding
+    --padding-end: 10px; 
+}
+
+// Alternativamente, si el padding no funciona con la variable:
+ion-item .item-inner {
+    padding-right: 10px; 
 }

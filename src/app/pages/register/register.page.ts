@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { Auth } from '../../services/auth';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
+import { IonHeader, IonToolbar, IonTitle, IonContent,IonButtons,       // <-- AÑADIR ESTO
+    IonBackButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
   IonItem, IonLabel, IonInput, IonSegment, IonSegmentButton, IonButton 
 } from '@ionic/angular/standalone'
 
@@ -15,7 +16,8 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, Io
   standalone: true,
 
   imports: [CommonModule,FormsModule,ReactiveFormsModule,RouterModule, IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonItem, IonLabel, IonInput, IonSegment, IonSegmentButton, IonButton ]
+  IonItem, IonLabel, IonInput, IonSegment,IonButtons,       // <-- AÑADIR ESTO
+    IonBackButton, IonSegmentButton, IonButton ]
 
 
 })

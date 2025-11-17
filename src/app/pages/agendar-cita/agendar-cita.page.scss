@@ -67,15 +67,11 @@ ion-select-option {
   color: #0a2540;
 }
 
-
-
-
-
 // Commit: Mostrar horarios ocupados
 .slot-legend ion-chip { margin-right: 6px; }
-.legend-pro     { --color: var(--bn-600); border-color: var(--bn-500); }
+.legend-pro     { --color: var(--bn-600); border-color: var(--bn-500); }
 .legend-patient { --color: var(--ss-600); border-color: var(--ss-500); }
-.legend-both    { --color: #c55252; border-color: #e57373; }
+.legend-both    { --color: #c55252; border-color: #e57373; }
 
 .slots-grid {
   .slot {
@@ -105,4 +101,305 @@ ion-select-option {
     opacity: 0.55;
     filter: grayscale(0.2);
   }
+}
+
+/* Formularios más responsivos */
+ion-card-content form ion-item {
+  display: flex;
+  flex-direction: column; /* elementos apilados */
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+ion-card-content form ion-label {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+ion-card-content form ion-input,
+ion-card-content form ion-select,
+ion-card-content form ion-datetime {
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 400px) {
+  ion-card-title {
+    font-size: 1rem;
+  }
+
+  ion-card-content form ion-label {
+    font-size: 0.85rem;
+  }
+
+  ion-card-content form ion-input,
+  ion-card-content form ion-select,
+  ion-card-content form ion-datetime {
+    font-size: 0.9rem;
+  }
+
+  .slots-grid ion-col {
+    flex: 1 1 45%; /* dos por fila en móviles muy pequeños */
+  }
+
+  .slots-grid .slot {
+    font-size: 0.75rem;
+    padding: 6px;
+  }
+}
+
+ion-list ion-item h2, ion-list ion-item p {
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+  word-break: break-word;
+}
+
+/* 🚀 Solución: Estilos del Profesional Select */
+
+/* 1. Estilo para las OPCIONES de la lista (Pop-up/Alert) */
+ion-select-option {
+  // Asegura que las opciones dentro del popover rompan línea si son muy largas
+  white-space: normal !important; 
+  word-break: break-word !important;
+  display: block;
+  padding-right: 4px;
+}
+
+.professional-name {
+  font-weight: 600;
+  color: #0a2540;
+}
+
+.professional-specialty {
+  font-size: 0.85rem; // Usamos 0.85rem que tenías más abajo
+  color: #555;
+}
+
+
+/* 🚀 SOLUCIÓN FINAL: Estilo para que el texto seleccionado (botón) NO se corte */
+ion-item ion-select {
+  // Asegura el 100% de ancho
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+// Apuntamos al elemento interno del Shadow DOM de ion-select
+ion-item ion-select::part(text) {
+  // Las reglas clave para que el texto se envuelva y no se corte
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  display: block; // Es necesario para permitir el "wrap"
+  line-height: 1.25; /* Opcional: mejora la separación si ocupa dos líneas */
+  padding: 4px 0; /* Opcional: más espacio vertical dentro del select */
+}
+
+/* Aumentar ancho del ion-select si es necesario */
+ion-item ion-select {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* --- Mejoras de Responsividad para ion-datetime --- */
+
+ion-datetime {
+  // Asegura que la cuadrícula del calendario no tenga límites fijos de ancho
+  &::part(calendar-wrapper) {
+    max-width: 100%;
+  }
+
+  // Estilos para los días individuales (las celdas numéricas)
+  &::part(calendar-day) {
+    font-size: 0.9em;        /* Hace el texto un poco más pequeño */
+    min-width: 30px;         /* Asegura un tamaño mínimo pero permite reducir */
+    height: 30px;            /* Mantiene la proporción de la celda */
+  }
+
+  // Ajuste para el encabezado (D, L, M, J, V, S)
+  &::part(calendar-header) {
+    font-size: 0.9em;
+  }
+}
+
+/* --- Estilos para responsividad de la grilla de disponibilidad --- */
+
+// Contenedor de la leyenda (Ion-chips)
+.slot-legend {
+  display: flex;             /* Usa flexbox para distribuir los chips */
+  flex-wrap: wrap;           /* Permite que los chips salten de línea en pantallas pequeñas */
+  gap: 8px;                  /* Espacio entre los chips */
+  margin-bottom: 16px;       /* Espacio debajo de la leyenda */
+  justify-content: center;   /* Centra los chips si hay espacio */
+
+  ion-chip {
+    margin: 0;               /* Elimina el margen por defecto de los chips de Ionic */
+    font-size: 0.8em;        /* Reduce un poco el tamaño de la fuente para que quepan más */
+    height: 32px;            /* Altura estándar para los chips */
+  }
+}
+
+// Grilla de horarios (Ion-grid)
+.slots-grid {
+  ion-col {
+    padding: 4px;            /* Reduce el padding de las columnas para más espacio */
+    display: flex;           /* Flexbox para centrar el botón dentro de la columna */
+    justify-content: center; /* Centra el botón horizontalmente */
+    align-items: center;     /* Centra el botón verticalmente */
+  }
+
+  .slot {
+    width: 100%;             /* El botón ocupa todo el ancho de la columna */
+    max-width: 100px;        /* Limita el ancho máximo del botón en pantallas grandes */
+    min-height: 40px;        /* Altura mínima para que sean fáciles de tocar */
+    height: auto;            /* Ajusta la altura automáticamente según el contenido */
+    padding: 8px 0;          /* Padding vertical y horizontal */
+    font-size: 0.9em;        /* Tamaño de fuente del texto del slot */
+    border-radius: 8px;      /* Bordes redondeados */
+    border: 1px solid var(--ion-color-medium); /* Borde por defecto */
+    background-color: var(--ion-color-light);  /* Fondo claro por defecto */
+    color: var(--ion-color-dark);              /* Texto oscuro por defecto */
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Transición suave */
+
+    // Estilos para cuando el slot está ocupado
+    &.busy-pro {
+      background-color: var(--ion-color-warning); /* Color para profesional ocupado */
+      color: var(--ion-color-warning-contrast);
+      border-color: var(--ion-color-warning);
+    }
+    &.busy-patient {
+      background-color: var(--ion-color-danger); /* Color para paciente ocupado */
+      color: var(--ion-color-danger-contrast);
+      border-color: var(--ion-color-danger);
+    }
+    &.busy-both {
+      background-color: var(--ion-color-dark); /* Color para ambos ocupados */
+      color: var(--ion-color-dark-contrast);
+      border-color: var(--ion-color-dark);
+    }
+
+    // Estilos para cuando el slot está deshabilitado
+    &:disabled {
+      opacity: 0.6;           /* Más opaco si está deshabilitado */
+      cursor: not-allowed;    /* Cursor de "no permitido" */
+      background-color: var(--ion-color-light-shade); // Un color un poco más oscuro que light
+      color: var(--ion-color-medium);
+      border-color: var(--ion-color-medium);
+    }
+  }
+}
+
+// Ajustes para pantallas pequeñas (ej: móviles)
+@media (max-width: 576px) {
+  .slots-grid {
+    ion-col {
+      size: 6; // Cambia a 2 columnas por fila en pantallas pequeñas
+    }
+    .slot {
+      font-size: 0.85em; // Un poco más pequeña la fuente
+      max-width: 90px;   // Reduce el ancho máximo de los botones
+    }
+  }
+}
+
+// Ajustes para pantallas aún más pequeñas (ej: algunos móviles estrechos)
+@media (max-width: 380px) {
+  .slots-grid {
+    ion-col {
+      size: 12; // Una columna por fila en pantallas muy estrechas
+    }
+    .slot {
+      max-width: 150px; // Permite que el botón sea un poco más ancho en una sola columna
+    }
+  }
+  .slot-legend ion-chip {
+    font-size: 0.75em; // Aún más pequeña la fuente de los chips
+  }
+}
+
+/* --- Estilos para la sección Mis Próximas Citas --- */
+
+ion-card.mt-16 {
+  // Solo aplicamos a la lista de citas (el segundo ion-card en tu HTML)
+  margin-top: 16px; // Ajusta el margen superior
+}
+
+ion-card.mt-16 ion-item {
+  // 1. Mejora el espaciado interno del ion-item
+  --padding-start: 16px; 
+  --inner-padding-end: 16px;
+  --min-height: 75px; // Asegura una altura mínima para citas
+  
+  // 2. Hace que el borde de separación no se muestre si está en la lista (mejor control de márgenes)
+  --border-width: 0;
+  
+  margin-bottom: 12px; // Más espacio entre cada cita
+}
+
+ion-card.mt-16 ion-label {
+  // Asegura que el label, que contiene toda la info, use el espacio completo.
+  display: block; 
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+// Estilo para el título de la cita (Fecha y Hora)
+ion-label h2 {
+  font-size: 1em;
+  font-weight: 600; /* Más audaz para destacar la hora */
+  margin-top: 0;
+  margin-bottom: 6px; /* Espacio antes de la info del profesional */
+  line-height: 1.3;
+
+  // Estilo para la duración
+  ion-text[color="medium"] {
+    font-weight: normal;
+    font-size: 0.9em;
+  }
+}
+
+// Estilos para las líneas de información (Profesional, Paciente, Estado)
+ion-label p {
+  font-size: 0.9em;
+  margin-top: 0;
+  margin-bottom: 3px; /* Espacio ajustado entre líneas */
+  line-height: 1.3;
+  color: #000000; /* Color de texto más suave para los detalles */
+}
+
+// Estilo del chip de estado
+.status-info {
+  display: flex; /* Usa flexbox para alinear el texto "Estado" y el chip */
+  align-items: center;
+  margin-top: 8px; /* Más espacio para separar el estado de los datos anteriores */
+  margin-bottom: 0;
+  
+  // Texto "Estado:" (que usa ion-text color="dark")
+  ion-text[color="dark"] {
+    font-weight: 500;
+    margin-right: 8px; // Espacio entre el texto "Estado:" y el chip
+    color: #0a2540; // Mantenemos el color oscuro para la etiqueta
+  }
+  
+  // El chip en sí
+  ion-chip.status-chip {
+    margin: 0;
+    font-size: 0.75em;
+    height: 24px; /* Altura más compacta */
+    padding: 0 8px;
+    font-weight: 500;
+  }
+}
+
+// Estilo para el botón Cancelar
+ion-button[slot="end"] {
+  height: 30px;
+  font-size: 0.75em;
+}
+
+/* --- Ajuste específico para el texto que seguía al label Profesional: --- */
+.professional-info ion-text[color="dark"] {
+    /* Forzamos la visibilidad para el nombre del profesional */
+    color: #0A2540 !important; /* Usamos tu color principal de contraste (azul oscuro) */
+    font-weight: 500;
 }
