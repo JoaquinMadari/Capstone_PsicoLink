@@ -10,7 +10,7 @@ from .views import (
 )
 from .serializers import CustomTokenObtainPairSerializer
 from .views_zoom import zoom_connect, zoom_callback
-
+from .views import MyProfileView
 router = DefaultRouter()
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
 

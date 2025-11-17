@@ -12,7 +12,7 @@ from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetai
 
 from api.zoom_service import create_meeting_for_professional
 from datetime import timezone as dt_timezone
-
+from .serializers import MyProfileSerializer, MyProfileUpdateSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -37,6 +37,7 @@ from integrations.supabase_sync import ensure_supabase_user, get_supabase_sessio
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
+    authentication_classes = []  # ← AGREGAR ESTO
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -49,7 +50,7 @@ class RegisterView(generics.CreateAPIView):
         last_name   = ser.validated_data.get("last_name", "")
 
         with transaction.atomic():
-            user: CustomUser = ser.save()  # crea en Django
+            user: CustomUser = ser.save()
 
             try:
                 uid = ensure_supabase_user(
@@ -64,7 +65,6 @@ class RegisterView(generics.CreateAPIView):
 
             except SupabaseAdminError as e:
                 msg = str(e)
-                # Si es error de datos/duplicado → 400
                 if " 400 " in msg or " 409 " in msg or " 422 " in msg:
                     transaction.set_rollback(True)
                     return Response(
@@ -76,8 +76,9 @@ class RegisterView(generics.CreateAPIView):
         data = UserSerializer(user).data
         if not user.supabase_uid:
             data["supabase_sync"] = "pending"
+
         return Response(data, status=status.HTTP_201_CREATED)
-    
+
 
 logger = logging.getLogger(__name__)
 
@@ -476,3 +477,20 @@ class ProfessionalAvailabilityView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         #Devuelve el perfil del psicólogo asociado al usuario autenticado
         return PsicologoProfile.objects.get(user=self.request.user)
+
+
+class MyProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        serializer = MyProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = MyProfileUpdateSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.update(request.user, serializer.validated_data)
+        # Devolver el perfil actualizado
+        out = MyProfileSerializer(user).data
+        return Response(out, status=status.HTTP_200_OK)

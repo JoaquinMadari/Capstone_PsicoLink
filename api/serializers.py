@@ -83,10 +83,9 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
             'rut', 'age', 'gender', 'nationality', 'phone', 
             'specialty','specialty_label','specialty_other', 
             'license_number', 'main_focus', 
-            'therapeutic_techniques', 'style_of_attention', 
-            'attention_schedule', 'work_modality', 'certificates',
+            'therapeutic_techniques', 'style_of_attention', 'work_modality', 'certificates',
             'address', 'payment_method',
-            
+            'session_price',
             # Opcionales si quieres que se rellenen aquí también
             'inclusive_orientation', 'languages', 'experience_years', 'curriculum_vitae'
         ]
@@ -127,6 +126,8 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
              validated_data.pop('experience_years', None)
 
         # Crear la instancia del perfil vinculada al usuario
+        validated_data.setdefault("is_available", True)
+
         profile = PsicologoProfile.objects.create(user=user, **validated_data)
         return profile
     
@@ -195,6 +196,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         data['user'] = {
+            'id': self.user.id,                 # 🔹 agregar el id
             'role': self.user.role,
             'email': self.user.email,
             'full_name': self.user.get_full_name() or None,
@@ -203,6 +205,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'is_staff': self.user.is_staff,
             'supabase_uid': str(self.user.supabase_uid) if self.user.supabase_uid else None
             }
+            
         return data
 
 
@@ -456,6 +459,101 @@ class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
         if obj.specialty == Specialty.OTRO and obj.specialty_other:
             return obj.specialty_other
         return obj.get_specialty_display()
+
+
+
+User = get_user_model()
+
+def _get_profile_for_user(user):
+    if user.role == 'profesional':
+        return getattr(user, 'psicologoprofile', None)
+
+    if user.role == 'paciente':
+        # nombre correcto: pacienteprofile
+        return getattr(user, 'pacienteprofile', None)
+
+    if user.role == 'organizacion':
+        return getattr(user, 'organizacionprofile', None)
+
+    return None
+def get_session_price(self, obj):
+    profile = _get_profile_for_user(obj)
+    if profile and hasattr(profile, 'session_price'):
+        return profile.session_price
+    return None
+
+class MyProfileSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+    full_name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    specialty = serializers.SerializerMethodField()
+    session_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id", "first_name", "last_name", "full_name",
+            "email", "role", "phone", "specialty",
+            "session_price",
+        ]
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+    def get_phone(self, obj):
+        profile = _get_profile_for_user(obj)
+        if not profile:
+            return None
+        return getattr(profile, "phone", getattr(profile, "contact_phone", None))
+
+    def get_specialty(self, obj):
+        profile = _get_profile_for_user(obj)
+        return getattr(profile, 'specialty', None) if profile else None
+
+    def get_session_price(self, obj):
+        profile = _get_profile_for_user(obj)
+        if profile and hasattr(profile, 'session_price'):
+            return profile.session_price
+        return None
+
+class MyProfileUpdateSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(required=False, allow_blank=True)
+    session_price = serializers.IntegerField(required=False, allow_null=True)
+    def validate_email(self, value):
+        user = self.context['request'].user
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError("Este correo ya está en uso.")
+        return value
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            email = validated_data.get("email", None)
+            phone = validated_data.get("phone", None)
+            price = validated_data.get('session_price', None)
+
+            if price is not None:
+                profile = _get_profile_for_user(instance)
+                if profile and hasattr(profile, 'session_price'):
+                    profile.session_price = price
+                    profile.save(update_fields=['session_price'])
+
+            if email is not None:
+                instance.email = email
+                instance.save(update_fields=["email"])
+
+            if phone is not None:
+                profile = _get_profile_for_user(instance)
+
+                if profile:
+                    if hasattr(profile, "phone"):
+                        profile.phone = phone
+                        profile.save(update_fields=["phone"])
+                    elif hasattr(profile, "contact_phone"):
+                        profile.contact_phone = phone
+                        profile.save(update_fields=["contact_phone"])
+
+        return instance
 
 
 # --------------------------------------------
