@@ -69,4 +69,22 @@ export class AppointmentService {
     });
   }
 
+  // Obtener notas de una cita
+getAppointmentNotes(id: number): Observable<{ notes: string }> {
+  return this.http.get<{ notes: string }>(
+    `${this.apiUrl}/appointments/${id}/`,
+    { headers: this.getAuthHeaders() }
+  );
+}
+
+// Guardar / actualizar notas (solo profesionales, PATCH)
+updateAppointmentNotes(id: number, notes: string): Observable<any> {
+  return this.http.patch(
+    `${this.apiUrl}/appointments/${id}/notes/`,
+    { notes },
+    { headers: this.getAuthHeaders() }
+  );
+}
+
+
 }

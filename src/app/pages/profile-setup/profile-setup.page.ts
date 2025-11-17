@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Catalog, SpecialtyOption } from 'src/app/services/catalog';
 import { environment } from 'src/environments/environment';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle,IonButtons,
+  IonBackButton, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelectOption, IonToggle, IonSelect, IonTextarea } from '@ionic/angular/standalone';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -92,7 +93,8 @@ function normalizePhoneCL(raw: string): string {
     IonHeader, IonToolbar, IonTitle, IonContent, IonCard,
     IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
     IonItem, IonLabel, IonInput, IonButton, IonSelectOption,
-    IonToggle, IonSelect, IonTextarea,RouterModule
+    IonToggle, IonSelect, IonTextarea,RouterModule,IonButtons,
+  IonBackButton,
   ]
 })
 export class ProfileSetupPage implements OnInit {

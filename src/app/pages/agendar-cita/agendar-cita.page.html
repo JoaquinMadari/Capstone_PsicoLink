@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Mis Citas</ion-title>
+    <ion-title>Agendar Cita</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -18,9 +18,14 @@
           <ion-label position="stacked">Profesional</ion-label>
           <ion-select formControlName="professional">
             <ion-select-option *ngFor="let p of professionals" [value]="p.id">
-              {{ p.full_name || (p.first_name || p.last_name ? (p.first_name + ' ' + p.last_name) : p.username) }}
-              • {{ p.specialty_label || p.specialty || '—' }}
-            </ion-select-option>
+            <div class="professional-name">
+              {{ p.full_name || (p.first_name + ' ' + p.last_name) || p.username }}
+            </div>
+            <div class="professional-specialty">
+              {{ p.specialty_label || p.specialty || '—' }}
+            </div>
+          </ion-select-option>
+
           </ion-select>
         </ion-item>
 
@@ -30,44 +35,44 @@
               displayFormat="DD MMM YYYY" 
               formControlName="date"
               presentation="date"
-              (ionChange)="form.controls['date'].markAsDirty(); form.controls['date'].updateValueAndValidity();">
+              [min]="minDate" (ionChange)="form.controls['date'].markAsDirty(); form.controls['date'].updateValueAndValidity();">
           </ion-datetime>
         </ion-item>
 
         <ion-item>
-          <ion-label position="stacked">Hora de inicio</ion-label>
-          <ion-select 
-              formControlName="time" 
-              placeholder="Selecciona una hora"
-              (ionChange)="form.controls['time'].markAsDirty(); form.controls['time'].updateValueAndValidity();">
-            
-            <ion-select-option value="08:00:00">08:00 AM</ion-select-option>
-            <ion-select-option value="08:30:00">08:30 AM</ion-select-option>
-            <ion-select-option value="09:00:00">09:00 AM</ion-select-option>
-            <ion-select-option value="09:30:00">09:30 AM</ion-select-option>
-            <ion-select-option value="10:00:00">10:00 AM</ion-select-option>
-            <ion-select-option value="10:30:00">10:30 AM</ion-select-option>
-            <ion-select-option value="11:00:00">11:00 AM</ion-select-option>
-            <ion-select-option value="11:30:00">11:30 AM</ion-select-option>
-            <ion-select-option value="12:00:00">12:00 PM</ion-select-option>
-            <ion-select-option value="12:30:00">12:30 PM</ion-select-option>
-            <ion-select-option value="13:00:00">01:00 PM</ion-select-option>
-            <ion-select-option value="13:30:00">01:30 PM</ion-select-option>
-            <ion-select-option value="14:00:00">02:00 PM</ion-select-option>
-            <ion-select-option value="14:30:00">02:30 PM</ion-select-option>
-            <ion-select-option value="15:00:00">03:00 PM</ion-select-option>
-            <ion-select-option value="15:30:00">03:30 PM</ion-select-option>
-            <ion-select-option value="16:00:00">04:00 PM</ion-select-option>
-            <ion-select-option value="16:30:00">04:30 PM</ion-select-option>
-            <ion-select-option value="17:00:00">05:00 PM</ion-select-option>
-            <ion-select-option value="17:30:00">05:30 PM</ion-select-option>
-            <ion-select-option value="18:00:00">06:00 PM</ion-select-option>
-            <ion-select-option value="18:30:00">06:30 PM</ion-select-option>
-            <ion-select-option value="19:00:00">07:00 PM</ion-select-option>
-            <ion-select-option value="19:30:00">07:30 PM</ion-select-option>
-            <ion-select-option value="20:00:00">08:00 PM</ion-select-option>
-          </ion-select>
-        </ion-item>
+    <ion-label position="stacked">Hora de inicio</ion-label>
+    <ion-select 
+      formControlName="time" 
+      placeholder="Selecciona una hora"
+      (ionChange)="form.controls['time'].markAsDirty(); form.controls['time'].updateValueAndValidity();">
+      
+      <ion-select-option value="08:00:00" [disabled]="isStartDisabled('08:00:00')">08:00 AM</ion-select-option>
+      <ion-select-option value="08:30:00" [disabled]="isStartDisabled('08:30:00')">08:30 AM</ion-select-option>
+      <ion-select-option value="09:00:00" [disabled]="isStartDisabled('09:00:00')">09:00 AM</ion-select-option>
+      <ion-select-option value="09:30:00" [disabled]="isStartDisabled('09:30:00')">09:30 AM</ion-select-option>
+      <ion-select-option value="10:00:00" [disabled]="isStartDisabled('10:00:00')">10:00 AM</ion-select-option>
+      <ion-select-option value="10:30:00" [disabled]="isStartDisabled('10:30:00')">10:30 AM</ion-select-option>
+      <ion-select-option value="11:00:00" [disabled]="isStartDisabled('11:00:00')">11:00 AM</ion-select-option>
+      <ion-select-option value="11:30:00" [disabled]="isStartDisabled('11:30:00')">11:30 AM</ion-select-option>
+      <ion-select-option value="12:00:00" [disabled]="isStartDisabled('12:00:00')">12:00 PM</ion-select-option>
+      <ion-select-option value="12:30:00" [disabled]="isStartDisabled('12:30:00')">12:30 PM</ion-select-option>
+      <ion-select-option value="13:00:00" [disabled]="isStartDisabled('13:00:00')">01:00 PM</ion-select-option>
+      <ion-select-option value="13:30:00" [disabled]="isStartDisabled('13:30:00')">01:30 PM</ion-select-option>
+      <ion-select-option value="14:00:00" [disabled]="isStartDisabled('14:00:00')">02:00 PM</ion-select-option>
+      <ion-select-option value="14:30:00" [disabled]="isStartDisabled('14:30:00')">02:30 PM</ion-select-option>
+      <ion-select-option value="15:00:00" [disabled]="isStartDisabled('15:00:00')">03:00 PM</ion-select-option>
+      <ion-select-option value="15:30:00" [disabled]="isStartDisabled('15:30:00')">03:30 PM</ion-select-option>
+      <ion-select-option value="16:00:00" [disabled]="isStartDisabled('16:00:00')">04:00 PM</ion-select-option>
+      <ion-select-option value="16:30:00" [disabled]="isStartDisabled('16:30:00')">04:30 PM</ion-select-option>
+      <ion-select-option value="17:00:00" [disabled]="isStartDisabled('17:00:00')">05:00 PM</ion-select-option>
+      <ion-select-option value="17:30:00" [disabled]="isStartDisabled('17:30:00')">05:30 PM</ion-select-option>
+      <ion-select-option value="18:00:00" [disabled]="isStartDisabled('18:00:00')">06:00 PM</ion-select-option>
+      <ion-select-option value="18:30:00" [disabled]="isStartDisabled('18:30:00')">06:30 PM</ion-select-option>
+      <ion-select-option value="19:00:00" [disabled]="isStartDisabled('19:00:00')">07:00 PM</ion-select-option>
+      <ion-select-option value="19:30:00" [disabled]="isStartDisabled('19:30:00')">07:30 PM</ion-select-option>
+      <ion-select-option value="20:00:00" [disabled]="isStartDisabled('20:00:00')">08:00 PM</ion-select-option>
+    </ion-select>
+  </ion-item>
         
         <ion-item>
           <ion-label position="stacked">Duración (min)</ion-label>
@@ -142,36 +147,30 @@
     </ion-card-header>
     <ion-card-content>
       <ion-list>
-        <ion-item *ngFor="let a of appointments">
+        <ion-item *ngFor="let a of appointments" lines="none">
           <ion-label>
-            <h2>{{ a.start_datetime | date:'medium':'':'es-CL' }} ({{ a.duration_minutes }} min)</h2>
+            <h2>
+              {{ a.start_datetime | date:'fullDate':'':'es-CL' }}, {{ a.start_datetime | date:'shortTime' }}
+              <ion-text color="medium">({{ a.duration_minutes }} min)</ion-text>
+            </h2>
 
-            <!-- nombre del profesional -->
-            <p>
-              Profesional:
+            <p class="professional-info">
+              <ion-text color="dark">Profesional:</ion-text>
+              <ion-text color="dark">
               {{ a?.professional_detail?.full_name
                 || (a?.professional_detail?.first_name || a?.professional_detail?.last_name
                     ? (a?.professional_detail?.first_name + ' ' + a?.professional_detail?.last_name)
                     : a?.professional_detail?.username) }}
+              </ion-text>
             </p>
 
-            <!-- nombre del paciente -->
-            <p *ngIf="a?.patient">
-              Paciente:
-              {{ a?.patient?.full_name
-                || (a?.patient?.first_name || a?.patient?.last_name
-                    ? (a?.patient?.first_name + ' ' + a?.patient?.last_name)
-                    : a?.patient?.username) }}
+            <p class="status-info">
+              <ion-text color="dark">Estado:</ion-text>
+              <ion-chip [color]="a.status === 'scheduled' ? 'success' : (a.status === 'cancelled' ? 'danger' : 'medium')" class="status-chip">
+                {{ a.status | titlecase }}
+              </ion-chip>
             </p>
-
-            <p>Status: {{ a.status }}</p>
           </ion-label>
-
-          <ion-button slot="end" color="danger"
-                      *ngIf="a.status === 'scheduled'"
-                      (click)="cancel(a.id)">
-            Cancelar
-          </ion-button>
         </ion-item>
       </ion-list>
     </ion-card-content>

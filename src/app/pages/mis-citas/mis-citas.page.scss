@@ -42,7 +42,12 @@ ion-list {
 ion-item {
   --background: #ffffff !important; /* Cada cita con fondo blanco */
   border-radius: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding: 15px 15px;
+  /* 🌟 CLAVE: Estructura vertical */
+  display: flex;
+  flex-direction: column; /* Apila los elementos (label y acciones) verticalmente */
+  align-items: center; /* Centra todo el contenido (texto y botones) horizontalmente */
 }
 
 ion-label h2,
@@ -55,4 +60,47 @@ p.ion-text-center {
   color: #000 !important;
   background: transparent !important;
 }
+
+/* 🔧 Contenedor de botones: vertical y alineado a la derecha */
+.appointment-actions {
+  display: flex;
+  flex-direction: column;   /* Mantiene los botones uno arriba del otro */
+  align-items: flex-end;    /* 🔥 Mueve toda la columna hacia la derecha */
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* 🔧 BOTONES DE ESTADO COMPACTOS */
+.appointment-actions ion-button {
+  width: auto !important;
+  min-width: 100px;
+  max-width: 130px;
+  font-size: 0.60rem;
+  padding: 4px 8px;
+  text-align: center;
+  white-space: nowrap;
+  --border-radius: 6px;
+  margin-left: 16px;
+}
+
+ion-label h2.appointment-datetime {
+  font-size: 0.90rem;        /* tamaño base legible */
+  line-height: 1.1rem;    /* separación entre líneas */   
+  word-break: break-word;  /* evitar overflow */
+  margin: 0 0 6px 0;
+  /* 🌟 HABILITAR CORTE ESTÉTICO DENTRO DEL LÍMITE */
+  white-space: normal;/* Fuerza a que esté en una sola línea */
+  overflow: visible;        /* Oculta el exceso */
+  text-overflow: clip; /* Muestra "..." */
+  
+}
+
+ion-label p {
+  font-size: 0.80rem;     /* tamaño ligeramente menor */
+  margin: 0 0 4px 0;
+}
+
+
+
+
 

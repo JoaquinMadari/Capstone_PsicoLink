@@ -27,9 +27,7 @@ export class Auth {
         const fullName = res?.user?.full_name || `${res?.user?.first_name || ''} ${res?.user?.last_name || ''}`.trim();
         if (fullName) localStorage.setItem('user_full_name', fullName);
         if (res?.user?.email) localStorage.setItem('user_email', res.user.email);
-  return this.http.post(`${this.apiUrl}/auth/login/`, payload).pipe(
-    tap((res: any) => {
-      console.log('Login response:', res); // 👀 Verifica la respuesta del backend
+    
 
       // Guardar tokens si existen
       if (res.access) localStorage.setItem('access', res.access);
@@ -43,12 +41,6 @@ export class Auth {
 
         const isStaff = res?.is_staff ?? res?.user?.is_staff ?? false;
         localStorage.setItem('user_is_staff', String(isStaff));
-      // Guardar rol
-      const role = res?.user?.role ?? res?.role ?? null;
-      if (role) {
-        localStorage.setItem('role', role);
-        localStorage.setItem('user_role', role);
-      }
 
       // Guardar Supabase UID si existe
       const sbUid = res?.user?.supabase_uid ?? null;
@@ -79,6 +71,8 @@ export class Auth {
       )
     )
   );
+
+
 }
 
 

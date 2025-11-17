@@ -141,6 +141,15 @@ export class MisCitasPage implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
+  // ⭐ NUEVO: ir a la página de notas del profesional
+  irANotas(appointmentId: number) {
+  this.router.navigate([`/mis-notas/${appointmentId}`]);
+}
+
+  goToNotas(id: any) {
+    this.router.navigate(['/mis-notas', id]);
+}
+
   isPastAppointment(appointment: any): boolean {
     const startTime = new Date(appointment.start_datetime).getTime();
     const now = new Date().getTime();

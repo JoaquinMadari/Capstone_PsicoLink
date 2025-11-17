@@ -1,19 +1,20 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
-  IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
-  IonItem, IonLabel, IonToggle, IonBadge,IonGrid, IonRow, IonCol, IonList, IonFab, IonFabButton, IonNote, IonSpinner 
-} from '@ionic/angular/standalone';
+  IonContent, IonRefresher, IonRefresherContent,
+  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
+  IonItem, IonLabel, IonToggle, IonBadge,
+  IonGrid, IonRow, IonCol, IonList,
+  IonFab, IonFabButton, IonNote, IonSpinner  } from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AppointmentService } from 'src/app/services/appointment';
 import { ProfessionalService } from 'src/app/services/professional-service';
-
+import { addIcons } from 'ionicons';
+import { time } from 'ionicons/icons';
 type Status = 'scheduled' | 'cancelled' | 'completed';
-
 interface UserDetail {
   id: number;
   email: string;
@@ -57,28 +58,33 @@ interface Kpis {
   styleUrls: ['./home-pro.page.scss'],
   standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
-  IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, 
-  IonCardContent, IonItem, IonLabel, IonToggle, IonBadge,
-  IonGrid, IonRow, IonCol, IonList, IonFab, IonFabButton, IonNote, IonSpinner,
-  CommonModule, RouterLink]
+  IonContent, IonRefresher, IonRefresherContent,
+  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
+  IonItem, IonLabel, IonToggle, IonBadge,
+  IonGrid, IonRow, IonCol, IonList,
+  IonFab, IonFabButton, CommonModule, IonNote, IonSpinner, RouterLink]
 })
 export class HomeProPage implements OnInit {
   private apiUrl = (environment.API_URL || '').replace(/\/$/, '');
 
   // Estado
   loading = false;
-  isAvailable = signal<boolean>(true);
-  submittingAvailability = false;
+  isAvailable = signal<boolean>(true); // nos falta la logica para que desactive al profesional
   upcoming: AppointmentDTO[] = [];
   pending: AppointmentDTO[] = [];
-  kpis: Kpis = { hoursToday: 0, weekAppointments: 0 };
-
+  kpis: Kpis = { hoursToday: 0, weekAppointments: 0,};
+  submittingAvailability: boolean = false; // ⬅️ Declárala aquí
   constructor(
     private svc: AppointmentService,
-    private proSvc: ProfessionalService,
     private toastCtrl: ToastController,
-    private router: Router
-  ) {}
+    private http: HttpClient,
+    private router: Router,
+    private proSvc: ProfessionalService,
+  ) {
+
+    // Registrar iconos aquí
+    addIcons({ time });
+  }
 
   ngOnInit() {
     this.load();
@@ -124,6 +130,23 @@ export class HomeProPage implements OnInit {
   goMessages() { this.router.navigate(['/pro/messages']);  }
   goSupport()  { this.router.navigate(['/soporte']);       }
 
+
+  detalleLink(a: { professional?: number; professional_detail?: UserDetail; start_datetime: string }) {
+    const proId = (typeof a.professional === 'number' && a.professional) ? a.professional : (a.professional_detail?.id ?? null);
+
+    const d = new Date(a.start_datetime);
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, '0');
+    const dd   = String(d.getDate()).padStart(2, '0');
+    const hh   = String(d.getHours()).padStart(2, '0');
+    const mi   = String(d.getMinutes()).padStart(2, '0');
+
+    const fecha = `${yyyy}-${mm}-${dd}`;
+    const hora  = `${hh}:${mi}`;
+
+    return ['/detalle-cita', proId, fecha, hora];
+  }
+
   //Carga de datos
   load(done?: () => void) {
     this.loading = true;
@@ -164,7 +187,6 @@ export class HomeProPage implements OnInit {
         this.upcoming = upcoming;
         this.pending  = pending;
         this.kpis     = { hoursToday, weekAppointments};
-
         this.loading = false;
         done?.();
       },

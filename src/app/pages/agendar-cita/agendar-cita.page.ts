@@ -35,8 +35,24 @@ import {
     IonCol,
     IonChip,
     IonGrid,
-    IonCardSubtitle
+    IonCardSubtitle,
+    IonText
 } from '@ionic/angular/standalone';
+
+// Define la estructura mínima de una cita ocupada del backend
+interface BusySlot {
+    id: number;
+    start: string;
+    end: string;
+    // Agregamos professional_id para el filtro
+
+}
+
+// Define el tipo de la respuesta del servicio (debe coincidir con tu servicio)
+interface BusyResponse {
+    professional: BusySlot[];
+    patient: BusySlot[];
+}
 
 @Component({
     selector: 'app-agendar-cita',
@@ -47,21 +63,28 @@ import {
         CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule,
         IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
         IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonSelectOption, IonSelect, IonInput, IonDatetime,
-        IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle
+        IonRow, IonCol, IonChip, IonGrid, IonCardSubtitle,IonText
     ]
 })
 export class AgendarCitaPage implements OnInit {
+    
+    // 👈🏼 1. DECLARACIÓN DE LA PROPIEDAD
+    minDate: string; 
 
-    constructor(
-        private fb: FormBuilder,
-        private svc: AppointmentService,
-        private toastCtrl: ToastController,
-        private alertCtrl: AlertController, // Necesario para la alerta de Zoom/Mis Citas
-        private router: Router, // Necesario para navegar a /mis-citas
-        private route: ActivatedRoute,
-        private mpService: MercadopagoService, // Inyección de Mercado Pago
-        private loadingCtrl: LoadingController  // Inyección de Loading
-    ) { }
+     constructor(
+    private fb: FormBuilder, private svc: AppointmentService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
+    private router: Router,
+    private route: ActivatedRoute,
+    private mpService: MercadopagoService,
+        private loadingCtrl: LoadingController 
+ ) {
+        // 👈🏼 2. INICIALIZACIÓN EN EL CONSTRUCTOR
+        const today = new Date();
+        // Genera la fecha actual en formato ISO 8601 (YYYY-MM-DD), requerido por [min]
+        this.minDate = today.toISOString().split('T')[0];
+    }
 
     // --------- Form ----------
     form = this.fb.group({
@@ -74,13 +97,35 @@ export class AgendarCitaPage implements OnInit {
     });
 
     professionals: any[] = [];
-    appointments: any[] = [];
+    private _allAppointments: any[] = []; // Nueva propiedad privada para todas las citas
     busyTimes: string[] = [];
 
     get selectedProfessional() {
         const id = this.form.get('professional')!.value;
         return this.professionals.find(p => p.id === id);
     }
+
+    get appointments(): any[] {
+        const now = new Date();
+        
+        return this._allAppointments.filter(a => {
+            // 1. Filtrar por estado 'scheduled'
+            const isScheduled = a.status === 'scheduled';
+            
+            // 2. Filtrar por fecha futura (o la de hoy)
+            const appointmentDate = new Date(a.start_datetime);
+            
+            // Compara solo el día (ignora la hora) para incluir citas de hoy
+            const appDateOnly = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
+            const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // La cita debe ser hoy o en el futuro
+            const isFutureOrToday = appDateOnly >= todayDateOnly;
+
+            return isScheduled && isFutureOrToday;
+        });
+    }
+
 
     // --------- Slots / disponibilidad ----------
     STEP_MINUTES = 30;
@@ -179,10 +224,11 @@ export class AgendarCitaPage implements OnInit {
 
     loadAppointments() {
         this.svc.getAppointments().subscribe({
-            next: (res) => { this.appointments = res; },
-            error: (err) => console.error(err)
+            next: res => this._allAppointments = res, // 🎯 asigna a la propiedad privada
+            error: err => console.error(err)
         });
-    }
+        }
+
 
     // 💰 FUNCIÓN CENTRAL: Llama a Mercado Pago.
     async iniciarPago() {
@@ -248,12 +294,18 @@ export class AgendarCitaPage implements OnInit {
     cancel(id: number) {
         this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
             next: () => {
-                this.presentToast('Cita cancelada');
-                this.loadAppointments();
+            this.presentToast('Cita cancelada');
+            // 🎯 Actualiza el estado localmente para reflejar el cambio al instante
+            const index = this._allAppointments.findIndex(a => a.id === id);
+            if (index !== -1) {
+                this._allAppointments[index].status = 'cancelled';
+                // La próxima vez que se acceda a 'this.appointments', la cita se filtrará
+            }
             },
             error: () => this.presentToast('No se pudo cancelar')
         });
-    }
+        }
+
 
     // ⏰ MÉTODOS DE MANEJO DE SLOTS:
 
@@ -286,26 +338,41 @@ export class AgendarCitaPage implements OnInit {
     }
 
     refreshBusy(professionalId: number, dateISO: string) {
-        this.svc.getBusy(professionalId, dateISO).subscribe({
-            next: (res) => {
-                this.busyPro = res.professional.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
-                this.busyPatient = res.patient.map(x => ({ start: new Date(x.start), end: new Date(x.end) }));
-                this.busyTimes = res.professional.map(x => {
-                    const d = new Date(x.start);
-                    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                });
-                this.recomputeSlotStatus(dateISO);
-            },
-            error: err => {
-                console.error('busy error', err);
-                this.busyPro = [];
-                this.busyPatient = [];
-                this.busyTimes = [];
-                this.recomputeSlotStatus(dateISO);
-            }
-        });
-    }
+  // 1. Limpieza inmediata de datos anteriores (MANTENER ESTO)
+  this.busyPro = [];
+  this.busyPatient = [];
+  this.busyTimes = [];
+  this.slotStatus = {};
+  this.recomputeSlotStatus(dateISO);
 
+  this.svc.getBusy(professionalId, dateISO).subscribe({
+    next: (res: any) => {
+      // 🛑 ELIMINAMOS EL FILTRO: backend ya garantiza que los datos están filtrados
+      const proAppointments = res.professional;
+
+      // 2. Asignación de busyPro
+      this.busyPro = proAppointments.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
+
+      // Asignación de busyPatient
+      this.busyPatient = res.patient.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
+
+      // Asignación de busyTimes
+      this.busyTimes = proAppointments.map((x: any) => {
+        const d = new Date(x.start);
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      });
+
+      this.recomputeSlotStatus(dateISO);
+    },
+    error: err => {
+      console.error('busy error', err);
+      this.busyPro = [];
+      this.busyPatient = [];
+      this.busyTimes = [];
+      this.recomputeSlotStatus(dateISO);
+    }
+  });
+}
     recomputeSlotStatus(dateISO: string) {
         const map: Record<string, 'free'|'pro'|'patient'|'both'> = {};
         for (const s of this.slots) {
