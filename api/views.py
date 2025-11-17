@@ -9,7 +9,7 @@ from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetai
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
     ProfessionalSearchSerializer, SupportTicketCreateSerializer, SupportTicketReplySerializer,
     AdminUserSerializer, ProfessionalAvailabilitySerializer)
-
+from rest_framework.generics import RetrieveAPIView
 from api.zoom_service import create_meeting_for_professional
 from datetime import timezone as dt_timezone
 from .serializers import MyProfileSerializer, MyProfileUpdateSerializer
@@ -304,6 +304,42 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             "patient": serialize(qs_patient)
         })
 
+
+    # -----------------------
+# Appointment Notes (Crear / Editar)
+# -----------------------
+class AppointmentNotesUpdateView(generics.UpdateAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        appointment = self.get_object()
+
+        # Solo profesionales pueden escribir notas
+        if request.user.role != "profesional":
+            return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Validar que la cita esté completada
+        if appointment.status != "completed":
+            return Response(
+                {"detail": "Solo se pueden agregar notas a citas completadas."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        notes = request.data.get("notes")
+        if notes is None:
+            return Response({"detail": "Debe proporcionar notas."}, status=400)
+
+        appointment.notes = notes
+        appointment.save(update_fields=["notes"])
+
+        return Response({
+            "detail": "Notas guardadas correctamente",
+            "notes": appointment.notes
+        })
+
+
 # -----------------------
 # ProfesionalSearchView
 # -----------------------
@@ -347,6 +383,7 @@ class ProfesionalSearchView(generics.ListAPIView):
     def get_queryset(self):
         queryset = CustomUser.objects.filter(role='profesional')
         queryset = queryset.filter(psicologoprofile__is_available=True)
+
         available_only = self.request.query_params.get('available', None)
         if available_only == 'true':
             now = timezone.now()
@@ -369,6 +406,11 @@ class ProfessionalDetailView(generics.RetrieveAPIView):
         user_id = self.kwargs.get(self.lookup_url_kwarg)
         return PsicologoProfile.objects.select_related('user').get(user__id=user_id)
     
+
+class AppointmentDetailWithHistoryAPIView(RetrieveAPIView):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+
 
 
 # -----------------------
@@ -494,3 +536,4 @@ class MyProfileView(APIView):
         # Devolver el perfil actualizado
         out = MyProfileSerializer(user).data
         return Response(out, status=status.HTTP_200_OK)
+

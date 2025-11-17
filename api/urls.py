@@ -6,7 +6,7 @@ from .views import (
     ProfesionalSearchView, SpecialtyListView, LoginView,
     SupportTicketCreateView, UserTicketListView, UserTicketDetailView, SupportTicketReplyView,
     AdminTicketListView, SupportTicketDetailView, AdminUserDetailView, AdminUserListView,
-    ProfessionalAvailabilityView
+    ProfessionalAvailabilityView,AppointmentNotesUpdateView,AppointmentDetailWithHistoryAPIView
 )
 from .serializers import CustomTokenObtainPairSerializer
 from .views_zoom import zoom_connect, zoom_callback
@@ -36,7 +36,14 @@ urlpatterns = [
     path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
     path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
     path('pro/profile/availability/', ProfessionalAvailabilityView.as_view(), name='pro-availability'),
+    # ================================
+    #  🔥 Ruta correcta para notas
+    # ================================
+    path("appointments/<int:pk>/notes/", AppointmentNotesUpdateView.as_view(), name="appointment-notes"),
 
+    path("zoom/connect/", zoom_connect, name="zoom_connect"),
+    path("zoom/oauth/callback/", zoom_callback, name="zoom_callback"),
+    path("appointments/<int:pk>/detail/", AppointmentDetailWithHistoryAPIView.as_view(), name="appointment-detail"),
 ]
 
 

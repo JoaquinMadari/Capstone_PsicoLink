@@ -4,10 +4,9 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import UniqueValidator
 
-
 from django.utils import timezone
 from django.conf import settings
-from .models import Appointment
+from .models import Appointment, AppointmentNote
 from django.contrib.auth import get_user_model
 from django.db import transaction, IntegrityError
 from datetime import timedelta
@@ -229,44 +228,62 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
     'default': (15, 120),
 })
 
+class AppointmentNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentNote
+        fields = ("id", "text", "fecha")
+
+
+
+# -----------------------------
+# APPOINTMENT SERIALIZER
+# -----------------------------
+class AppointmentNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentNote
+        fields = ("id", "text", "fecha")
+
 
 class AppointmentSerializer(serializers.ModelSerializer):
-    
-    # 1. 'patient' y 'professional' ahora son 'PrimaryKeyRelatedField'.
     patient = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(role__in=['paciente', 'organizacion']), # Permite pacientes u organizaciones
-        required=False # Lo haremos requerido en el validate/create
+        queryset=User.objects.filter(role__in=['paciente', 'organizacion']),
+        required=False
     )
     professional = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.filter(role='profesional'),
         required=True
     )
-    
-    # 2. Mantenemos los 'details' para que puedas LEER la info
-    #    del usuario
-    patient_detail = UserSerializer(source='patient', read_only=True)
-    professional_detail = UserSerializer(source='professional', read_only=True)
-    
+
+    patient_detail = serializers.SerializerMethodField(read_only=True)
+    professional_detail = serializers.SerializerMethodField(read_only=True)
+    historial = AppointmentNoteSerializer(many=True, read_only=True)
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Appointment
         fields = (
-            'id', 
-            'patient',  # Campo de escritura (ID)
-            'patient_detail', # Campo de lectura (Objeto)
-            'professional', # Campo de escritura (ID)
-            'professional_detail', # Campo de lectura (Objeto)
-            'professional_role', 'start_datetime', 'duration_minutes',
-            'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at',
-            'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id'
+            'id', 'patient', 'patient_detail', 'professional', 'professional_detail',
+            'professional_role', 'start_datetime', 'duration_minutes', 'end_datetime',
+            'status', 'modality', 'reason', 'notes', 'created_at',
+            'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id', 'historial',
         )
-        read_only_fields = ('created_at', 'end_datetime', 'professional_role', 'patient_detail', 'professional_detail')
+        read_only_fields = ('created_at', 'end_datetime', 'professional_role',
+                            'patient_detail', 'professional_detail')
 
     def get_end_datetime(self, obj):
         return obj.end_datetime
 
-    # --- Validaciones individuales ---
+    def get_patient_detail(self, obj):
+        from .serializers import UserSerializer
+        return UserSerializer(obj.patient).data if obj.patient else None
+
+    def get_professional_detail(self, obj):
+        from .serializers import UserSerializer
+        return UserSerializer(obj.professional).data if obj.professional else None
+
+    # -----------------------------
+    # VALIDACIONES
+    # -----------------------------
     def validate_professional(self, value):
         if getattr(value, 'role', None) != 'profesional':
             raise serializers.ValidationError("El usuario seleccionado no es un profesional.")
@@ -371,70 +388,49 @@ class AppointmentSerializer(serializers.ModelSerializer):
         if self.instance:
             qs_prof = qs_prof.exclude(pk=self.instance.pk)
         if any((a.start_datetime < end) and (a.end_datetime > start) for a in qs_prof):
-            raise serializers.ValidationError("El profesional ya tiene una cita en ese horario. Por favor selecciona otro horario disponible.")
+
+            raise serializers.ValidationError("El profesional ya tiene una cita en ese horario.")
 
         return data
-    
-    # --- Creación / Update ---
+
+    # -----------------------------
+# CREATE / UPDATE UNIFICADO
+# -----------------------------
     def create(self, validated_data):
-        
-        # --- LÓGICA DE CREATE MODIFICADA ---
-        # 4. Hacemos que la creación funcione en ambos escenarios.
         request = self.context.get('request')
-        
-        # Si 'patient' no vino en los datos (Webhook), 
-        # lo tomamos del request (Vista normal).
+
+        # --- Asignar patient si no viene en validated_data ---
         if 'patient' not in validated_data:
             if request and request.user and request.user.is_authenticated:
                 validated_data['patient'] = request.user
             else:
-                # Esto no debería pasar si la validación funcionó, pero por si acaso.
                 raise serializers.ValidationError({"patient": "No se proveyó un paciente."})
-        # --- FIN LÓGICA DE CREATE ---
 
+        # --- Asignar professional_role si existe professional ---
+        professional = validated_data.get('professional')
+        if professional:
+            try:
+                validated_data['professional_role'] = professional.psicologoprofile.specialty
+            except AttributeError:
+                validated_data['professional_role'] = 'desconocido'
+
+        # --- Crear la instancia en transacción ---
         with transaction.atomic():
-            professional = validated_data.get('professional')
-            if professional:
-                try:
-                    spec = professional.psicologoprofile.specialty
-                    validated_data['professional_role'] = spec
-                except AttributeError:
-                    validated_data['professional_role'] = 'desconocido'
             return super().create(validated_data)
 
+
     def update(self, instance, validated_data):
+        # --- Actualizar notes si vienen ---
+        notes = validated_data.get("notes", None)
+        if notes is not None:
+            instance.notes = notes
+            instance.save()
+            return instance
+
+        # --- Lógica adicional: transacción para otros updates ---
         with transaction.atomic():
             return super().update(instance, validated_data)
-        
 
-
-class ProfessionalSearchSerializer(UserSerializer):
-    specialty = serializers.SerializerMethodField()
-    specialty_label = serializers.SerializerMethodField()
-    full_name = serializers.SerializerMethodField()
-    work_modality = serializers.SerializerMethodField() 
-
-    
-    class Meta(UserSerializer.Meta):
-        model = CustomUser
-        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name', 'work_modality')  
-        
-    def get_specialty(self, obj):
-        try: return obj.psicologoprofile.specialty
-        except AttributeError: return None
-
-    def get_specialty_label(self, obj):
-        try:
-            p = obj.psicologoprofile
-            return p.specialty_other if p.specialty == Specialty.OTRO and p.specialty_other else p.get_specialty_display()
-        except AttributeError:
-            return None
-    
-    def get_work_modality(self, obj):
-        try:
-            return obj.psicologoprofile.work_modality  # 'Presencial' | 'Online' | 'Mixta'
-        except AttributeError:
-            return None
 
 
 
