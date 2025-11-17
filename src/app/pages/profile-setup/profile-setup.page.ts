@@ -131,7 +131,7 @@ export class ProfileSetupPage implements OnInit {
       main_focus: ['', [notBlank(), maxLenTrim(100)]],
       therapeutic_techniques: ['', [notBlank(), maxLenTrim(2000)]],
       style_of_attention: ['', [notBlank(), maxLenTrim(2000)]],
-      attention_schedule: ['', [notBlank(), maxLenTrim(255)]],
+      session_price: [null, [Validators.required, Validators.min(1), Validators.max(100000)]],
       work_modality: ['', [Validators.required]],
 
       inclusive_orientation: [false],
@@ -207,7 +207,7 @@ export class ProfileSetupPage implements OnInit {
     };
     if (payload.specialty !== 'otro') delete payload.specialty_other;
 
-    this['http'].post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
+    this.http.post(`${this.api}/profile/setup/`, payload, { headers: this.authHeaders() }).subscribe({
       next: () => this.router.navigate([this.roleBase(), 'home']), // home por rol
       error: (err) => console.error('Error guardando perfil profesional', err)
     });

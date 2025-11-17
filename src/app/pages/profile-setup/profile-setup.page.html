@@ -143,16 +143,21 @@
             <div *ngIf="proForm.get('style_of_attention')?.hasError('maxlength')">*Máximo 2000 caracteres.</div>
           </div>
 
-          <!-- Disponibilidad -->
+          <!-- Precio por sesión -->
           <ion-item>
-            <ion-label position="stacked">Disponibilidad (texto)</ion-label>
-            <ion-textarea formControlName="attention_schedule" placeholder="Ej. Lun-Vie 09:00–18:00"></ion-textarea>
+            <ion-label position="stacked">Precio por sesión (CLP)</ion-label>
+            <ion-input type="number"
+                      formControlName="session_price"
+                      placeholder="Ej. 20000">
+            </ion-input>
           </ion-item>
           <div class="validation-errors"
-               [class.visible]="proForm.get('attention_schedule')?.invalid && proForm.get('attention_schedule')?.touched">
-            <div *ngIf="proForm.get('attention_schedule')?.hasError('blank')">*La disponibilidad es obligatoria.</div>
-            <div *ngIf="proForm.get('attention_schedule')?.hasError('maxlength')">*Máximo 255 caracteres.</div>
+              [class.visible]="proForm.get('session_price')?.invalid && proForm.get('session_price')?.touched">
+            <div *ngIf="proForm.get('session_price')?.hasError('required')">*El precio es obligatorio.</div>
+            <div *ngIf="proForm.get('session_price')?.hasError('min')">*Debe ser un monto mayor a 0.</div>
+            <div *ngIf="proForm.get('session_price')?.hasError('max')">*No puede superar 100.000 CLP.</div>
           </div>
+
 
           <!-- Modalidad -->
           <ion-item>
