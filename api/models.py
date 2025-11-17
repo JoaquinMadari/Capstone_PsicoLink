@@ -95,7 +95,7 @@ class PsicologoProfile(BaseProfile):
     main_focus = models.CharField(max_length=100)
     therapeutic_techniques = models.TextField()
     style_of_attention = models.TextField()
-    attention_schedule = models.CharField(max_length=255) # Mejor un JSONField o FK a un modelo de Horario
+    attention_schedule = models.CharField(max_length=255,null=True,blank=True) # Mejor un JSONField o FK a un modelo de Horario
     work_modality = models.CharField(max_length=50)
     certificates = models.FileField(upload_to='certificates/')
     
@@ -113,6 +113,17 @@ class PsicologoProfile(BaseProfile):
     zoom_access_token = models.TextField(blank=True, null=True)
     zoom_refresh_token = models.TextField(blank=True, null=True)
     zoom_token_expires_at = models.DateTimeField(blank=True, null=True)
+
+    #--Mercado Pago Integration--
+    session_price = models.PositiveIntegerField(
+    null=True,
+    blank=True,
+    help_text="Precio por sesión en CLP")
+    
+    is_available = models.BooleanField(default=True)
+
+    #Permitir al usuario profesional desactivar su perfil para el resto
+    is_available = models.BooleanField(default=True)
 
 
 

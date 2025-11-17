@@ -4,14 +4,15 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, Appointment, PsicologoProfile
+from .models import CustomUser, Appointment, PsicologoProfile, SupportTicket
 from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer, AppointmentSerializer,
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
-    ProfessionalSearchSerializer)
-
+    ProfessionalSearchSerializer, SupportTicketCreateSerializer, SupportTicketReplySerializer,
+    AdminUserSerializer, ProfessionalAvailabilitySerializer)
+from rest_framework.generics import RetrieveAPIView
 from api.zoom_service import create_meeting_for_professional
 from datetime import timezone as dt_timezone
-from rest_framework.generics import RetrieveAPIView
+from .serializers import MyProfileSerializer, MyProfileUpdateSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -36,6 +37,7 @@ from integrations.supabase_sync import ensure_supabase_user, get_supabase_sessio
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
+    authentication_classes = []  # ← AGREGAR ESTO
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -48,7 +50,7 @@ class RegisterView(generics.CreateAPIView):
         last_name   = ser.validated_data.get("last_name", "")
 
         with transaction.atomic():
-            user: CustomUser = ser.save()  # crea en Django
+            user: CustomUser = ser.save()
 
             try:
                 uid = ensure_supabase_user(
@@ -63,7 +65,6 @@ class RegisterView(generics.CreateAPIView):
 
             except SupabaseAdminError as e:
                 msg = str(e)
-                # Si es error de datos/duplicado → 400
                 if " 400 " in msg or " 409 " in msg or " 422 " in msg:
                     transaction.set_rollback(True)
                     return Response(
@@ -75,8 +76,9 @@ class RegisterView(generics.CreateAPIView):
         data = UserSerializer(user).data
         if not user.supabase_uid:
             data["supabase_sync"] = "pending"
+
         return Response(data, status=status.HTTP_201_CREATED)
-    
+
 
 logger = logging.getLogger(__name__)
 
@@ -93,75 +95,39 @@ class LoginView(TokenObtainPairView):
             password = request.data.get('password')
             if not (email and password):
                 return resp
-
-            # Intentamos obtener sesión en Supabase (sign in)
-            try:
-                supabase_tokens = get_supabase_session_tokens(email, password)
-            except SupabaseAdminError as e:
-                # Error en admin API (crear/gestionar usuarios) — logueamos y seguimos
-                logger.warning("Supabase admin error when fetching session tokens for %s: %s", email, e)
-                supabase_tokens = None
-            except Exception as e:
-                # Errores inesperados al hablar con Supabase
-                logger.exception("Unexpected error getting supabase tokens for %s: %s", email, e)
-                supabase_tokens = None
-
-            # Si obtuvimos tokens válidos, los exponemos en la respuesta
+            
+            supabase_tokens = get_supabase_session_tokens(email, password)
+        
             if supabase_tokens:
-                final_data['supabase_access_token'] = supabase_tokens.get('access_token')
-                final_data['supabase_refresh_token'] = supabase_tokens.get('refresh_token')
-                final_data['supabase_sync'] = 'ok'
-            else:
-                # Indicamos claramente que la sincronización con Supabase no se pudo realizar
-                final_data['supabase_sync'] = 'failed'
+                final_data['supabase_access_token'] = supabase_tokens['access_token']
+                final_data['supabase_refresh_token'] = supabase_tokens['refresh_token']
 
-            # Intentamos enlazar supabase_uid en la DB local SOLO si no existe ya.
-            # Pero esto debe estar protegido — si falla, no abortamos el login.
-            try:
-                user = CustomUser.objects.get(email=email)
-                if not user.supabase_uid:
-                    # Intentar crear/asegurar usuario en Supabase solo si tenemos credenciales válidas
-                    # Esto evita intentar crear con password inválido repetidamente.
-                    if supabase_tokens:
-                        try:
-                            new_uid = ensure_supabase_user(
-                                email=user.email,
-                                password=password,
-                                role=user.role,
-                                first_name=user.first_name,
-                                last_name=user.last_name,
-                            )
-                            clash = CustomUser.objects.filter(supabase_uid=new_uid).exclude(pk=user.pk).first()
-                            if clash:
-                                logger.warning(
-                                    "Supabase UID %s ya enlazado a pk=%s (%s). Omitiendo relink para pk=%s (%s).",
-                                    new_uid, clash.pk, clash.email, user.pk, user.email
-                                )
-                            else:
-                                user.supabase_uid = new_uid
-                                user.save(update_fields=["supabase_uid"])
-                                final_data['supabase_sync'] = 'created'
-                        except SupabaseAdminError as e:
-                            logger.warning("SupabaseAdminError while ensure_supabase_user for %s: %s", user.email, e)
-                            final_data['supabase_sync'] = 'failed'
-                        except Exception:
-                            logger.exception("Unexpected error in ensure_supabase_user for %s", user.email)
-                            final_data['supabase_sync'] = 'failed'
-                    else:
-                        # No intentamos crear si no tenemos tokens válidos (evita crear con credenciales inválidas)
-                        logger.info("No supabase tokens — omitiendo ensure_supabase_user para %s", email)
-            except CustomUser.DoesNotExist:
-                logger.warning("Usuario Django no encontrado tras login: %s", email)
-            except Exception:
-                logger.exception("Error al intentar enlazar supabase_uid en login para %s", email)
+            user = CustomUser.objects.get(email=email)
+
+            if not user.supabase_uid:
+                new_uid = ensure_supabase_user(
+                    email=user.email,
+                    password=password,
+                    role=user.role,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                )
+                # Evitar colisiones si ese uid ya está enlazado a otra fila
+                clash = CustomUser.objects.filter(supabase_uid=new_uid).exclude(pk=user.pk).first()
+                if clash:
+                    logger.warning(
+                        "Supabase UID %s ya enlazado a pk=%s (%s). Omitiendo relink para pk=%s (%s).",
+                        new_uid, clash.pk, clash.email, user.pk, user.email
+                    )
+                else:
+                    user.supabase_uid = new_uid
+                    user.save(update_fields=["supabase_uid"])
 
         except Exception as e:
-            # Atrapamos cualquier cosa inesperada en la sincronización y NO rompemos el login
-            logger.exception("Supabase sync on login failed (caught outer): %s", e)
+            logger.exception("Supabase sync on login failed: %s", e)
 
-        # Devolvemos tokens + datos de usuario (resp.status_code viene de super())
+        # Devolvemos tokens + datos de usuario
         return Response(final_data, status=resp.status_code)
-
 
 
 class SpecialtyListView(APIView):
@@ -223,23 +189,12 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        try:
-            user = self.request.user
-        except Exception as e:
-            logger.exception("Error accediendo a request.user en AppointmentViewSet.get_queryset: %s", e)
-            return Appointment.objects.none()
-
-        if not user or not getattr(user, 'is_authenticated', False):
-            return Appointment.objects.none()
-
+        user = self.request.user
         if user.is_staff:
             return Appointment.objects.all().select_related('patient', 'professional')
-
         if getattr(user, 'role', None) == 'profesional':
             return Appointment.objects.filter(professional=user).select_related('patient', 'professional')
-
         return Appointment.objects.filter(patient=user).select_related('patient', 'professional')
-
 
     def perform_create(self, serializer):
         appointment = serializer.save()
@@ -286,6 +241,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 appointment.save(update_fields=['professional_role'])
         except Exception:
             pass
+
+
+
+
 
     def create(self, request, *args, **kwargs):
         #Redefinimos create() para devolver información más útil tras crear la cita.
@@ -345,6 +304,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             "patient": serialize(qs_patient)
         })
 
+
     # -----------------------
 # Appointment Notes (Crear / Editar)
 # -----------------------
@@ -383,15 +343,47 @@ class AppointmentNotesUpdateView(generics.UpdateAPIView):
 # -----------------------
 # ProfesionalSearchView
 # -----------------------
+from django_filters import rest_framework as filters
+
+class ProfessionalFilter(filters.FilterSet):
+    #Filtro de Años Mínimos de Experiencia (Min Experience)
+    # Nombre del filtro que usará el frontend: 'experience_years_gte'
+    experience_years_gte = filters.NumberFilter(
+        field_name='psicologoprofile__experience_years',
+        lookup_expr='gte' 
+    )
+    
+    #Filtro de Especialidad
+    specialty = filters.CharFilter(field_name='psicologoprofile__specialty')
+    
+    #Filtro de Modalidad de Trabajo
+    work_modality = filters.CharFilter(field_name='psicologoprofile__work_modality')
+    
+    #Filtro de Orientación Inclusiva
+    inclusive_orientation = filters.BooleanFilter(field_name='psicologoprofile__inclusive_orientation')
+
+    class Meta:
+        model = CustomUser
+        # Aquí las claves que el frontend puede enviar
+        fields = [
+            'experience_years_gte',
+            'specialty',
+            'work_modality',
+            'inclusive_orientation'
+        ]
+
+
 class ProfesionalSearchView(generics.ListAPIView):
     serializer_class = ProfessionalSearchSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['psicologoprofile__specialty']
+    filterset_class = ProfessionalFilter
     search_fields = ['username', 'first_name', 'last_name', 'psicologoprofile__specialty']
-    ordering_fields = ['username', 'psicologoprofile__specialty']
+    ordering_fields = ['username', 'psicologoprofile__specialty', 'psicologoprofile__experience_years']
 
     def get_queryset(self):
         queryset = CustomUser.objects.filter(role='profesional')
+        queryset = queryset.filter(psicologoprofile__is_available=True)
+
         available_only = self.request.query_params.get('available', None)
         if available_only == 'true':
             now = timezone.now()
@@ -414,6 +406,134 @@ class ProfessionalDetailView(generics.RetrieveAPIView):
         user_id = self.kwargs.get(self.lookup_url_kwarg)
         return PsicologoProfile.objects.select_related('user').get(user__id=user_id)
     
+
 class AppointmentDetailWithHistoryAPIView(RetrieveAPIView):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+
+
+
+# -----------------------
+# SoporteTicketView
+# -----------------------
+class SupportTicketCreateView(generics.CreateAPIView):
+    #Creacion del ticket
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [AllowAny] 
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+
+
+class UserTicketListView(generics.ListAPIView):
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return SupportTicket.objects.filter(user=user)
+
+
+class UserTicketDetailView(viewsets.ReadOnlyModelViewSet):
+    #Detalle del ticket para el usuario autenticado
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SupportTicket.objects.filter(user=self.request.user)
+    
+
+
+class IsAdminUser(permissions.BasePermission):
+    #Permite el acceso solo a usuarios que son miembros del staff (Administradores).
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.is_staff
+
+#Responder ticket
+class SupportTicketReplyView(generics.UpdateAPIView):
+    queryset = SupportTicket.objects.all()
+    serializer_class = SupportTicketReplySerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['patch']
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        #Asignar la respuesta
+        instance.respuesta = serializer.validated_data.get('respuesta')
+        
+        #Asignar el admin que respondió
+        instance.respondido_por = request.user 
+        
+        #Marcar como resuelto y la fecha
+        instance.status = 'cerrado' 
+        instance.fecha_respuesta = timezone.now()
+        
+        instance.save()
+        return Response(serializer.data)
+    
+
+#Listar todos los tickets para el admin
+class AdminTicketListView(generics.ListAPIView):
+    serializer_class = SupportTicketCreateSerializer 
+    permission_classes = [IsAdminUser]
+    
+    # Muestra todos los tickets, ordenados por fecha de creación (los más viejos primero si están abiertos)
+    def get_queryset(self):
+        return SupportTicket.objects.exclude(status='cerrado').order_by('created_at')
+
+
+class SupportTicketDetailView(generics.RetrieveAPIView): 
+    queryset = SupportTicket.objects.all()
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+
+class AdminUserListView(generics.ListCreateAPIView):
+    queryset = CustomUser.objects.all().order_by('-date_joined')
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAdminUser]
+
+#Vista para Ver, Editar (PATCH) y Desactivar (Admin)
+class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+
+
+
+class ProfessionalAvailabilityView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfessionalAvailabilitySerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'patch']
+
+    def get_object(self):
+        #Devuelve el perfil del psicólogo asociado al usuario autenticado
+        return PsicologoProfile.objects.get(user=self.request.user)
+
+
+class MyProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        serializer = MyProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = MyProfileUpdateSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.update(request.user, serializer.validated_data)
+        # Devolver el perfil actualizado
+        out = MyProfileSerializer(user).data
+        return Response(out, status=status.HTTP_200_OK)
+
