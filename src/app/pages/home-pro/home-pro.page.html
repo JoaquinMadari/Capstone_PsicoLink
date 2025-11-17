@@ -36,7 +36,7 @@
   <!-- KPIs -->
   <ion-grid>
     <ion-row>
-      <ion-col size="4">
+      <ion-col size="6">
         <ion-card>
           <ion-card-content class="ion-text-center">
             <h1>{{ kpis.hoursToday | number:'1.0-1' }}</h1>
@@ -44,19 +44,11 @@
           </ion-card-content>
         </ion-card>
       </ion-col>
-      <ion-col size="4">
+      <ion-col size="6">
         <ion-card>
           <ion-card-content class="ion-text-center">
             <h1>{{ kpis.weekAppointments }}</h1>
             <small>Citas semana</small>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="4">
-        <ion-card>
-          <ion-card-content class="ion-text-center">
-            <h1>{{ kpis.rating | number:'1.1-1' }}</h1>
-            <small>Rating</small>
           </ion-card-content>
         </ion-card>
       </ion-col>
