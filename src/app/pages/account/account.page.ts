@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton
+  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonButtons
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Auth } from 'src/app/services/auth';
@@ -12,9 +12,6 @@ import { environment } from 'src/environments/environment';
   templateUrl: './account.page.html',
   styleUrls: ['./account.page.scss'],
   standalone: true,
-<<<<<<< HEAD
-  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton],
-=======
   imports: [
     CommonModule,
     IonHeader,
@@ -27,7 +24,6 @@ import { environment } from 'src/environments/environment';
     IonButtons,
     IonButton,
   ],
->>>>>>> 2392221 (miscitas agendarcita enlazado con zoom)
 })
 export class AccountPage {
   role = localStorage.getItem('role') || '';

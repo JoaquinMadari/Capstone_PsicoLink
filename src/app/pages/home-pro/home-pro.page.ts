@@ -1,17 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
-  IonContent, IonRefresher, IonRefresherContent,
-  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
-  IonItem, IonLabel, IonToggle, IonBadge,
-  IonGrid, IonRow, IonCol, IonList,
-  IonFab, IonFabButton } from '@ionic/angular/standalone';
+  IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
+  IonItem, IonLabel, IonToggle, IonBadge,IonGrid, IonRow, IonCol, IonList, IonFab, IonFabButton, IonNote, IonSpinner 
+} from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AppointmentService } from 'src/app/services/appointment';
+import { ProfessionalService } from 'src/app/services/professional-service';
 
 type Status = 'scheduled' | 'cancelled' | 'completed';
 
@@ -49,7 +48,6 @@ interface AppointmentDTO {
 interface Kpis {
   hoursToday: number;
   weekAppointments: number;
-  rating: number;
 }
 
 
@@ -59,26 +57,26 @@ interface Kpis {
   styleUrls: ['./home-pro.page.scss'],
   standalone: true,
   imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
-  IonContent, IonRefresher, IonRefresherContent,
-  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
-  IonItem, IonLabel, IonToggle, IonBadge,
-  IonGrid, IonRow, IonCol, IonList,
-  IonFab, IonFabButton, CommonModule, RouterLink]
+  IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, 
+  IonCardContent, IonItem, IonLabel, IonToggle, IonBadge,
+  IonGrid, IonRow, IonCol, IonList, IonFab, IonFabButton, IonNote, IonSpinner,
+  CommonModule, RouterLink]
 })
 export class HomeProPage implements OnInit {
   private apiUrl = (environment.API_URL || '').replace(/\/$/, '');
 
   // Estado
   loading = false;
-  isAvailable = signal<boolean>(true); // nos falta la logica para que desactive al profesional
+  isAvailable = signal<boolean>(true);
+  submittingAvailability = false;
   upcoming: AppointmentDTO[] = [];
   pending: AppointmentDTO[] = [];
-  kpis: Kpis = { hoursToday: 0, weekAppointments: 0, rating: 0 };
+  kpis: Kpis = { hoursToday: 0, weekAppointments: 0 };
 
   constructor(
     private svc: AppointmentService,
+    private proSvc: ProfessionalService,
     private toastCtrl: ToastController,
-    private http: HttpClient,
     private router: Router
   ) {}
 
@@ -99,35 +97,46 @@ export class HomeProPage implements OnInit {
   }
 
   onToggleAvailability(ev: CustomEvent) {
-    const checked = (ev as any).detail?.checked ?? false;
-    this.isAvailable.set(checked);
-    this.presentToast(checked ? 'Disponibilidad activada' : 'Disponibilidad pausada');
-  }
+  if (this.submittingAvailability) return; 
+
+  const checked = (ev as any).detail?.checked ?? false;
+  
+  this.submittingAvailability = true;
+
+  //Llamar al ProfessionalService para actualizar el estado
+  this.proSvc.updateAvailability(checked).subscribe({
+    next: () => {
+      this.isAvailable.set(checked);
+      this.presentToast(checked ? 'Disponibilidad activada' : 'Disponibilidad pausada');
+      this.submittingAvailability = false;
+    },
+    error: (err) => {
+      // Si falla, revertir el toggle en la UI y mostrar error
+      this.isAvailable.set(!checked); 
+      this.presentToast('Error al cambiar la disponibilidad. Intenta nuevamente.');
+      console.error('Error al actualizar disponibilidad:', err);
+      this.submittingAvailability = false;
+    }
+  });
+}
 
   goAgenda()   { this.router.navigate(['/pro/mis-citas']); }
   goMessages() { this.router.navigate(['/pro/messages']);  }
   goSupport()  { this.router.navigate(['/soporte']);       }
 
-
-  detalleLink(a: { professional?: number; professional_detail?: UserDetail; start_datetime: string }) {
-    const proId = (typeof a.professional === 'number' && a.professional) ? a.professional : (a.professional_detail?.id ?? null);
-
-    const d = new Date(a.start_datetime);
-    const yyyy = d.getFullYear();
-    const mm   = String(d.getMonth() + 1).padStart(2, '0');
-    const dd   = String(d.getDate()).padStart(2, '0');
-    const hh   = String(d.getHours()).padStart(2, '0');
-    const mi   = String(d.getMinutes()).padStart(2, '0');
-
-    const fecha = `${yyyy}-${mm}-${dd}`;
-    const hora  = `${hh}:${mi}`;
-
-    return ['/detalle-cita', proId, fecha, hora];
-  }
-
   //Carga de datos
   load(done?: () => void) {
     this.loading = true;
+
+    //Obtener el estado de disponibilidad del profesional
+    this.proSvc.getAvailabilityStatus().subscribe({
+        next: (res) => {
+            this.isAvailable.set(res.is_available);
+        },
+        error: (err) => {
+            console.error('No se pudo cargar la disponibilidad inicial:', err);
+        }
+    });
 
     this.svc.getAppointments().subscribe({
       next: async (res: AppointmentDTO[]) => {
@@ -154,7 +163,7 @@ export class HomeProPage implements OnInit {
 
         this.upcoming = upcoming;
         this.pending  = pending;
-        this.kpis     = { hoursToday, weekAppointments, rating: 0 };
+        this.kpis     = { hoursToday, weekAppointments};
 
         this.loading = false;
         done?.();

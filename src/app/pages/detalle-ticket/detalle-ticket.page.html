@@ -1,0 +1,68 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="mis-tickets"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ ticket ? 'Ticket #' + ticket.id : 'Detalle del Ticket' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  
+  <div *ngIf="loading" class="ion-text-center ion-padding-top">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando detalle...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="ion-padding ion-text-center">
+    <ion-card color="danger">
+      <ion-card-content>
+        <p>{{ error }}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ion-card *ngIf="ticket && !loading">
+    <ion-card-header>
+      <ion-card-title>Ticket #{{ ticket.id }}</ion-card-title>
+      <ion-note 
+        [color]="getStatusColor(ticket.status)" 
+        class="ion-margin-top ion-padding-horizontal ion-padding-vertical">
+        Estado: {{ getStatusLabel(ticket.status) }}
+      </ion-note>
+    </ion-card-header>
+
+    <ion-card-content class="ion-padding-top">
+      
+      <!-- Información del Usuario -->
+      <ion-item lines="none">
+        <ion-label>
+          <p><strong>Enviado por:</strong> {{ ticket.name }}</p>
+          <p><strong>Email:</strong> {{ ticket.email }}</p>
+          <p><strong>Fecha:</strong> {{ ticket.created_at | date:'medium' }}</p>
+        </ion-label>
+      </ion-item>
+
+      <h3 class="ion-padding-top ion-padding-start">Mensaje Original:</h3>
+    
+      <div class="message-display ion-padding-horizontal">
+          {{ ticket.message }}
+      </div>
+
+      <h3 class="ion-padding-top ion-padding-start">Respuesta del Equipo de Soporte:</h3>
+      
+      <ion-card class="ion-margin-top admin-response-card" [color]="ticket.respuesta ? 'light' : 'warning'">
+        <ion-card-content>
+          <div *ngIf="ticket.respuesta">
+            <p>{{ ticket.respuesta }}</p>
+            <p class="ion-padding-top ion-text-end ion-text-italic">— Equipo de Soporte</p>
+          </div>
+          <div *ngIf="!ticket.respuesta">
+            <p>Tu solicitud está siendo procesada. Por favor, espera una respuesta de nuestro equipo.</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+    </ion-card-content>
+  </ion-card>
+</ion-content>

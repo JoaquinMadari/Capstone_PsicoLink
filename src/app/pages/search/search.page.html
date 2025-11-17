@@ -26,6 +26,36 @@
         </ion-select-option>
       </ion-select>
     </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Modalidad</ion-label>
+      <ion-select formControlName="workModality" placeholder="Selecciona la modalidad">
+        <ion-select-option value="">Cualquiera</ion-select-option>
+        <ion-select-option *ngFor="let m of workModalities" [value]="m.value">
+          {{ m.label }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Orientación Inclusiva</ion-label>
+      <ion-select formControlName="inclusiveOrientation" placeholder="¿Incluye orientación inclusiva?">
+        <ion-select-option value="">Cualquiera</ion-select-option>
+        <ion-select-option *ngFor="let o of inclusiveOptions" [value]="o.value">
+          {{ o.label }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Experiencia mínima (años)</ion-label>
+      <ion-select formControlName="minExperience" placeholder="Cualquier experiencia">
+        <ion-select-option [value]="null">Cualquiera</ion-select-option>
+        <ion-select-option *ngFor="let year of experienceOptions" [value]="year">
+          {{ year }}+
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
   </form>
 
   <ion-list lines="none">

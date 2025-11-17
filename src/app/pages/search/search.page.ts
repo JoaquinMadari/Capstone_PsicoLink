@@ -43,10 +43,26 @@ export class SearchPage implements OnInit {
 
   specialties: SpecialtyOption[] = [];
 
+  workModalities = [
+    { value: 'Online', label: 'Online' },
+    { value: 'Presencial', label: 'Presencial' },
+    { value: 'Mixta', label: 'Mixta' }
+  ];
+  
+  inclusiveOptions = [
+    { value: 'true', label: 'Sí' },
+    { value: 'false', label: 'No' }
+  ];
+
+  experienceOptions = [0, 1, 3, 5, 10];
+
   constructor(private toastCtrl: ToastController) {
     this.searchForm = this.fb.group({
       query: [''],
-      specialty: ['']
+      specialty: [''],
+      workModality: [''],
+      inclusiveOrientation: [''],
+      minExperience: [null],
     });
   }
 
@@ -68,11 +84,32 @@ export class SearchPage implements OnInit {
   }
 
   loadResults(event?: any) {
-    const { query, specialty } = this.searchForm.value as { query: string; specialty: string };
+    const { query, 
+        specialty, 
+        workModality, 
+        inclusiveOrientation,
+        minExperience } = this.searchForm.value as 
+      { query: string; 
+        specialty: string;
+        workModality: string;
+        inclusiveOrientation: string;
+        minExperience: number; };
 
     const filters: Record<string, string> = {};
     if (specialty) {
-      filters['psicologoprofile__specialty'] = specialty;
+      filters['specialty'] = specialty;
+    }
+
+    if (workModality) {
+      filters['work_modality'] = workModality;
+    }
+    
+    if (inclusiveOrientation) {
+      filters['inclusive_orientation'] = inclusiveOrientation;
+    }
+    
+    if (minExperience !== null && minExperience > 0) {
+      filters['experience_years_gte'] = minExperience.toString();
     }
 
     const ordering = '';
@@ -133,7 +170,6 @@ export class SearchPage implements OnInit {
     const role = localStorage.getItem('user_role') || localStorage.getItem('role') || 'paciente';
     const base = role === 'profesional' ? '/pro' : '/tabs';
 
-    // IMPORTANTE: pasar from = '/search' porque search es top-level
     this.router.navigate([base, 'chat', 'with', otherUid], {
       state: { from: '/search' }
     });

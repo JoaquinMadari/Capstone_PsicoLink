@@ -1,0 +1,83 @@
+ion-toolbar {
+  --background: #274472;
+  --color: #fff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-card {
+  --background: #ffffff !important;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+ion-card-title{
+    color: #333
+}
+
+ion-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --color: #333333;
+}
+
+.message-display {
+    color: #333;
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    margin-top: 10px;
+    border: 1px solid #dcdfe4;
+}
+
+ion-label {
+  font-size: 15px;
+}
+
+ion-label p {
+  color: #333333;
+  margin: 0;
+  padding: 2px 0;
+}
+
+ion-label strong {
+  font-weight: 700;
+  color: #274472;
+}
+
+/* Estilos de la Respuesta */
+ion-card[color="light"] {
+  --background: #f0f4f8;
+  color: #1a1a1a;
+}
+
+ion-card[color="warning"] {
+  --background: #fff3cd;
+  color: #856404;
+}
+
+/* Estilo para el texto dentro de la tarjeta de respuesta */
+ion-card-content p {
+    color: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+h3 {
+  color: #274472;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Estilos del estado (ion-note) */
+ion-note {
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+}

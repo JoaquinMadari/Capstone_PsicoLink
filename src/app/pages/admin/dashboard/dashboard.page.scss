@@ -1,0 +1,55 @@
+/*Estilo general */
+ion-toolbar {
+  --background: #274472;
+  --color: #fff;
+}
+
+ion-content {
+  --background: #C5D5E4; /* Fondo gris azulado claro */
+}
+
+/*Tarjeta de Bienvenida */
+.welcome-card {
+  --background: #f8fbfd; 
+  border-radius: 14px;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-card ion-card-title {
+  color: #274472;
+  font-weight: 600;
+}
+
+.welcome-card ion-card-content {
+  color: #333;
+}
+
+/*Tarjetas de Módulo de Navegación */
+.module-card {
+  --background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-card ion-card-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.module-card ion-icon {
+  color: #274472;
+  font-size: 3rem;
+}
+
+.module-card ion-label {
+  color: #274472;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+}

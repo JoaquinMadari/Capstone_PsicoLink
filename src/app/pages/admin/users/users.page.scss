@@ -1,0 +1,60 @@
+/*Estilo general */
+ion-toolbar {
+  --background: #274472;
+  --color: #fff;
+}
+
+ion-content {
+  --background: #C5D5E4;
+}
+
+ion-title {
+  color: #fff;
+}
+
+/*Estilo de la Lista */
+ion-list {
+  background: transparent !important;
+  padding: 10px;
+}
+
+ion-item {
+  --background: #ffffff;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+ion-item:hover {
+  --background: #f0f4f8;
+}
+
+/* Títulos y Subtítulos */
+ion-label {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+ion-label h2 {
+  font-weight: 700;
+  color: #274472;
+  font-size: 16px;
+  margin: 0;
+}
+
+ion-label p {
+  color: #666;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Ícono de estado */
+ion-icon[slot="start"] {
+  font-size: 24px;
+  min-width: 24px;
+}
+
+ion-note {
+    font-weight: 600;
+}

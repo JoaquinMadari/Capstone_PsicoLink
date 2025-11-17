@@ -1,0 +1,70 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        [defaultHref]="backHref"
+        routerDirection="back">
+      </ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Usuarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Usuarios del Sistema</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadUsers($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding-top">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando usuarios...</p>
+  </div>
+  
+  <ion-alert
+    [isOpen]="!!error"
+    [message]="error || ''"
+    header="Error"
+    [buttons]="['OK']">
+  </ion-alert>
+
+  <ion-list *ngIf="!loading && !error">
+    <ion-item 
+      *ngFor="let user of users" 
+      [routerLink]="['/admin/users', user.id]" 
+      button 
+      detail="false">
+      
+      <ion-icon 
+        slot="start" 
+        [name]="getStatusIcon(user.is_active)" 
+        [color]="getStatusColor(user.is_active)"
+      ></ion-icon>
+      
+      <ion-label>
+        <h2>{{ user.email }}</h2>
+        <p>Rol: {{ user.role | titlecase }}</p>
+        <p>Registro: {{ user.date_joined | date:'shortDate' }}</p>
+      </ion-label>
+      
+      <ion-note 
+        slot="end" 
+        [color]="getStatusColor(user.is_active)">
+        {{ user.is_active ? 'ACTIVO' : 'INACTIVO' }}
+      </ion-note>
+
+      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+    </ion-item>
+    
+    <ion-item *ngIf="users.length === 0 && !loading">
+      <ion-label class="ion-text-center ion-padding-vertical">
+        No hay usuarios registrados en el sistema.
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

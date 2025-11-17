@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button
         [defaultHref]="backHref"
@@ -7,34 +7,76 @@
         (click)="onBackClick()">
       </ion-back-button>
     </ion-buttons>
-    <ion-title>Soporte</ion-title>
+    <ion-title>Centro de Soporte</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-card>
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Soporte y Ayuda</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-card class="ion-padding">
     <ion-card-header>
-      <ion-card-title>Centro de Soporte</ion-card-title>
+      <ion-card-title>Envíanos tu consulta</ion-card-title>
     </ion-card-header>
+
     <ion-card-content>
-      <p>
-        Si tienes dudas, problemas técnicos o sugerencias, escríbenos y te
-        responderemos a la brevedad.
-      </p>
+      <p class="ion-padding-bottom">Por favor, describe tu problema o duda en detalle. Nos pondremos en contacto contigo lo antes posible.</p>
+
+      <form [formGroup]="soporteForm" (ngSubmit)="enviarSoporte()">
+
+        <!-- Campo Nombre -->
+        <ion-item>
+          <ion-label position="stacked">Tu Nombre</ion-label>
+          <ion-input type="text" formControlName="nombre" placeholder="Nombre completo"></ion-input>
+        </ion-item>
+        <div *ngIf="soporteForm.get('nombre')?.invalid && soporteForm.get('nombre')?.touched" class="text-error ion-padding-start">
+          El nombre es obligatorio.
+        </div>
+
+        <!-- Campo Email -->
+        <ion-item>
+          <ion-label position="stacked">Email de Contacto</ion-label>
+          <ion-input type="email" formControlName="email" placeholder="email@ejemplo.com"></ion-input>
+        </ion-item>
+        <div *ngIf="soporteForm.get('email')?.invalid && soporteForm.get('email')?.touched" class="text-error ion-padding-start">
+          Email válido es obligatorio.
+        </div>
+
+        <!-- Campo Asunto -->
+        <ion-item>
+          <ion-label position="stacked">Asunto o Título de la Consulta</ion-label>
+          <ion-input type="text" formControlName="asunto" placeholder="Ej: Problema con el login"></ion-input>
+        </ion-item>
+        <div *ngIf="soporteForm.get('asunto')?.invalid && soporteForm.get('asunto')?.touched" class="text-error ion-padding-start">
+          El asunto es obligatorio (máx 250 caracteres).
+        </div>
+
+        <!-- Campo Mensaje -->
+        <ion-item class="ion-margin-top">
+          <ion-label position="stacked">Mensaje</ion-label>
+          <ion-textarea formControlName="mensaje" rows="6" placeholder="Describe tu problema aquí..."></ion-textarea>
+        </ion-item>
+        <div *ngIf="soporteForm.get('mensaje')?.invalid && soporteForm.get('mensaje')?.touched" class="text-error ion-padding-start">
+          El mensaje es obligatorio.
+        </div>
+
+        <ion-button 
+          type="submit" 
+          expand="block" 
+          class="ion-margin-top"
+          [disabled]="soporteForm.invalid">
+          Enviar Ticket
+        </ion-button>
+        
+        <p class="ion-text-center ion-padding-top">
+          ¿Quieres ver tus consultas anteriores? 
+          <a routerLink="/mis-tickets">Ver mis tickets</a>. 
+        </p>
+      </form>
     </ion-card-content>
   </ion-card>
-  <ion-item>
-    <ion-label position="stacked">Mensaje</ion-label>
-    <ion-textarea
-      [(ngModel)]="mensaje"
-      placeholder="Describe tu consulta o problema"
-    ></ion-textarea>
-  </ion-item>
-
-  <div class="ion-padding">
-    <ion-button expand="block" color="primary" (click)="enviarSoporte()">
-      Enviar
-    </ion-button>
-  </div>
 </ion-content>
-

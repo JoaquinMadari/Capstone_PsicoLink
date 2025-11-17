@@ -24,11 +24,18 @@ export class Auth {
         if (res.access) localStorage.setItem('access', res.access);
         if (res.refresh) localStorage.setItem('refresh', res.refresh);
 
+        const fullName = res?.user?.full_name || `${res?.user?.first_name || ''} ${res?.user?.last_name || ''}`.trim();
+        if (fullName) localStorage.setItem('user_full_name', fullName);
+        if (res?.user?.email) localStorage.setItem('user_email', res.user.email);
+
         const role = res?.user?.role ?? res?.role ?? null;
         if (role) {
           localStorage.setItem('role', role);
           localStorage.setItem('user_role', role);
         }
+
+        const isStaff = res?.is_staff ?? res?.user?.is_staff ?? false;
+        localStorage.setItem('user_is_staff', String(isStaff));
 
         const sbUid = res?.user?.supabase_uid ?? null;
         if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
@@ -50,7 +57,7 @@ export class Auth {
     }
 
     // Limpia todo
-    ['access', 'refresh', 'role', 'access_token', 'refresh_token', 'user_role', 'user_id']
+    ['access', 'refresh', 'role', 'access_token', 'refresh_token', 'user_role', 'user_id', 'user_full_name', 'user_email', 'sb_uid', 'user_is_staff']
       .forEach(k => localStorage.removeItem(k));
   }
 
@@ -62,4 +69,20 @@ export class Auth {
   completeProfile(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/profile/setup/`, data);
   }
+
+  //arreglo sesion supabase
+  async initSupabaseSession(): Promise<void> {
+        const sbAccessToken = localStorage.getItem('supabase_access_token');
+        const sbRefreshToken = localStorage.getItem('supabase_refresh_token');
+
+        if (sbAccessToken && sbRefreshToken) {
+            try {
+                // Llama a setSession. El SDK de Supabase manejará la actualización si el token está vencido.
+                await this.chatSb.setSession(sbAccessToken, sbRefreshToken);
+                console.log('Sesión de Supabase reestablecida.');
+            } catch (e) {
+                console.error('Fallo al reestablecer la sesión de Supabase (IGNORANDO):', e);
+            }
+        }
+    }
 }

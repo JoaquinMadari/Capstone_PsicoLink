@@ -1,4 +1,4 @@
-/* 🎨 Estilo general */
+/* Estilo general */
 ion-toolbar {
   --background: #274472;
   --color: #fff;
@@ -8,7 +8,7 @@ ion-content {
   --background: #C5D5E4;
 }
 
-/* 🩵 Tarjeta principal (Centro de Soporte) */
+/*Tarjeta principal (Centro de Soporte) */
 ion-card {
   --background: #f8fbfd !important; /* Fondo claro */
   background: #f8fbfd !important;
@@ -31,7 +31,7 @@ ion-card-content {
   color: #000 !important;
 }
 
-/* ✏️ Campo de mensaje */
+/*Campo de mensaje */
 ion-item {
   --background: #ffffff !important;
   border-radius: 10px;
@@ -44,16 +44,29 @@ ion-label {
   color: #000 !important;
 }
 
+ion-input {
+  --color: #000000;
+  color: #000000 !important;
+  font-size: 15px;
+}
+
 ion-textarea {
   color: #000 !important;
   font-size: 15px;
   background: transparent;
 }
 
-/* 🔘 Botón Enviar */
+/*Botón Enviar */
 ion-button {
   --border-radius: 10px;
   font-weight: 600;
   margin: 12px;
 }
 
+
+.text-error {
+    color: var(--ion-color-danger);
+    font-size: 0.8rem;
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
