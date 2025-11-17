@@ -4,10 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, Appointment, PsicologoProfile
+from .models import CustomUser, Appointment, PsicologoProfile, SupportTicket
 from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer, AppointmentSerializer,
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
-    ProfessionalSearchSerializer)
+    ProfessionalSearchSerializer, SupportTicketCreateSerializer, SupportTicketReplySerializer,
+    AdminUserSerializer, ProfessionalAvailabilitySerializer)
 
 from api.zoom_service import create_meeting_for_professional
 from datetime import timezone as dt_timezone
@@ -86,7 +87,7 @@ class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         # Emite los tokens de Django (valida user/pass)
         resp = super().post(request, *args, **kwargs)
-        data = resp.data.copy()
+        final_data = resp.data
 
         try:
             email = request.data.get('email')
@@ -97,8 +98,8 @@ class LoginView(TokenObtainPairView):
             supabase_tokens = get_supabase_session_tokens(email, password)
         
             if supabase_tokens:
-                resp.data['supabase_access_token'] = supabase_tokens['access_token']
-                resp.data['supabase_refresh_token'] = supabase_tokens['refresh_token']
+                final_data['supabase_access_token'] = supabase_tokens['access_token']
+                final_data['supabase_refresh_token'] = supabase_tokens['refresh_token']
 
             user = CustomUser.objects.get(email=email)
 
@@ -125,7 +126,7 @@ class LoginView(TokenObtainPairView):
             logger.exception("Supabase sync on login failed: %s", e)
 
         # Devolvemos tokens + datos de usuario
-        return Response(data, status=resp.status_code)
+        return Response(final_data, status=resp.status_code)
 
 
 class SpecialtyListView(APIView):
@@ -305,15 +306,46 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 # -----------------------
 # ProfesionalSearchView
 # -----------------------
+from django_filters import rest_framework as filters
+
+class ProfessionalFilter(filters.FilterSet):
+    #Filtro de Años Mínimos de Experiencia (Min Experience)
+    # Nombre del filtro que usará el frontend: 'experience_years_gte'
+    experience_years_gte = filters.NumberFilter(
+        field_name='psicologoprofile__experience_years',
+        lookup_expr='gte' 
+    )
+    
+    #Filtro de Especialidad
+    specialty = filters.CharFilter(field_name='psicologoprofile__specialty')
+    
+    #Filtro de Modalidad de Trabajo
+    work_modality = filters.CharFilter(field_name='psicologoprofile__work_modality')
+    
+    #Filtro de Orientación Inclusiva
+    inclusive_orientation = filters.BooleanFilter(field_name='psicologoprofile__inclusive_orientation')
+
+    class Meta:
+        model = CustomUser
+        # Aquí las claves que el frontend puede enviar
+        fields = [
+            'experience_years_gte',
+            'specialty',
+            'work_modality',
+            'inclusive_orientation'
+        ]
+
+
 class ProfesionalSearchView(generics.ListAPIView):
     serializer_class = ProfessionalSearchSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['psicologoprofile__specialty']
+    filterset_class = ProfessionalFilter
     search_fields = ['username', 'first_name', 'last_name', 'psicologoprofile__specialty']
-    ordering_fields = ['username', 'psicologoprofile__specialty']
+    ordering_fields = ['username', 'psicologoprofile__specialty', 'psicologoprofile__experience_years']
 
     def get_queryset(self):
         queryset = CustomUser.objects.filter(role='profesional')
+        queryset = queryset.filter(psicologoprofile__is_available=True)
         available_only = self.request.query_params.get('available', None)
         if available_only == 'true':
             now = timezone.now()
@@ -335,3 +367,112 @@ class ProfessionalDetailView(generics.RetrieveAPIView):
     def get_object(self):
         user_id = self.kwargs.get(self.lookup_url_kwarg)
         return PsicologoProfile.objects.select_related('user').get(user__id=user_id)
+    
+
+
+# -----------------------
+# SoporteTicketView
+# -----------------------
+class SupportTicketCreateView(generics.CreateAPIView):
+    #Creacion del ticket
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [AllowAny] 
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+
+
+class UserTicketListView(generics.ListAPIView):
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return SupportTicket.objects.filter(user=user)
+
+
+class UserTicketDetailView(viewsets.ReadOnlyModelViewSet):
+    #Detalle del ticket para el usuario autenticado
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SupportTicket.objects.filter(user=self.request.user)
+    
+
+
+class IsAdminUser(permissions.BasePermission):
+    #Permite el acceso solo a usuarios que son miembros del staff (Administradores).
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.is_staff
+
+#Responder ticket
+class SupportTicketReplyView(generics.UpdateAPIView):
+    queryset = SupportTicket.objects.all()
+    serializer_class = SupportTicketReplySerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['patch']
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        #Asignar la respuesta
+        instance.respuesta = serializer.validated_data.get('respuesta')
+        
+        #Asignar el admin que respondió
+        instance.respondido_por = request.user 
+        
+        #Marcar como resuelto y la fecha
+        instance.status = 'cerrado' 
+        instance.fecha_respuesta = timezone.now()
+        
+        instance.save()
+        return Response(serializer.data)
+    
+
+#Listar todos los tickets para el admin
+class AdminTicketListView(generics.ListAPIView):
+    serializer_class = SupportTicketCreateSerializer 
+    permission_classes = [IsAdminUser]
+    
+    # Muestra todos los tickets, ordenados por fecha de creación (los más viejos primero si están abiertos)
+    def get_queryset(self):
+        return SupportTicket.objects.exclude(status='cerrado').order_by('created_at')
+
+
+class SupportTicketDetailView(generics.RetrieveAPIView): 
+    queryset = SupportTicket.objects.all()
+    serializer_class = SupportTicketCreateSerializer
+    permission_classes = [IsAdminUser]
+
+
+
+
+class AdminUserListView(generics.ListCreateAPIView):
+    queryset = CustomUser.objects.all().order_by('-date_joined')
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAdminUser]
+
+#Vista para Ver, Editar (PATCH) y Desactivar (Admin)
+class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+
+
+
+class ProfessionalAvailabilityView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfessionalAvailabilitySerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'patch']
+
+    def get_object(self):
+        #Devuelve el perfil del psicólogo asociado al usuario autenticado
+        return PsicologoProfile.objects.get(user=self.request.user)

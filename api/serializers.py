@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile, Specialty
+from .models import CustomUser, PacienteProfile, PsicologoProfile, OrganizacionProfile, Specialty, SupportTicket
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import UniqueValidator
@@ -187,13 +187,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['role'] = user.role
+        token['is_staff'] = user.is_staff
         token['supabase_uid'] = str(user.supabase_uid) if user.supabase_uid else None
+        token['full_name'] = user.get_full_name() or None
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
         data['user'] = {
             'role': self.user.role,
+            'email': self.user.email,
+            'full_name': self.user.get_full_name() or None,
+            'first_name': self.user.first_name,
+            'last_name': self.user.last_name,
+            'is_staff': self.user.is_staff,
             'supabase_uid': str(self.user.supabase_uid) if self.user.supabase_uid else None
             }
         return data
@@ -222,9 +229,7 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
 
 class AppointmentSerializer(serializers.ModelSerializer):
     
-    # --- CAMBIOS AQUÍ ---
     # 1. 'patient' y 'professional' ahora son 'PrimaryKeyRelatedField'.
-    #    Esto permite que el Webhook envíe los IDs.
     patient = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.filter(role__in=['paciente', 'organizacion']), # Permite pacientes u organizaciones
         required=False # Lo haremos requerido en el validate/create
@@ -235,10 +240,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
     )
     
     # 2. Mantenemos los 'details' para que puedas LEER la info
-    #    del usuario (como lo tenías antes).
+    #    del usuario
     patient_detail = UserSerializer(source='patient', read_only=True)
     professional_detail = UserSerializer(source='professional', read_only=True)
-    # --- FIN DE LOS CAMBIOS DE CAMPO ---
     
     end_datetime = serializers.SerializerMethodField(read_only=True)
 
@@ -252,7 +256,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'professional_detail', # Campo de lectura (Objeto)
             'professional_role', 'start_datetime', 'duration_minutes',
             'end_datetime', 'status', 'modality', 'reason', 'notes', 'created_at',
-            # 🔥 AÑADIR ESTOS:
             'zoom_join_url', 'zoom_start_url', 'zoom_meeting_id'
         )
         read_only_fields = ('created_at', 'end_datetime', 'professional_role', 'patient_detail', 'professional_detail')
@@ -287,6 +290,19 @@ class AppointmentSerializer(serializers.ModelSerializer):
         if not start or not professional or not duration:
             return data
 
+        try:
+            # Intentamos acceder al perfil del psicólogo para obtener la disponibilidad
+            profile = professional.psicologoprofile
+ 
+            if not profile.is_available:
+                raise serializers.ValidationError({
+                    'professional': "El profesional ha pausado temporalmente su disponibilidad para nuevas citas."
+                })
+        except AttributeError:
+            # Si no tiene un perfil asociado, asumimos que no es agendable si su rol es profesional
+            if professional.role == 'profesional':
+                raise serializers.ValidationError({"professional": "Perfil de profesional incompleto o no encontrado."})
+        
         # límites por especialidad
         try:
             specialty = professional.psicologoprofile.specialty
@@ -318,10 +334,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         else:
             pass
         
-        # --- ¡¡AQUÍ ESTÁ EL ARREGLO PARA EL ERROR "name 'end' is not defined"!! ---
-        # Esta línea faltaba y es necesaria para la validación de solapamiento.
         end = start + timedelta(minutes=duration)
-        # --- FIN DEL ARREGLO ---
 
         # Solapamientos
         
@@ -443,3 +456,61 @@ class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
         if obj.specialty == Specialty.OTRO and obj.specialty_other:
             return obj.specialty_other
         return obj.get_specialty_display()
+
+
+# --------------------------------------------
+# ----------- DASHBOARD ADMIN ----------------
+# --------------------------------------------
+class SupportTicketCreateSerializer(serializers.ModelSerializer):
+    #Serializador para la creación de tickets
+    status = serializers.CharField(read_only=True)
+    class Meta:
+        model = SupportTicket
+        # Solo necesitamos estos campos para crear el ticket
+        fields = ('id', 'name', 'email', 'subject', 'message', 'created_at', 'status', 'respuesta', 'respondido_por', 'fecha_respuesta')
+        read_only_fields = ('id', 'created_at', 'status', 'respuesta', 'respondido_por', 'fecha_respuesta')
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            validated_data['user'] = user
+        
+        return super().create(validated_data)
+
+
+class SupportTicketReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupportTicket
+        fields = ['respuesta', 'status']
+        extra_kwargs = {
+            'status': {'required': False}
+        }
+
+    def validate_respuesta(self, value):
+        if len(value) < 10:
+            raise serializers.ValidationError("La respuesta debe ser más detallada.")
+        return value
+    
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        # Campos que el admin necesita ver y gestionar
+        fields = (
+            'id', 
+            'email', 
+            'role', 
+            'is_active', 
+            'date_joined', 
+            'last_login'
+        )
+        read_only_fields = ('id', 'date_joined', 'last_login')
+
+
+
+
+# Serializer para manejar solo el toggle de disponibilidad
+class ProfessionalAvailabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PsicologoProfile
+        fields = ['is_available']

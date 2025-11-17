@@ -114,6 +114,9 @@ class PsicologoProfile(BaseProfile):
     zoom_refresh_token = models.TextField(blank=True, null=True)
     zoom_token_expires_at = models.DateTimeField(blank=True, null=True)
 
+    #Permitir al usuario profesional desactivar su perfil para el resto
+    is_available = models.BooleanField(default=True)
+
 
 
 class PacienteProfile(BaseProfile):
@@ -234,3 +237,48 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient} with {self.professional} @ {self.start_datetime.isoformat()} ({self.status})"
+    
+
+
+class SupportTicket(models.Model):
+    STATUS_CHOICES = [
+        ('abierto', 'Abierto'),
+        ('en_proceso', 'En Proceso'),
+        ('cerrado', 'Cerrado'),
+    ]
+
+    # Si el usuario está autenticado, lo guardamos. Si no, es anónimo (null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='support_tickets'
+    )
+    
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=255, default='Consulta de Soporte General', blank=True)
+    message = models.TextField()
+
+    # Campos de gestión
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='abierto')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    respuesta = models.TextField(blank=True, null=True)
+    respondido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='tickets_respondidos' # Nuevo related_name para evitar conflicto con 'support_tickets'
+    )
+    fecha_respuesta = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Ticket de Soporte"
+        verbose_name_plural = "Tickets de Soporte"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Ticket #{self.id} - {self.name} ({self.status})"
