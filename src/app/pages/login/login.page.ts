@@ -89,18 +89,21 @@ export class LoginPage implements OnInit {
     this.loginForm.patchValue({ email: emailNorm }, { emitEvent: false });
 
     try {
-      await firstValueFrom(this.authService.login({ email: emailNorm, password }));
-      const role = localStorage.getItem('user_role') || localStorage.getItem('role') || '';
-      if (role === 'profesional') {
-        this.router.navigate(['/pro/home']);
-      } else {
-        // Paciente
-        this.router.navigate(['/tabs/home']);
-      }
-    } catch {
-      this.errorMessage = 'Usuario o contraseña incorrectos';
-    } finally {
-      this.loading = false;
+    await firstValueFrom(this.authService.login({ email: emailNorm, password }));
+    const isStaff = localStorage.getItem('user_is_staff') === 'true';
+    const role = localStorage.getItem('user_role') || localStorage.getItem('role') || '';
+    if (isStaff) {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (role === 'profesional') {
+      this.router.navigate(['/pro/home']);
+    } else {
+      // Paciente
+      this.router.navigate(['/tabs/home']);
     }
+  } catch {
+    this.errorMessage = 'Usuario o contraseÃ±a incorrectos';
+  } finally {
+    this.loading = false;
+  }
   }
 }

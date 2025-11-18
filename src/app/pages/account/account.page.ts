@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonButtons
+  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonCard, IonInput, IonSpinner
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController } from '@ionic/angular';
+import {  AlertController } from '@ionic/angular';
 import { Auth } from 'src/app/services/auth';
 import { environment } from 'src/environments/environment';
 import { ProfileService } from 'src/app/services/profile';
@@ -24,10 +24,11 @@ import { FormsModule } from '@angular/forms';
     IonList,
     IonItem,
     IonLabel,
-    IonButtons,
     IonButton,
-    IonicModule,
-    FormsModule
+    FormsModule,
+    IonCard,
+    IonInput,
+    IonSpinner,
   ],
 })
 export class AccountPage {

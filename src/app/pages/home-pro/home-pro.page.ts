@@ -5,7 +5,7 @@ import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
   IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
   IonItem, IonLabel, IonToggle, IonBadge,
   IonGrid, IonRow, IonCol, IonList,
-  IonFab, IonFabButton, IonNote, IonSpinner  } from '@ionic/angular/standalone';
+  IonFab, IonFabButton } from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
@@ -62,7 +62,7 @@ interface Kpis {
   IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
   IonItem, IonLabel, IonToggle, IonBadge,
   IonGrid, IonRow, IonCol, IonList,
-  IonFab, IonFabButton, CommonModule, IonNote, IonSpinner, RouterLink]
+  IonFab, IonFabButton, CommonModule,  RouterLink]
 })
 export class HomeProPage implements OnInit {
   private apiUrl = (environment.API_URL || '').replace(/\/$/, '');
@@ -131,21 +131,7 @@ export class HomeProPage implements OnInit {
   goSupport()  { this.router.navigate(['/soporte']);       }
 
 
-  detalleLink(a: { professional?: number; professional_detail?: UserDetail; start_datetime: string }) {
-    const proId = (typeof a.professional === 'number' && a.professional) ? a.professional : (a.professional_detail?.id ?? null);
 
-    const d = new Date(a.start_datetime);
-    const yyyy = d.getFullYear();
-    const mm   = String(d.getMonth() + 1).padStart(2, '0');
-    const dd   = String(d.getDate()).padStart(2, '0');
-    const hh   = String(d.getHours()).padStart(2, '0');
-    const mi   = String(d.getMinutes()).padStart(2, '0');
-
-    const fecha = `${yyyy}-${mm}-${dd}`;
-    const hora  = `${hh}:${mi}`;
-
-    return ['/detalle-cita', proId, fecha, hora];
-  }
 
   //Carga de datos
   load(done?: () => void) {

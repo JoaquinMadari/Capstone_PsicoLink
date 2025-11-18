@@ -150,10 +150,6 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['admin'] }
   },
-
-  // fallback (evita loop con guards si no hay sesión)
-  { path: '**', redirectTo: 'splash' },  
-
   // 🔹 Nueva ruta: Mis Notas
   {
     path: 'mis-notas/:id',
@@ -161,5 +157,9 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['profesional'] }
   },
+  // fallback (evita loop con guards si no hay sesión)
+  { path: '**', redirectTo: 'splash' },  
+
+  
 ];
 
