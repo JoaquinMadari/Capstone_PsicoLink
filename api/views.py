@@ -319,6 +319,11 @@ class AppointmentNotesUpdateView(generics.UpdateAPIView):
         # Solo profesionales pueden escribir notas
         if request.user.role != "profesional":
             return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+        if request.user != appointment.professional:
+            return Response(
+                {"detail": "Solo el profesional asignado puede agregar notas a esta cita."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         # Validar que la cita esté completada
         if appointment.status != "completed":
