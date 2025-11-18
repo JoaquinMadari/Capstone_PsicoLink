@@ -6,7 +6,8 @@ from .views import (
     ProfesionalSearchView, SpecialtyListView, LoginView,
     SupportTicketCreateView, UserTicketListView, UserTicketDetailView, SupportTicketReplyView,
     AdminTicketListView, SupportTicketDetailView, AdminUserDetailView, AdminUserListView,
-    ProfessionalAvailabilityView,AppointmentNotesUpdateView,AppointmentDetailWithHistoryAPIView
+    ProfessionalAvailabilityView,AppointmentNotesUpdateView,AppointmentDetailWithHistoryAPIView,
+    CloseAppointmentView
 )
 from .serializers import CustomTokenObtainPairSerializer
 from .views_zoom import zoom_connect, zoom_callback
@@ -15,6 +16,9 @@ router = DefaultRouter()
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 urlpatterns = [
+    path('appointments/<int:pk>/close/', CloseAppointmentView.as_view(), name='appointment-close'),
+    path("appointments/<int:pk>/detail/", AppointmentDetailWithHistoryAPIView.as_view(), name="appointment-detail"),
+    path("appointments/<int:pk>/notes/", AppointmentNotesUpdateView.as_view(), name="appointment-notes"),
     path('', include(router.urls)),
     path('auth/register/', RegisterView.as_view(), name='auth_register'),    
     path('auth/login/', LoginView.as_view(), name='token_obtain_pair'),
@@ -39,11 +43,8 @@ urlpatterns = [
     # ================================
     #  🔥 Ruta correcta para notas
     # ================================
-    path("appointments/<int:pk>/notes/", AppointmentNotesUpdateView.as_view(), name="appointment-notes"),
-
     path("zoom/connect/", zoom_connect, name="zoom_connect"),
     path("zoom/oauth/callback/", zoom_callback, name="zoom_callback"),
-    path("appointments/<int:pk>/detail/", AppointmentDetailWithHistoryAPIView.as_view(), name="appointment-detail"),
     path('profile/me/', MyProfileView.as_view(), name='my_profile'),
 ]
 

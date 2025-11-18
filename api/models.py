@@ -205,9 +205,10 @@ class Appointment(models.Model):
         return self.start_datetime + timedelta(minutes=self.duration_minutes)
     
     def clean(self):
-        """Validaciones a nivel de modelo"""
-        if self.start_datetime and self.start_datetime < timezone.now():
-            raise ValidationError({'start_datetime': 'No se pueden crear citas en el pasado'})
+        """Validaciones a nivel de modelo"""            
+        if self.pk is None:
+            if self.start_datetime and self.start_datetime < timezone.now():
+                raise ValidationError({'start_datetime': 'No se pueden crear citas en el pasado'})
         
         if self.duration_minutes <= 0:
             raise ValidationError({'duration_minutes': 'La duración debe ser mayor a 0'})
