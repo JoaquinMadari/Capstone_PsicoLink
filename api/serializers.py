@@ -292,8 +292,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     def validate_start_datetime(self, value):
         now = timezone.now()
+
+        # Permite pasar la validación si estamos actualizando (self.instance)
+        if self.instance and 'start_datetime' not in self.initial_data:
+            return value
+            
+        # El resto de la validación solo se ejecuta si la cita es nueva o si la fecha se está modificando
         if value < now:
             raise serializers.ValidationError("No se puede agendar en el pasado.")
+
         return value
 
     def validate_duration_minutes(self, value):

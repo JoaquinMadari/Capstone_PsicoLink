@@ -537,3 +537,49 @@ class MyProfileView(APIView):
         out = MyProfileSerializer(user).data
         return Response(out, status=status.HTTP_200_OK)
 
+
+
+
+CLOSING_GRACE_PERIOD_MINUTES = 10
+
+class CloseAppointmentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk, format=None): 
+        appointment = get_object_or_404(Appointment, pk=pk)
+        
+        #Solo el profesional asignado puede cerrar la cita
+        if appointment.professional != request.user:
+            return Response(
+                {"detail": "No tienes permiso para cerrar esta cita."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        #Verificar el estado actual
+        if appointment.status != 'scheduled':
+            return Response(
+                {"detail": f"Solo se pueden cerrar citas en estado 'scheduled'. Estado actual: {appointment.status}"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        #Validación de Tiempo
+        start_time = appointment.start_datetime
+        #Hora mínima para habilitar el cierre: Inicio + Tiempo de Gracia
+        earliest_close_time = start_time + timedelta(minutes=CLOSING_GRACE_PERIOD_MINUTES)
+        
+        if timezone.now() < earliest_close_time:
+            #Si el tiempo de gracia no ha pasado, no se permite el cierre
+            remaining = (earliest_close_time - timezone.now()).total_seconds() // 60
+            return Response(
+                {"detail": f"La cita no puede cerrarse aún. Se habilita en aproximadamente {int(remaining)} minutos."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        #Procesar el Cierre
+        appointment.status = 'completed'
+        appointment.save()
+
+        return Response(
+            {"detail": "Cita marcada como completada con éxito.", "status": "completed"}, 
+            status=status.HTTP_200_OK
+        )
