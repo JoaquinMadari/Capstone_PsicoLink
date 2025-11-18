@@ -228,11 +228,6 @@ ROLE_DURATION_LIMITS = getattr(settings, 'ROLE_DURATION_LIMITS', {
     'default': (15, 120),
 })
 
-class AppointmentNoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AppointmentNote
-        fields = ("id", "text", "fecha")
-
 
 
 # -----------------------------
