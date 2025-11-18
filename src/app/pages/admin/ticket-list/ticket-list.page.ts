@@ -18,9 +18,7 @@ import {
     IonItem, 
     IonLabel, 
     IonIcon,
-    IonNote,
-    IonSpinner,
-    IonAlert
+    IonNote
 } from '@ionic/angular/standalone';
 
 addIcons({ arrowForwardOutline, checkmarkCircleOutline, helpCircleOutline, hourglassOutline });
@@ -34,8 +32,7 @@ type Role = 'paciente' | 'profesional' | 'organizacion' | 'admin';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink,
     IonContent, IonHeader, IonToolbar, IonTitle, IonBackButton,
-    IonButtons, IonList, IonItem, IonLabel, IonIcon, IonNote, 
-    IonSpinner, IonAlert
+    IonButtons, IonList, IonItem, IonLabel, IonIcon, IonNote
   ]
 })
 export class TicketListPage implements OnInit {

@@ -4,7 +4,7 @@ import { FormBuilder, FormsModule, FormGroup, Validators, ReactiveFormsModule } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonCard, IonCardHeader, IonCardTitle, 
          IonCardContent, IonItem, IonLabel, IonNote, IonSelect, IonSelectOption, 
-         IonSpinner, IonAlert, IonButton, IonButtons, IonBackButton, ToastController, 
+         IonSpinner,  IonButton, IonButtons, IonBackButton, ToastController, 
          IonToggle } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 import { SoporteService } from 'src/app/services/soporte';
@@ -25,7 +25,7 @@ interface UserDetail {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, IonContent, IonHeader, IonToolbar, IonTitle, IonCard, IonCardHeader, 
     IonCardTitle, IonCardContent, IonItem, IonLabel, IonNote, IonSelect, IonSelectOption, IonSpinner, 
-    IonAlert, IonButton, IonButtons, IonBackButton, IonToggle]
+     IonButton, IonButtons, IonBackButton, IonToggle]
 })
 export class UserDetailPage implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);

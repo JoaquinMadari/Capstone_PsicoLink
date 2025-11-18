@@ -81,10 +81,11 @@ getAppointmentNotes(id: number): Observable<{ notes: string }> {
 updateAppointmentNotes(id: number, notes: string): Observable<any> {
   return this.http.patch(
     `${this.apiUrl}/appointments/${id}/notes/`,
-    { notes },
+    { notes },  // <-- el backend espera "notes"
     { headers: this.getAuthHeaders() }
   );
 }
+
 
 
 }
