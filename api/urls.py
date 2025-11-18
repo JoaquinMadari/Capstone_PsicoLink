@@ -44,6 +44,7 @@ urlpatterns = [
     path("zoom/connect/", zoom_connect, name="zoom_connect"),
     path("zoom/oauth/callback/", zoom_callback, name="zoom_callback"),
     path("appointments/<int:pk>/detail/", AppointmentDetailWithHistoryAPIView.as_view(), name="appointment-detail"),
+    path('profile/me/', MyProfileView.as_view(), name='my_profile'),
 ]
 
 

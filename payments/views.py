@@ -124,6 +124,7 @@ def create_preference(request):
                 "failure": f"{URL_FRONTEND_PUBLICO}/fallido",
                 "pending": f"{URL_FRONTEND_PUBLICO}/pendiente",
             },
+            "auto_return": "approved",
 
             "metadata": {
                 **appointment_data,

@@ -241,7 +241,8 @@ class AppointmentNoteSerializer(serializers.ModelSerializer):
 class AppointmentNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppointmentNote
-        fields = ("id", "text", "fecha")
+        fields = ("id", "text", "fecha", "appointment")
+        read_only_fields = ("id", "fecha")
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
@@ -433,7 +434,33 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
 
 
+class ProfessionalSearchSerializer(UserSerializer):
+    specialty = serializers.SerializerMethodField()
+    specialty_label = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
+    work_modality = serializers.SerializerMethodField() 
 
+
+    class Meta(UserSerializer.Meta):
+        model = CustomUser
+        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name', 'work_modality')
+
+    def get_specialty(self, obj):
+        try: return obj.psicologoprofile.specialty
+        except AttributeError: return None
+
+    def get_specialty_label(self, obj):
+        try:
+            p = obj.psicologoprofile
+            return p.specialty_other if p.specialty == Specialty.OTRO and p.specialty_other else p.get_specialty_display()
+        except AttributeError:
+            return None
+
+    def get_work_modality(self, obj):
+        try:
+            return obj.psicologoprofile.work_modality  # 'Presencial' | 'Online' | 'Mixta'
+        except AttributeError:
+            return None
 
 class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
