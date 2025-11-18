@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface BusyInterval { id: number; start: string; end: string; }
 export interface BusyResponse { professional: BusyInterval[]; patient: BusyInterval[]; }
+export interface AppointmentNote { id: number; text: string; fecha: string; appointment: number; }
 
 
 @Injectable({
@@ -69,26 +70,54 @@ export class AppointmentService {
     });
   }
 
-  // Obtener notas de una cita
-getAppointmentNotes(id: number): Observable<{ notes: string }> {
-  return this.http.get<{ notes: string }>(
-    `${this.apiUrl}/appointments/${id}/`,
-    { headers: this.getAuthHeaders() }
-  );
-}
+  // ============================================
+  // NUEVOS MÉTODOS PARA NOTAS MÚLTIPLES
+  // ============================================
 
-// Guardar / actualizar notas (solo profesionales, PATCH)
-updateAppointmentNotes(id: number, notes: string): Observable<any> {
-  return this.http.patch(
-    `${this.apiUrl}/appointments/${id}/notes/`,
-    { notes },  // <-- el backend espera "notes"
-    { headers: this.getAuthHeaders() }
-  );
-}
+  // Crear nueva nota (POST)
+  createAppointmentNote(appointmentId: number, text: string): Observable<AppointmentNote> {
+    const data = {
+      appointment: appointmentId,  //  Importante: incluir el appointment_id
+      text: text                   //  Ahora se llama "text" en lugar de "notes"
+    };
+
+    return this.http.post<AppointmentNote>(
+      `${this.apiUrl}/appointments/notes/create/`,  // Nueva URL
+      data,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  // Obtener todas las notas de una cita (GET)
+  getAppointmentNotesList(appointmentId: number): Observable<AppointmentNote[]> {
+    return this.http.get<AppointmentNote[]>(
+      `${this.apiUrl}/appointments/${appointmentId}/notes/`,  //  Nueva URL
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  // ============================================
+  // MÉTODOS OBSOLETOS - ELIMINAR O MANTENER POR COMPATIBILIDAD
+  // ============================================
+
+  //  OBSOLETO: Obtener solo el campo 'notes' de la cita (campo simple)
+  getAppointmentNotes(id: number): Observable<{ notes: string }> {
+    return this.http.get<{ notes: string }>(
+      `${this.apiUrl}/appointments/${id}/`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  // OBSOLETO: Actualizar campo 'notes' simple (PATCH)
+  updateAppointmentNotes(id: number, notes: string): Observable<any> {
+    return this.http.patch(
+      `${this.apiUrl}/appointments/${id}/notes/`,
+      { notes },
+      { headers: this.getAuthHeaders() }
+    );
+  }
 
   closeAppointment(id: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/appointments/${id}/close/`, {}, { headers: this.getAuthHeaders() }); 
   }
-
-
 }

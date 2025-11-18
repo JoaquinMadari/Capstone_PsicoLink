@@ -9,49 +9,56 @@
 
 <ion-content class="ion-padding">
 
-  <!-- MOSTRAR NOTAS ANTERIORES -->
-  <ion-card *ngIf="hasNotas">
-    <ion-card-header>
-      <ion-card-title>Notas anteriores</ion-card-title>
-    </ion-card-header>
-
-    <ion-list>
-      <ion-item *ngFor="let nota of historialNotas">
-        <ion-label>
-          <p style="white-space: pre-line;">{{ nota.text }}</p>
-          <small style="color: gray;">{{ nota.fecha | date:'short' }}</small>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-card>
-
   <!-- NUEVA NOTA -->
   <ion-card *ngIf="isVisible">
     <ion-card-header>
-      <ion-card-title>Notas de la sesión</ion-card-title>
+      <ion-card-title>Agregar Nueva Nota</ion-card-title>
     </ion-card-header>
 
     <ion-card-content>
       <ion-textarea
         auto-grow="true"
         placeholder="Escribe aquí tus apuntes sobre esta sesión..."
-        [(ngModel)]="notes"
-        [disabled]="!canEdit">
+        [(ngModel)]="nuevaNota"
+        [disabled]="!canEdit"
+        rows="4">
       </ion-textarea>
 
       <ion-button 
         expand="block" 
         color="primary" 
         class="save-btn"
-        (click)="guardarNotas()"
-        [disabled]="!canEdit">
-        Guardar Notas
+        (click)="guardarNota()"
+        [disabled]="!canEdit || !nuevaNota.trim()">
+        Agregar Nota
       </ion-button>
     </ion-card-content>
   </ion-card>
 
+  <!-- MOSTRAR NOTAS ANTERIORES -->
+  <ion-card *ngIf="hasNotas; else sinNotasTemplate">
+    <ion-card-header>
+      <ion-card-title>Historial de Notas</ion-card-title>
+    </ion-card-header>
+
+    <ion-list>
+      <ion-item *ngFor="let nota of historialNotas">
+        <ion-label>
+          <p style="white-space: pre-line;">{{ nota.text }}</p>
+          <small style="color: gray;">{{ formatearFecha(nota.fecha) }}</small>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <!-- MENSAJE CUANDO NO HAY NOTAS -->
+  <ng-template #sinNotasTemplate>
+    <ion-card>
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="document-text-outline" size="large" color="medium"></ion-icon>
+        <p>No hay notas registradas para esta cita</p>
+      </ion-card-content>
+    </ion-card>
+  </ng-template>
+
 </ion-content>
-
-
-
-
