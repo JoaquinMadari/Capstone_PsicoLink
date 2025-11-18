@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser, Appointment, PsicologoProfile, SupportTicket
 from .serializers import (CustomTokenObtainPairSerializer, PsicologoProfileDetailSerializer, RegisterSerializer, UserSerializer, AppointmentSerializer,
     PsicologoProfileSerializer, PacienteProfileSerializer, OrganizacionProfileSerializer,
-    ProfessionalSearchSerializer, SupportTicketCreateSerializer, SupportTicketReplySerializer,
+    ProfessionalSearchSerializer, SupportTicketCreateSerializer, SupportTicketReplySerializer,AppointmentNoteSerializer,AppointmentNote,
     AdminUserSerializer, ProfessionalAvailabilitySerializer)
 from rest_framework.generics import RetrieveAPIView
 from api.zoom_service import create_meeting_for_professional
@@ -308,41 +308,55 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     # -----------------------
 # Appointment Notes (Crear / Editar)
 # -----------------------
-class AppointmentNotesUpdateView(generics.UpdateAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+class AppointmentNotesCreateView(generics.CreateAPIView):
+    queryset = AppointmentNote.objects.all()
+    serializer_class = AppointmentNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def patch(self, request, *args, **kwargs):
-        appointment = self.get_object()
+    def create(self, request, *args, **kwargs):
+        appointment_id = request.data.get('appointment')
+        
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+        except Appointment.DoesNotExist:
+            return Response(
+                {"detail": "Cita no encontrada."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        # Solo profesionales pueden escribir notas
+        # Validaciones de permisos
         if request.user.role != "profesional":
             return Response({"detail": "No autorizado."}, status=status.HTTP_403_FORBIDDEN)
+
         if request.user != appointment.professional:
             return Response(
-                {"detail": "Solo el profesional asignado puede agregar notas a esta cita."},
+                {"detail": "Solo el profesional asignado puede agregar notas."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Validar que la cita esté completada
         if appointment.status != "completed":
             return Response(
                 {"detail": "Solo se pueden agregar notas a citas completadas."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        notes = request.data.get("notes")
-        if notes is None:
-            return Response({"detail": "Debe proporcionar notas."}, status=400)
+        # Crear la nota usando el serializer
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Asociar automáticamente con la cita
+            serializer.save(appointment=appointment)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        appointment.notes = notes
-        appointment.save(update_fields=["notes"])
+# View para listar todas las notas de una cita
+class AppointmentNotesListView(generics.ListAPIView):
+    serializer_class = AppointmentNoteSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-        return Response({
-            "detail": "Notas guardadas correctamente",
-            "notes": appointment.notes
-        })
+    def get_queryset(self):
+        appointment_id = self.kwargs['appointment_id']
+        return AppointmentNote.objects.filter(appointment_id=appointment_id)
 
 
 # -----------------------
