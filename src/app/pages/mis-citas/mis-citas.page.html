@@ -39,7 +39,7 @@
                 || 'Sin nombre disponible' }}
             </p>
 
-            <!-- 🔥 Nuevo estado correcto -->
+            <!-- Nuevo estado correcto -->
             <p class="appointment-status">
               Estado:
 
@@ -52,7 +52,7 @@
               <ng-container *ngIf="a.status !== 'cancelled'">
 
                 <!-- Finalizada -->
-                <span *ngIf="isPastAppointment(a); else scheduledState">
+                <span *ngIf="isPastAppointment(a) && a.status === 'completed'; else scheduledState">
                   Cita finalizada
                 </span>
 
@@ -69,7 +69,7 @@
           <!-- CONTENEDOR RESPONSIVE DE BOTONES -->
           <div class="appointment-actions">
 
-             <!-- ⭐ Botón NUEVO: Ver / Crear notas del profesional -->
+             <!-- Ver / Crear notas del profesional -->
             <ion-button
               *ngIf="role === 'profesional' && isPastAppointment(a) && a.status !== 'cancelled'"
               (click)="goToNotas(a.id)">
@@ -89,9 +89,17 @@
             <ion-button
               color="medium"
               fill="outline"
-              *ngIf="isPastAppointment(a) && a.status !== 'cancelled'"
+              *ngIf="isPastAppointment(a) && a.status === 'completed'"
               disabled="true">
               Reunión finalizada
+            </ion-button>
+            
+            <ion-button
+              color="warning"
+              fill="outline"
+              *ngIf="isPastAppointment(a) && a.status === 'scheduled'"
+              disabled="true">
+              Reunión Sin Cerrar
             </ion-button>
 
             <ion-button
@@ -104,9 +112,16 @@
 
             <ion-button
               color="danger"
-              *ngIf="a.status === 'scheduled' && !isPastAppointment(a)"
+              *ngIf="a.status === 'scheduled' && canBeCancelled(a)"
               (click)="cancel(a.id)">
               Cancelar
+            </ion-button>
+
+            <ion-button 
+              *ngIf="role === 'profesional' && a.status === 'scheduled' && canBeClosed(a)"
+              (click)="onClose(a)" 
+              color="success">
+              Cerrar Cita
             </ion-button>
 
           </div>

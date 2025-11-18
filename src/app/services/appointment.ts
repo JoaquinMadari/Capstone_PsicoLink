@@ -86,6 +86,9 @@ updateAppointmentNotes(id: number, notes: string): Observable<any> {
   );
 }
 
+  closeAppointment(id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/appointments/${id}/close/`, {}, { headers: this.getAuthHeaders() }); 
+  }
 
 
 }
