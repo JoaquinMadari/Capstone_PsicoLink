@@ -1,106 +1,337 @@
 /* 🎨 Estilo general */
 ion-toolbar {
-  --background: #274472;
+  --background: #274472; /* Azul Oscuro */
   --color: #fff;
 }
 
 ion-content {
-  --background: #C5D5E4;
+  --background: #C5D5E4; /* Azul Claro */
 }
 
 /* 🩵 Tarjeta principal (Listado de Citas) */
 ion-card {
-  --background: #f8fbfd !important; /* Fondo claro */
+  --background: #f8fbfd !important; 
   background: #f8fbfd !important;
   color: #000 !important;
   border-radius: 14px;
   box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
 }
+/* ... otros estilos de ion-card-header y ion-card-title ... */
 
-/* Encabezado y título del card */
-ion-card-header {
-  background: transparent !important;
-}
-
-ion-card-title {
-  color: #274472 !important;
-  font-weight: 600;
-}
-
-/* Contenido dentro del card */
-ion-card-content {
-  background: transparent !important;
-  color: #000 !important;
+/* 🖥️ Ancho Máximo para Escritorio */
+@media (min-width: 768px) {
+  ion-card {
+    max-width: 900px; /* Centra el card y le da un ancho máximo */
+    margin: 20px auto; 
+  }
 }
 
 /* Listado de citas */
 ion-list {
-  --background: transparent !important; /* Quitar fondo oscuro */
+  --background: transparent !important;
   background: transparent !important;
 }
 
+//Estructura Responsive de la Cita (ion-item)
 ion-item {
   --background: #ffffff !important; /* Cada cita con fondo blanco */
   border-radius: 10px;
   margin-bottom: 12px;
-  padding: 15px 15px;
-  /* 🌟 CLAVE: Estructura vertical */
+  padding: 15px 10px;
+  
+  /* CLAVE 1: Estructura por defecto (Móvil) es COLUMNA */
   display: flex;
-  flex-direction: column; /* Apila los elementos (label y acciones) verticalmente */
-  align-items: center; /* Centra todo el contenido (texto y botones) horizontalmente */
+  flex-direction: column; 
+  align-items: flex-start; 
 }
 
-ion-label h2,
+/* 🟢 ¡¡CLAVES AGREGADAS!!: Neutralizar el posicionamiento de Ionic */
+ion-item ion-label {
+    /* Sobrescribe cualquier posicionamiento de Ionic que pueda estar interfiriendo */
+    position: static !important;
+    display: block !important;
+    /* Asegura que el texto ocupe todo el ancho en modo columna (móvil) */
+    width: 100%; 
+    margin: 0;
+    padding: 0;
+}
+/* FIN CLAVES AGREGADAS */
+/* 💻 MEDIA QUERY: Tablet Pequeña / Z Fold Desplegado (A partir de 576px) */
+@media (min-width: 576px) {
+  ion-item {
+    /* CLAVE 2: En pantallas grandes, cambia a FILA */
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 20px 20px;
+  }
+  
+  /* Asegura que el texto tome el espacio principal en fila */
+  ion-label {
+    flex-grow: 1;
+    min-width: 0;
+    padding-inline-end: 20px;
+  }
+}
+
+//Estilo de Texto Responsive (h2 y p)
+ion-label h2.appointment-datetime {
+  /* 🛑 AGREGAR ESTO: Fuerza la visibilidad y asegura que no haya altura limitada */
+  display: block !important;
+  color: #000000 !important; /* Asegura que el color no sea el mismo que el fondo */
+  height: auto !important;
+  min-height: 20px !important; /* Mínimo para que se vea la línea */
+  
+  /* Tamaño Base (Móvil Plegado) */
+  font-size: 0.70rem; 
+  line-height: 1rem;
+  word-break: break-word;
+  margin: 0 0 6px 0;
+  white-space: normal;
+  overflow: visible; 
+  padding: auto;
+  
+  /* 2. Móvil Estándar */
+  @media (min-width: 360px) {
+    font-size: 0.70rem;
+  }
+  
+  /* 3. Z Fold Desplegado / Tablet */
+  @media (min-width: 650px) { 
+    font-size: 1.2rem;
+  }
+}
+
 ion-label p {
-  color: #000 !important;
+  /* Mantengo tu base y escalamos */
+  font-size: 0.80rem; 
+  margin: 0 0 4px 0;
+
+  @media (min-width: 650px) { 
+    font-size: 0.95rem; /* Aumento para pantallas grandes */
+  }
 }
 
-/* Mensaje cuando no hay citas */
-p.ion-text-center {
-  color: #000 !important;
-  background: transparent !important;
-}
-
-/* 🔧 Contenedor de botones: vertical y alineado a la derecha */
+/* Contenedor de botones */
 .appointment-actions {
   display: flex;
-  flex-direction: column;   /* Mantiene los botones uno arriba del otro */
-  align-items: flex-end;    /* 🔥 Mueve toda la columna hacia la derecha */
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  margin-top: 10px;
-}
-
-/* 🔧 BOTONES DE ESTADO COMPACTOS */
-.appointment-actions ion-button {
-  width: auto !important;
-  min-width: 100px;
-  max-width: 130px;
-  font-size: 0.60rem;
-  padding: 4px 8px;
-  text-align: center;
-  white-space: nowrap;
-  --border-radius: 6px;
-  margin-left: 16px;
-}
-
-ion-label h2.appointment-datetime {
-  font-size: 0.90rem;        /* tamaño base legible */
-  line-height: 1.1rem;    /* separación entre líneas */   
-  word-break: break-word;  /* evitar overflow */
-  margin: 0 0 6px 0;
-  /* 🌟 HABILITAR CORTE ESTÉTICO DENTRO DEL LÍMITE */
-  white-space: normal;/* Fuerza a que esté en una sola línea */
-  overflow: visible;        /* Oculta el exceso */
-  text-overflow: clip; /* Muestra "..." */
+  margin-top: 5px;
   
 }
 
-ion-label p {
-  font-size: 0.80rem;     /* tamaño ligeramente menor */
-  margin: 0 0 4px 0;
+/* Layout horizontal en pantallas grandes */
+@media (min-width: 576px) {
+  .appointment-actions {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .appointment-actions.has-actions {
+    padding: 20px 25px;
+  }
 }
 
+/* Estilo de botones */
+.appointment-actions ion-button {
+  min-width: 120px;
+  max-width: 120px;
+  width: 100%;
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  margin: 3px 0;
+  --border-radius: 6px;
+  margin-left: 0 !important;
+}
 
+/* Botones en pantallas grandes */
+@media (min-width: 576px) {
+  .appointment-actions ion-button {
+    width: auto;
+    min-width: 100px;
+    max-width: 130px;
+    margin: 0 0 0 8px;
+  }
+}
 
+/* Centrado cuando solo hay botón cancelado */
+.appointment-actions.is-cancelled-solo {
+  align-items: center !important;
+  /* 🟢 CLAVE: Agregamos un margen superior para bajar el botón */
+  margin-top: 70px !important; /* Ajusta este valor (e.g., 5px, 10px, 12px) hasta que quede centrado visualmente */
+}
+
+@media (min-width: 576px) {
+  .appointment-actions.is-cancelled-solo ion-button {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    
+  }
+}
+
+/* 💻 AJUSTE FINO VERTICAL: Para 768px y superiores */
+@media (min-width: 768px) {
+    .appointment-actions.is-cancelled-solo ion-button {
+        /* Prueba con un valor más alto si el texto se hace más grande a 768px */
+        margin-top: -70px !important; 
+        margin-right: 150px !important;
+    }
+}
+
+/* 💻 AJUSTE FINO VERTICAL: Para 1024px y superiores */
+@media (min-width: 1024px) {
+    .appointment-actions.is-cancelled-solo ion-button {
+        /* Prueba otro valor si el botón sigue desalineado */
+        margin-top: -70px !important; 
+        margin-right: 150px !important;
+    }
+}
+
+/* ----------------------------------------------------------------- */
+/* 💻 AJUSTE FINO VERTICAL PARA "REUNIÓN SIN CERRAR" (768px y 1024px) */
+/* ----------------------------------------------------------------- */
+@media (min-width: 768px) {
+    /* **ATENCIÓN**: TUS REGLAS DE CANCELADA AQUÍ ESTÁN CAUSANDO DESPLAZAMIENTO.
+       Si quieres centrar, borra el margin-right: 150px!
+    
+    .appointment-actions.is-cancelled-solo ion-button {
+        margin-top: -70px !important; 
+        margin-right: 150px !important; // <-- ¡ESTO LO MUEVE! NO LO CENTRA.
+    } */
+    
+    /* 🟢 REGLA FINAL: Mover "Reunión Sin Cerrar" arriba en 768px+ */
+    .appointment-actions.is-uncaptured-solo ion-button {
+         margin-top: -20px !important; 
+        margin-right: 150px !important;
+    }
+}
+    
+/* =============================== */
+/*  🎯 Control independiente para "Reunión Finalizada" */
+/* =============================== */
+
+.appointment-actions.is-finished-solo {
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative;
+}
+
+/* --- Vista >= 768px --- */
+@media (min-width: 768px) {
+    .appointment-actions.is-finished-solo ion-button {
+        position: relative !important;
+        top: -10px !important;   /* Ajusta vertical */
+        right: 50px !important;   /* Ajusta horizontal */
+    }
+}
+
+/* --- Vista >= 1024px --- */
+@media (min-width: 1024px) {
+    .appointment-actions.is-finished-solo ion-button {
+        position: relative !important;
+        top: -10px !important;  /* Ajusta vertical */
+        right: 50px !important;   /* Ajusta horizontal */
+    }
+}
+
+/* ========================================= */
+/*  📱 Ajustes móviles pequeños (425px → 320px) */
+/* ========================================= */
+
+/* REGLAS GENERALES PARA ESTOS BOTONES */
+@media (max-width: 425px) {
+
+  /* Reunión Sin Cerrar */
+  .appointment-actions.is-uncaptured-solo ion-button {
+      position: relative !important;
+      top: 40px !important;   /* Mueve hacia ABAJO */
+  }
+
+  /* Reunión Finalizada */
+  .appointment-actions.is-finished-solo ion-button {
+      position: relative !important;
+      top: 40px !important;   /* Mueve hacia ABAJO */
+  }
+}
+
+/* Ajuste adicional para pantallas MUY pequeñas (≤ 360px) */
+@media (max-width: 360px) {
+
+  .appointment-actions.is-uncaptured-solo ion-button,
+  .appointment-actions.is-finished-solo ion-button {
+      top: 50px !important;   /* Baja un poco más */
+  }
+}
+
+@media (max-width: 768px) {
+
+  .appointment-actions.is-finished-solo ion-button {
+      top: 0px !important; 
+      right: 150px !important;  /* Baja un poco más */
+  }
+}
+
+@media (max-width: 1024px) {
+
+  .appointment-actions.is-finished-solo ion-button {
+      top: 0px !important; 
+      right: 150px !important;  /* Baja un poco más */
+  }
+}
+
+@media (max-width: 1440px) {
+
+  .appointment-actions.is-finished-solo ion-button {
+      top: 0px !important; 
+      right: 150px !important;  /* Baja un poco más */
+  }
+}
+
+/* Ajuste aún más fuerte para 320px exactos */
+@media (max-width: 320px) {
+
+  .appointment-actions.is-uncaptured-solo ion-button,
+  .appointment-actions.is-finished-solo ion-button {
+      top: 60px !important;   /* Baja más en pantallas ultra pequeñas */
+  }
+}
+
+/* Botones personalizados */
+.btn-unirse,
+.btn-cancelar {
+  min-width: 140px;
+  height: 45px;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  --border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  .btn-unirse,
+  .btn-cancelar {
+    min-width: 160px;
+    height: 50px;
+    font-size: 1rem;
+    margin-top: 15px; /* los baja */
+    margin-right: 55px !important;  /* separa entre sí */
+    
+  }
+}
+
+@media (min-width: 1024px) {
+  .btn-unirse,
+  .btn-cancelar {
+    min-width: 180px;
+    height: 55px;
+    font-size: 1.1rem;
+    margin-top: 20px;  /* más abajo */
+    margin-right: 55px !important;
+  }
+}
 
 

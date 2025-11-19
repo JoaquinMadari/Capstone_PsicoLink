@@ -81,12 +81,9 @@
             </ion-label>
           </ion-item>
 
-          <ion-item>
+          <ion-item *ngIf="d.inclusive_orientation">
             <ion-label>
-              <h3>Disponibilidad</h3>
-              <p [style.white-space]="'pre-line'">
-                {{ d.attention_schedule }}
-              </p>
+              <h3>inclusividad</h3>
               <p *ngIf="d.inclusive_orientation">Atención inclusiva</p>
             </ion-label>
           </ion-item>
