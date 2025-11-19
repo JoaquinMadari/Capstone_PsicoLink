@@ -36,22 +36,27 @@ ion-content {
   --background: #e0e5ec;
   border-radius: 12px;
   text-align: center;
+  padding: 12px 6px; /* ⭐ Más espacio para texto */
 
   ion-card-title {
     color: #4A90E2;
-    font-weight: 500;
-    font-size: 0.85rem; /* 📌 más pequeño y equilibrado */
-    line-height: 1.2;
-    word-wrap: break-word;
-    /* ⭐ Permite dos líneas PERO sin cortar palabras */
-    white-space: normal;
-    overflow-wrap: break-word;  /* Evita cortar palabras */
-    word-break: keep-all;       /* Mantiene las palabras unidas */
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.25;
 
-    /* ⭐ Centrado visual */
-    text-align: center;
-    max-width: 110%;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    /* ⭐ evita cortes RAROS en palabras largas */
+    word-break: keep-all;
+
+    /* ⭐ centra y deja margen lateral adicional */
+    max-width: 95%;
     margin: 0 auto;
+
+    /* ⭐ permite 2 líneas y no más */
+    overflow: hidden;
   }
 
   &:hover {
@@ -62,30 +67,25 @@ ion-content {
   }
 }
 
-/* Pantallas muy pequeñas */
+/* Pantallas MUY pequeñas (320px) */
 @media (max-width: 360px) {
-  .welcome-card ion-card-title {
-    font-size: 0.85rem;
-  }
-
   .action-card ion-card-title {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
+    max-width: 100%;
   }
 
   .quick-actions {
-    gap: 8px;
+    gap: 6px;
   }
 }
 
-/* Pantallas medianas */
-@media (max-width: 480px) {
-  .welcome-card {
-    padding: 12px;
-  }
-
-  .action-card {
-    padding: 14px;
+/* Pantallas EXTREMAS como 320px */
+@media (max-width: 330px) {
+  .action-card ion-card-title {
+    font-size: 0.72rem;
+    line-height: 1.15;
   }
 }
+
 
 

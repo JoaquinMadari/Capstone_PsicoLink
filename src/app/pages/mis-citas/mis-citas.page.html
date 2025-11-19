@@ -66,23 +66,29 @@
 
           </ion-label>
 
-          <!-- CONTENEDOR RESPONSIVE DE BOTONES -->
-          <div class="appointment-actions">
+          <div 
+            class="appointment-actions"
+            [class.is-cancelled-solo]="a.status === 'cancelled'"
+                        [class.has-actions]="a.status !== 'cancelled' && ! (isPastAppointment(a) && a.status === 'scheduled') && ! (a.status === 'completed')"
+                        [class.is-uncaptured-solo]="isPastAppointment(a) && a.status === 'scheduled'"
+                        [class.is-finished-solo]="isPastAppointment(a) && a.status === 'completed'"
 
-             <!-- Ver / Crear notas del profesional -->
+            >
+
             <ion-button
               *ngIf="role === 'profesional' && isPastAppointment(a) && a.status !== 'cancelled'"
-              (click)="goToNotas(a.id)">
+              (click)="goToNotas(a.id)"
+            >
               Mis Notas
             </ion-button>
 
-
-
             <ion-button
+              class="btn-unirse"
               color="primary"
               fill="outline"
               *ngIf="a.zoom_join_url && !isPastAppointment(a) && a.status === 'scheduled'"
-              (click)="joinMeeting(a.zoom_join_url)">
+              (click)="joinMeeting(a.zoom_join_url)"
+            >
               Unirse
             </ion-button>
 
@@ -90,15 +96,17 @@
               color="medium"
               fill="outline"
               *ngIf="isPastAppointment(a) && a.status === 'completed'"
-              disabled="true">
+              disabled="true"
+            >
               Reunión finalizada
             </ion-button>
-            
+
             <ion-button
               color="warning"
               fill="outline"
               *ngIf="isPastAppointment(a) && a.status === 'scheduled'"
-              disabled="true">
+              disabled="true"
+            >
               Reunión Sin Cerrar
             </ion-button>
 
@@ -106,25 +114,30 @@
               color="danger"
               fill="outline"
               *ngIf="a.status === 'cancelled'"
-              disabled="true">
+              disabled="true"
+            >
               Cita cancelada
             </ion-button>
 
             <ion-button
+              class="btn-cancelar"
               color="danger"
               *ngIf="a.status === 'scheduled' && canBeCancelled(a)"
-              (click)="cancel(a.id)">
+              (click)="cancel(a.id)"
+            >
               Cancelar
             </ion-button>
 
             <ion-button 
+              color="success"
               *ngIf="role === 'profesional' && a.status === 'scheduled' && canBeClosed(a)"
-              (click)="onClose(a)" 
-              color="success">
+              (click)="onClose(a)"
+            >
               Cerrar Cita
             </ion-button>
 
           </div>
+
 
         </ion-item>
 

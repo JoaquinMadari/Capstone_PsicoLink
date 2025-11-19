@@ -63,4 +63,10 @@ ion-button {
     font-size: 0.8rem;
     padding-top: 4px;
     padding-bottom: 8px;
-  }
+}
+/* 🔧 Asegurar que el texto del ion-input sea visible */
+ion-input {
+  --color: #000 !important;
+  color: #000 !important;
+  font-size: 15px;
+}

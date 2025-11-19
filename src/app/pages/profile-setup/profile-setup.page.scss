@@ -116,3 +116,17 @@ ion-textarea {
     width: 100%;
     margin-top: 5px; 
 }
+
+/* Toggle APAGADO → pista gris + circulo gris */
+ion-toggle:not(.toggle-checked) {
+  --handle-background: #b5b5b5 !important;   /* círculo */
+  --track-background: #e0e0e0 !important;    /* pista gris */
+  --background: #e0e0e0 !important;          /* fallback */
+}
+
+/* Toggle ENCENDIDO → deja el azul original */
+ion-toggle.toggle-checked {
+  --track-background: var(--ion-color-primary, #4A90E2);
+  --handle-background: #ffffff;
+}
+
