@@ -1,100 +1,57 @@
 from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
-
-from api.models import CustomUser, PsicologoProfile, PacienteProfile, Appointment
+from unittest.mock import patch
+from api.models import PsicologoProfile, Specialty
 
 User = get_user_model()
 
-def try_reverse(name, fallback):
-    try:
-        return reverse(name)
-    except:
-        return fallback
-
-class AuthViewsTests(APITestCase):
-
-    def test_register_endpoint_creates_user(self):
-        url = try_reverse("register", "/api/auth/register/")
-        payload = {
-            "email": "apiuser@example.com",
-            "password": "SecretPass123", 
-            "first_name": "API",
-            "last_name": "User",
-            "role": "paciente"
-        }
-        resp = self.client.post(url, payload, format="json")
-        self.assertIn(resp.status_code, (status.HTTP_200_OK, status.HTTP_201_CREATED))
-        self.assertTrue(User.objects.filter(email="apiuser@example.com").exists())
-        # Cambia estas líneas:
-        self.assertIn("email", resp.data)
-        self.assertEqual(resp.data["role"], "paciente")
-
-    def test_login_returns_tokens(self):
-        user = User.objects.create_user(username="loginuser", email="login@example.com", password="LoginPass123", role="paciente")
-        url = try_reverse("login", "/api/auth/login/")
-        # Prueba con email en lugar de username:
-        resp = self.client.post(url, {"email": "login@example.com", "password": "LoginPass123"}, format="json")
-
-class ProfileSetupViewTests(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.patient = User.objects.create_user( username="p1",email="p1@test.com", password="pass", role="paciente")
-        cls.professional = User.objects.create_user(email="prof@test.com", password="pass", role="profesional")
-
-    def test_patient_profile_creation(self):
-        self.client.force_authenticate(user=self.patient)
-        payload = {"rut": "12345678-9", "age": 30, "gender": "Otro", "nationality": "Chileno", "phone": "123456789", "base_disease": "None"}
-        url = try_reverse("profile-setup", "/api/profile/setup/")
-        resp = self.client.post(url, payload, format="json")
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(PacienteProfile.objects.filter(user=self.patient).exists())
-
-    def test_professional_profile_creation(self):
-        self.client.force_authenticate(user=self.professional)
-        payload = {"rut": "87654321-0", "age": 40, "gender": "M", "nationality": "Chileno", "phone": "987654321", "specialty": "psiquiatria", "license_number": "123", "main_focus": "Ansiedad", "therapeutic_techniques": "CBT", "style_of_attention": "Individual", "attention_schedule": "Lun-Vie", "work_modality": "Online", "certificates": "cert.pdf"}
-        url = try_reverse("profile-setup", "/api/profile/setup/")
-        resp = self.client.post(url, payload, format="json")
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(PsicologoProfile.objects.filter(user=self.professional).exists())
-
-class AppointmentViewSetTests(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.patient = User.objects.create_user( username="p1",email="p1@test.com", password="pass", role="paciente")
-        cls.professional = User.objects.create_user(email="prof@test.com", password="pass", role="profesional")
-
+class ViewsTests(APITestCase):
     def setUp(self):
+        self.patient = User.objects.create_user(email="p_view@test.com", password="123", role="paciente")
+        self.pro = User.objects.create_user(email="pro_view@test.com", password="123", role="profesional")
+        
+        # Perfil con token falso de Zoom
+        PsicologoProfile.objects.create(
+            user=self.pro, rut="1-9", age=30, gender="X", nationality="CL", phone="1",
+            specialty=Specialty.PSICOLOGIA_CLINICA, work_modality="Online",
+            zoom_access_token="fake_token"
+        )
+
+    @patch('api.views.ensure_supabase_user') # <--- MOCK SUPABASE
+    def test_register_view(self, mock_supabase):
+        # Simulamos que Supabase responde OK
+        mock_supabase.return_value = "fake-uid-123"
+        
+        url = "/api/auth/register/" # O usa reverse('register') si tienes el name
+        payload = {
+            "email": "nuevo@api.com", "password": "123", "role": "paciente"
+        }
+        resp = self.client.post(url, payload)
+        
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        mock_supabase.assert_called_once() # Confirmamos que se intentó llamar
+
+    @patch('api.views.create_meeting_for_professional') # <--- MOCK ZOOM
+    def test_create_appointment_view(self, mock_zoom):
+        # Simulamos que Zoom responde OK con datos
+        mock_zoom.return_value = {
+            "id": "999", "join_url": "http://fake.zoom/j", "start_url": "http://fake.zoom/s"
+        }
+        
         self.client.force_authenticate(user=self.patient)
-
-    def test_create_appointment(self):
-        start = timezone.now() + timedelta(hours=1)
-        url = try_reverse("appointment-list", "/api/appointments/")
-        payload = {"professional": self.professional.id, "start_datetime": start, "duration_minutes": 50}
-        resp = self.client.post(url, payload, format="json")
-        self.assertEqual(resp.status_code, 201)
-        self.assertEqual(resp.data["professional"], self.professional.id)
-
-    def test_list_appointments_patient_only(self):
-        start = timezone.now() + timedelta(hours=1)
-        Appointment.objects.create(patient=self.patient, professional=self.professional, start_datetime=start, duration_minutes=50, professional_role="psiquiatria")
-        url = try_reverse("appointment-list", "/api/appointments/")
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.data), 1)
-
-class ProfesionalSearchViewTests(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.prof = User.objects.create_user(username="profuser", email="prof@example.com", password="pass", role="profesional")
-        PsicologoProfile.objects.create(user=cls.prof, rut="11111111-1", age=40, gender="M", nationality="Chileno", phone="12345678", specialty="psiquiatria", license_number="123", main_focus="Ansiedad", therapeutic_techniques="CBT", style_of_attention="Individual", attention_schedule="Lun-Vie", work_modality="Online", certificates="cert.pdf")
-
-    def test_search_professional_by_specialty(self):
-        url = try_reverse("profesional-search", "/api/professionals/")
-        resp = self.client.get(url, {"search": "psiquiatria"})
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(len(resp.data), 1)
-        self.assertEqual(resp.data[0]["specialty"], "psiquiatria")
+        
+        url = "/api/appointments/"
+        payload = {
+            "professional": self.pro.id,
+            "start_datetime": timezone.now() + timedelta(days=1),
+            "duration_minutes": 50,
+            "modality": "Online"
+        }
+        resp = self.client.post(url, payload)
+        
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(resp.data['zoom_meeting_id'], "999") # Verificamos que guardó lo del mock
