@@ -107,6 +107,30 @@ def create_preference(request):
         # --------------------------------------------------------------
         # CREAR PREFERENCIA MP
         # --------------------------------------------------------------
+        
+        platform = request.headers.get("X-Platform", "web").lower()
+
+        # Compatibilidad según plataforma
+        is_mobile = platform in ["android", "ios", "mobile"]
+
+        # Deep links SOLO para app
+        if is_mobile:
+            back_urls = {
+                "success": "psicolink://exitoso",
+                "failure": "psicolink://fallido",
+                "pending": "psicolink://pendiente",
+            }
+        else:
+            # URLs normales SOLO para web
+            back_urls = {
+                "success": f"{URL_FRONTEND_PUBLICO}/exitoso",
+                "failure": f"{URL_FRONTEND_PUBLICO}/fallido",
+                "pending": f"{URL_FRONTEND_PUBLICO}/pendiente",
+            }
+
+        # 👉 NO RETURNS AQUÍ  
+        # Solo se prepara la variable back_urls
+
         preference_data = {
             "notification_url": URL_WEBHOOK,
 
@@ -119,17 +143,14 @@ def create_preference(request):
                 }
             ],
 
-            "back_urls": {
-                "success": f"{URL_FRONTEND_PUBLICO}/exitoso",
-                "failure": f"{URL_FRONTEND_PUBLICO}/fallido",
-                "pending": f"{URL_FRONTEND_PUBLICO}/pendiente",
-            },
+            "back_urls": back_urls,
             "auto_return": "approved",
 
             "metadata": {
                 **appointment_data,
                 "session_price": session_price,
-                "professional_name": prof_name
+                "professional_name": prof_name,
+                "platform": platform
             },
         }
 
