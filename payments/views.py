@@ -109,14 +109,14 @@ def create_preference(request):
         # --------------------------------------------------------------
         
         # Obtener header y user-agent
-        platform_header = request.headers.get("X-Platform", "").lower()
+        platform= request.headers.get("X-Platform", "").lower()
         user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
 
         # Lógica de detección mejorada
         is_mobile = False
 
         # 1. Si envían el header explícito, confiamos en él
-        if platform_header in ["android", "ios", "mobile"]:
+        if platform in ["android", "ios", "mobile"]:
             is_mobile = True
         # 2. Si no, revisamos el User-Agent (Plan B)
         # 'wv' indica WebView (común en Ionic/Capacitor), 'android' o 'iphone' detectan el SO
