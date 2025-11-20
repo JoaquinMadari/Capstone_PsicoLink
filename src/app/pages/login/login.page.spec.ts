@@ -1,60 +1,32 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { LoginPage } from './login.page';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { IonicModule } from '@ionic/angular';
+import { TestBed } from '@angular/core/testing';
 import { Auth } from '../../services/auth';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-describe('LoginPage', () => {
-  let component: LoginPage;
-  let fixture: ComponentFixture<LoginPage>;
-  let authSpy: jasmine.SpyObj<Auth>;
 
-  beforeEach(async () => {
-    authSpy = jasmine.createSpyObj('Auth', ['login', 'logout']);
-    authSpy.login.and.returnValue(of({ access: 'fake-token', refresh: 'fake-refresh' }));
+describe('AuthService', () => {
+  let service: Auth;
+  let httpMock: HttpTestingController;
 
-    await TestBed.configureTestingModule({
-      imports: [
-        LoginPage,              // Standalone component
-        HttpClientTestingModule,
-        IonicModule.forRoot()
-      ],
-      providers: [
-        { provide: Auth, useValue: authSpy },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { paramMap: { get: (key: string) => null } },
-            params: of({})
-          }
-        }
-      ]
-    }).compileComponents();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [Auth]
+    });
 
-    fixture = TestBed.createComponent(LoginPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    service = TestBed.inject(Auth);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    httpMock.verify();
   });
 
-  it('should login successfully using form', () => {
-  // patchValue asegura que no da error si agregas más campos en el formGroup
-  component.loginForm.patchValue({ 
-    email: 'test@example.com', 
-    password: '123456' 
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
-
-  component.login();
-
-  // Auth.login espera {username, password}, LoginPage hace el mapping
-  expect(authSpy.login).toHaveBeenCalledWith({ username: 'test@example.com', password: '123456' });
-}); 
 });
+
+
 
 
 

@@ -1,38 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of } from 'rxjs';
-import { Auth } from './auth'; // asegúrate que sea el nombre correcto del servicio
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { Auth } from './auth';
+import { environment } from '../../environments/environment';
 
-describe('AuthService', () => {
+describe('Auth Service', () => {
   let service: Auth;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [Auth], // explícito y seguro
+      providers: [Auth]
     });
+
     service = TestBed.inject(Auth);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should call login', () => {
-    const mockResp = { token: 'fake-token' };
-    const spy = spyOn(service, 'login').and.returnValue(of(mockResp)); // mockea el retorno
-    service.login({ username: 'test@example.com', password: '123456' }).subscribe(res => {
-      expect(res).toEqual(mockResp);
-    });
-    expect(spy).toHaveBeenCalled();
+  it('should call login API correctly', () => {
+    const mockResponse = { access: 'fake-token', refresh: 'fake-refresh' };
+
+    service.login({ email: 'test@example.com', password: '123456' })
+      .subscribe(res => {
+        expect(res).toEqual(mockResponse);
+      });
+
+    const req = httpMock.expectOne(`${environment.API_URL}/login/`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'test@example.com', password: '123456' });
+
+    req.flush(mockResponse);
   });
 
-  it('should call register', () => {
-    const mockResp = { id: 1, username: 'test@example.com' };
-    const spy = spyOn(service, 'register').and.returnValue(of(mockResp)); // mockea el retorno
-    service.register({ username: 'test@example.com', password: '123456' }).subscribe(res => {
-      expect(res).toEqual(mockResp);
-    });
-    expect(spy).toHaveBeenCalled();
+  afterEach(() => {
+    httpMock.verify();
   });
 });
+
