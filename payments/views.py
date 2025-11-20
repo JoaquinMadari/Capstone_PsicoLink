@@ -108,10 +108,20 @@ def create_preference(request):
         # CREAR PREFERENCIA MP
         # --------------------------------------------------------------
         
-        platform = request.headers.get("X-Platform", "web").lower()
+        # Obtener header y user-agent
+        platform_header = request.headers.get("X-Platform", "").lower()
+        user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
 
-        # Compatibilidad según plataforma
-        is_mobile = platform in ["android", "ios", "mobile"]
+        # Lógica de detección mejorada
+        is_mobile = False
+
+        # 1. Si envían el header explícito, confiamos en él
+        if platform_header in ["android", "ios", "mobile"]:
+            is_mobile = True
+        # 2. Si no, revisamos el User-Agent (Plan B)
+        # 'wv' indica WebView (común en Ionic/Capacitor), 'android' o 'iphone' detectan el SO
+        elif "wv" in user_agent or "android" in user_agent or "iphone" in user_agent:
+            is_mobile = True
 
         # Deep links SOLO para app
         if is_mobile:
