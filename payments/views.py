@@ -126,9 +126,9 @@ def create_preference(request):
         # Deep links SOLO para app
         if is_mobile:
             back_urls = {
-                "success": "psicolink://exitoso",
-                "failure": "psicolink://fallido",
-                "pending": "psicolink://pendiente",
+                "success": "psicolink://checkout/exitoso",
+                "failure": "psicolink://checkout/fallido",
+                "pending": "psicolink://checkout/pendiente",
             }
         else:
             # URLs normales SOLO para web
