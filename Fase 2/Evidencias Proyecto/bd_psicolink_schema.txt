@@ -6,7 +6,7 @@ CREATE TABLE public.api_appointment (
   start_datetime timestamp with time zone NOT NULL,
   duration_minutes integer NOT NULL CHECK (duration_minutes >= 0),
   status character varying NOT NULL,
-  notes text NOT NULL,
+  notes text,
   created_at timestamp with time zone NOT NULL,
   patient_id bigint NOT NULL,
   professional_id bigint NOT NULL,
@@ -14,9 +14,20 @@ CREATE TABLE public.api_appointment (
   time_range tstzrange,
   modality character varying,
   reason character varying NOT NULL,
+  zoom_join_url text,
+  zoom_meeting_id character varying,
+  zoom_start_url text,
   CONSTRAINT api_appointment_pkey PRIMARY KEY (id),
   CONSTRAINT api_appointment_patient_id_52c787b0_fk_api_customuser_id FOREIGN KEY (patient_id) REFERENCES public.api_customuser(id),
   CONSTRAINT api_appointment_professional_id_7f3d25a4_fk_api_customuser_id FOREIGN KEY (professional_id) REFERENCES public.api_customuser(id)
+);
+CREATE TABLE public.api_appointmentnote (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  text text NOT NULL,
+  fecha timestamp with time zone NOT NULL,
+  appointment_id bigint NOT NULL,
+  CONSTRAINT api_appointmentnote_pkey PRIMARY KEY (id),
+  CONSTRAINT api_appointmentnote_appointment_id_da39bdf6_fk_api_appoi FOREIGN KEY (appointment_id) REFERENCES public.api_appointment(id)
 );
 CREATE TABLE public.api_customuser (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -31,6 +42,7 @@ CREATE TABLE public.api_customuser (
   is_active boolean NOT NULL,
   date_joined timestamp with time zone NOT NULL,
   role character varying NOT NULL,
+  supabase_uid uuid UNIQUE,
   CONSTRAINT api_customuser_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.api_customuser_groups (
@@ -91,7 +103,7 @@ CREATE TABLE public.api_psicologoprofile (
   main_focus character varying NOT NULL,
   therapeutic_techniques text NOT NULL,
   style_of_attention text NOT NULL,
-  attention_schedule character varying NOT NULL,
+  attention_schedule character varying,
   work_modality character varying NOT NULL,
   certificates character varying NOT NULL,
   inclusive_orientation boolean NOT NULL,
@@ -104,8 +116,29 @@ CREATE TABLE public.api_psicologoprofile (
   gender character varying NOT NULL,
   nationality character varying NOT NULL,
   specialty_other character varying,
+  zoom_access_token text,
+  zoom_refresh_token text,
+  zoom_token_expires_at timestamp with time zone,
+  session_price integer CHECK (session_price >= 0),
+  is_available boolean NOT NULL,
   CONSTRAINT api_psicologoprofile_pkey PRIMARY KEY (user_id),
   CONSTRAINT api_psicologoprofile_user_id_60f32baa_fk_api_customuser_id FOREIGN KEY (user_id) REFERENCES public.api_customuser(id)
+);
+CREATE TABLE public.api_supportticket (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name character varying NOT NULL,
+  email character varying NOT NULL,
+  subject character varying NOT NULL,
+  message text NOT NULL,
+  status character varying NOT NULL,
+  created_at timestamp with time zone NOT NULL,
+  user_id bigint,
+  fecha_respuesta timestamp with time zone,
+  respondido_por_id bigint,
+  respuesta text,
+  CONSTRAINT api_supportticket_pkey PRIMARY KEY (id),
+  CONSTRAINT api_supportticket_user_id_90e3da4c_fk_api_customuser_id FOREIGN KEY (user_id) REFERENCES public.api_customuser(id),
+  CONSTRAINT api_supportticket_respondido_por_id_4151f70f_fk_api_custo FOREIGN KEY (respondido_por_id) REFERENCES public.api_customuser(id)
 );
 CREATE TABLE public.auth_group (
   id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -127,6 +160,16 @@ CREATE TABLE public.auth_permission (
   codename character varying NOT NULL,
   CONSTRAINT auth_permission_pkey PRIMARY KEY (id),
   CONSTRAINT auth_permission_content_type_id_2f476e4b_fk_django_co FOREIGN KEY (content_type_id) REFERENCES public.django_content_type(id)
+);
+CREATE TABLE public.direct_conversation (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user1 uuid NOT NULL,
+  user2 uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  last_message_at timestamp with time zone,
+  CONSTRAINT direct_conversation_pkey PRIMARY KEY (id),
+  CONSTRAINT direct_conversation_user1_fkey FOREIGN KEY (user1) REFERENCES auth.users(id),
+  CONSTRAINT direct_conversation_user2_fkey FOREIGN KEY (user2) REFERENCES auth.users(id)
 );
 CREATE TABLE public.django_admin_log (
   id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -159,4 +202,36 @@ CREATE TABLE public.django_session (
   session_data text NOT NULL,
   expire_date timestamp with time zone NOT NULL,
   CONSTRAINT django_session_pkey PRIMARY KEY (session_key)
+);
+CREATE TABLE public.message (
+  id bigint NOT NULL DEFAULT nextval('message_id_seq'::regclass),
+  conversation uuid NOT NULL,
+  sender uuid NOT NULL,
+  type text NOT NULL DEFAULT 'text'::text CHECK (type = ANY (ARRAY['text'::text, 'image'::text, 'file'::text])),
+  body text NOT NULL DEFAULT ''::text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT message_pkey PRIMARY KEY (id),
+  CONSTRAINT message_conversation_fkey FOREIGN KEY (conversation) REFERENCES public.direct_conversation(id),
+  CONSTRAINT message_sender_fkey FOREIGN KEY (sender) REFERENCES auth.users(id)
+);
+CREATE TABLE public.message_attachment (
+  id bigint NOT NULL DEFAULT nextval('message_attachment_id_seq'::regclass),
+  message_id bigint NOT NULL,
+  url text NOT NULL,
+  filename text,
+  size_bytes bigint,
+  mime_type text,
+  CONSTRAINT message_attachment_pkey PRIMARY KEY (id),
+  CONSTRAINT message_attachment_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.message(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  role text NOT NULL CHECK (role = ANY (ARRAY['paciente'::text, 'profesional'::text, 'organizacion'::text, 'admin'::text])),
+  full_name text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  first_name text,
+  last_name text,
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
