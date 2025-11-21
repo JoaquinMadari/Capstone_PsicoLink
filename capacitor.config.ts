@@ -1,18 +1,17 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tu.app',
-  appName: 'TuApp',
-  webDir: 'www',
+  appId: 'io.ionic.starter',
+  appName: 'psicolink',
+  webDir: 'www/browser',
   server: {
     androidScheme: 'https'
   },
-  // 👇 AGREGA ESTO AQUÍ 👇
   plugins: {
     Keyboard: {
-      resize: 'body',       // Esto empuja la vista hacia arriba
+      resize: 'body',
       style: 'dark',
-      scrollToBottomOnFocus: true, // Ayuda a mantener el foco visible
+      scrollToBottomOnFocus: true,
     },
   },
 };

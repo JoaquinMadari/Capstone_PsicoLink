@@ -6,9 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { MercadoPago as MercadopagoService } from 'src/app/services/mercado-pago';
 
-// 💡 ¡CORRECCIÓN IMPORTANTE! (Para el error t.setFocus)
-// Todos los controladores y componentes de Ionic deben importarse
-// desde '@ionic/angular/standalone' en un componente standalone.
 import {
     ToastController,
     AlertController,
@@ -68,7 +65,7 @@ interface BusyResponse {
 })
 export class AgendarCitaPage implements OnInit {
     
-    // 👈🏼 1. DECLARACIÓN DE LA PROPIEDAD
+    //DECLARACIÓN DE LA PROPIEDAD
     minDate: string; 
 
      constructor(
@@ -80,7 +77,7 @@ export class AgendarCitaPage implements OnInit {
     private mpService: MercadopagoService,
         private loadingCtrl: LoadingController 
  ) {
-        // 👈🏼 2. INICIALIZACIÓN EN EL CONSTRUCTOR
+        //INICIALIZACIÓN EN EL CONSTRUCTOR
         const today = new Date();
         // Genera la fecha actual en formato ISO 8601 (YYYY-MM-DD), requerido por [min]
         this.minDate = today.toISOString().split('T')[0];
@@ -224,13 +221,13 @@ export class AgendarCitaPage implements OnInit {
 
     loadAppointments() {
         this.svc.getAppointments().subscribe({
-            next: res => this._allAppointments = res, // 🎯 asigna a la propiedad privada
+            next: res => this._allAppointments = res, //asigna a la propiedad privada
             error: err => console.error(err)
         });
         }
 
 
-    // 💰 FUNCIÓN CENTRAL: Llama a Mercado Pago.
+    //FUNCIÓN CENTRAL: Llama a Mercado Pago.
     async iniciarPago() {
         if (!this.form.valid) {
             this.form.markAllAsTouched();
@@ -270,7 +267,7 @@ export class AgendarCitaPage implements OnInit {
             reason: (reason || '').trim()
         };
 
-        // 2. Llamar al servicio de Mercado Pago
+        // Llamar al servicio de Mercado Pago
         this.mpService.crearPreferencia(payload).subscribe({
             next: (respuesta) => {
                 loading.dismiss();
@@ -295,7 +292,7 @@ export class AgendarCitaPage implements OnInit {
         this.svc.updateAppointment(id, { status: 'cancelled' }).subscribe({
             next: () => {
             this.presentToast('Cita cancelada');
-            // 🎯 Actualiza el estado localmente para reflejar el cambio al instante
+            //Actualiza el estado localmente para reflejar el cambio al instante
             const index = this._allAppointments.findIndex(a => a.id === id);
             if (index !== -1) {
                 this._allAppointments[index].status = 'cancelled';
@@ -307,7 +304,7 @@ export class AgendarCitaPage implements OnInit {
         }
 
 
-    // ⏰ MÉTODOS DE MANEJO DE SLOTS:
+    //MÉTODOS DE MANEJO DE SLOTS:
 
     formatSlotLabel(s: string): string {
         return s.slice(0, 5);
@@ -338,46 +335,47 @@ export class AgendarCitaPage implements OnInit {
     }
 
     refreshBusy(professionalId: number, dateISO: string) {
-  // 1. Limpieza inmediata de datos anteriores (MANTENER ESTO)
-  this.busyPro = [];
-  this.busyPatient = [];
-  this.busyTimes = [];
-  this.slotStatus = {};
-  this.recomputeSlotStatus(dateISO);
+        //Limpieza inmediata de datos anteriores
+        this.busyPro = [];
+        this.busyPatient = [];
+        this.busyTimes = [];
+        this.slotStatus = {};
+        this.recomputeSlotStatus(dateISO);
 
-  this.svc.getBusy(professionalId, dateISO).subscribe({
-    next: (res: any) => {
-      // 🛑 ELIMINAMOS EL FILTRO: backend ya garantiza que los datos están filtrados
-      const proAppointments = res.professional;
+        this.svc.getBusy(professionalId, dateISO).subscribe({
+            next: (res: any) => {
+            //ELIMINAMOS EL FILTRO: backend ya garantiza que los datos están filtrados
+            const proAppointments = res.professional;
 
-      // 2. Asignación de busyPro
-      this.busyPro = proAppointments.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
+            //Asignación de busyPro
+            this.busyPro = proAppointments.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
 
-      // Asignación de busyPatient
-      this.busyPatient = res.patient.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
+            //Asignación de busyPatient
+            this.busyPatient = res.patient.map((x: any) => ({ start: new Date(x.start), end: new Date(x.end) }));
 
-      // Asignación de busyTimes
-      this.busyTimes = proAppointments.map((x: any) => {
-        const d = new Date(x.start);
-        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      });
+            //Asignación de busyTimes
+            this.busyTimes = proAppointments.map((x: any) => {
+                const d = new Date(x.start);
+                return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            });
 
-      this.recomputeSlotStatus(dateISO);
-    },
-    error: err => {
-      console.error('busy error', err);
-      this.busyPro = [];
-      this.busyPatient = [];
-      this.busyTimes = [];
-      this.recomputeSlotStatus(dateISO);
+            this.recomputeSlotStatus(dateISO);
+            },
+            error: err => {
+            console.error('busy error', err);
+            this.busyPro = [];
+            this.busyPatient = [];
+            this.busyTimes = [];
+            this.recomputeSlotStatus(dateISO);
+            }
+        });
     }
-  });
-}
     recomputeSlotStatus(dateISO: string) {
         const map: Record<string, 'free'|'pro'|'patient'|'both'> = {};
+        const dur = Number(this.form.get('duration')!.value) || this.STEP_MINUTES;
         for (const s of this.slots) {
             const start = new Date(`${dateISO}T${s}`);
-            const end   = new Date(start.getTime() + this.STEP_MINUTES * 60000);
+            const end   = new Date(start.getTime() + dur * 60000);
             const hitPro = this.overlapsAny(start, end, this.busyPro);
             const hitPa  = this.overlapsAny(start, end, this.busyPatient);
             map[s] = (hitPro && hitPa) ? 'both' : (hitPro ? 'pro' : (hitPa ? 'patient' : 'free'));
