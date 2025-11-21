@@ -80,8 +80,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8100",
     "https://capstone-psicolink.onrender.com",
     "http://localhost:8100",
-    "https://localhost/", 
-    "http://localhost/",
+    "https://localhost", 
+    "http://localhost",
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -99,8 +99,8 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8100",
     "https://capstone-psicolink.onrender.com" 
-    "https://localhost/", 
-    "http://localhost/",
+    "https://localhost", 
+    "http://localhost",
 ]
 
 ROOT_URLCONF = 'psicolink_backend.urls'

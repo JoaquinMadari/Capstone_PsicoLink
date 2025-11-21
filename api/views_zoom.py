@@ -80,8 +80,28 @@ def zoom_callback(request):
 
     profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
 
-    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:8100")
-    return redirect(f"{frontend_url}/zoom/success")
+    platform = request.headers.get("X-Platform", "").lower()
+    user_agent = request.META.get("HTTP_USER_AGENT", "").lower()
+
+    # Lógica de detección para saber si viene desde app
+    is_mobile = False
+
+    # 1. Header explícito → prioridad
+    if platform in ["android", "ios", "mobile"]:
+        is_mobile = True
+
+    # 2. Sin header → detectar WebView o Android/iOS
+    elif "wv" in user_agent or "android" in user_agent or "iphone" in user_agent:
+        is_mobile = True
+
+    # Ahora aplicamos el redirect adecuado
+    if is_mobile:
+        # Deep link a la app
+        return redirect("psicolink://zoom/success")
+    else:
+        # Redirección normal a la web
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:8100")
+        return redirect(f"{frontend_url}/zoom/success")
 
 
 
