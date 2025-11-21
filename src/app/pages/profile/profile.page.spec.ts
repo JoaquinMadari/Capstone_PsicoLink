@@ -1,41 +1,42 @@
+/// <reference types="jasmine" />
+
 import { of } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfilePage } from './profile.page';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ProfessionalService } from 'src/app/services/professional-service';
-import { Auth } from 'src/app/services/auth';
-import { Catalog } from 'src/app/services/catalog';
-import { ToastController } from '@ionic/angular';
+import { Location } from '@angular/common';
 
-// ✅ Mock de ProfessionalService
+// Mock ProfessionalService
 const professionalServiceMock = {
-  getProfessionals: jasmine.createSpy('getProfessionals').and.returnValue(of([])),
-  getProfessionalDetail: jasmine.createSpy('getProfessionalDetail').and.returnValue(of({}))
+  getProfessionalDetail: jasmine
+    .createSpy('getProfessionalDetail')
+    .and.returnValue(of({}))
 };
 
-// ✅ Mock de Auth (si lo inyecta ProfilePage)
-const authServiceMock = {
-  getCurrentUserRole: () => of('paciente'),
-  completeProfile: () => of({ success: true })
+// Mock ActivatedRoute
+const activatedRouteMock = {
+  snapshot: { paramMap: { get: () => '123' } }
 };
 
-// ✅ Mock de Catalog (si lo inyecta ProfilePage)
-const catalogMock = {
-  getSpecialties: jasmine.createSpy('getSpecialties').and.returnValue(of([]))
+// Mock Router
+const routerMock = {
+  events: of(), // evita subscripciones reales
+  navigate: jasmine.createSpy('navigate')
 };
 
-// ✅ Mock de ToastController
+// Mock Location
+const locationMock = {
+  getState: () => ({})
+};
+
+// Mock ToastController
 const toastControllerMock = {
   create: jasmine.createSpy('create').and.returnValue(
     Promise.resolve({ present: jasmine.createSpy('present') })
   )
-};
-
-// ✅ Mock de ActivatedRoute usando snapshot.paramMap
-const activatedRouteMock = {
-  snapshot: { paramMap: { get: (key: string) => '123' } }
 };
 
 describe('ProfilePage', () => {
@@ -47,13 +48,13 @@ describe('ProfilePage', () => {
       imports: [
         IonicModule.forRoot(),
         HttpClientTestingModule,
-        ProfilePage
+        ProfilePage // standalone component
       ],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: ProfessionalService, useValue: professionalServiceMock },
-        { provide: Auth, useValue: authServiceMock },
-        { provide: Catalog, useValue: catalogMock },
+        { provide: Router, useValue: routerMock },
+        { provide: Location, useValue: locationMock },
         { provide: ToastController, useValue: toastControllerMock }
       ]
     }).compileComponents();
@@ -67,6 +68,7 @@ describe('ProfilePage', () => {
     expect(component).toBeTruthy();
   });
 });
+
 
 
 

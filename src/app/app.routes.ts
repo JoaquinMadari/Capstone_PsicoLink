@@ -61,11 +61,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/mis-citas/mis-citas.page').then(m => m.MisCitasPage),
     canActivate: [roleGuard]
   },
-  { 
-    path: 'historial',
-    loadComponent: () => import('./pages/historial/historial.page').then(m => m.HistorialPage),
-    canActivate: [roleGuard]
-  },
+  
   {
     path: 'soporte',
     loadComponent: () => import('./pages/soporte/soporte.page').then(m => m.SoportePage),

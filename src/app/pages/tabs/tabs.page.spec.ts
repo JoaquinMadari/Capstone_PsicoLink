@@ -5,7 +5,11 @@ describe('TabsPage', () => {
   let component: TabsPage;
   let fixture: ComponentFixture<TabsPage>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TabsPage]
+    }).compileComponents();
+
     fixture = TestBed.createComponent(TabsPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -13,5 +17,23 @@ describe('TabsPage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('onTabWillChange should blur active element if possible', () => {
+    const mockElement = {
+      blur: jasmine.createSpy('blur')
+    } as any;
+
+    spyOnProperty(document, 'activeElement', 'get').and.returnValue(mockElement);
+
+    component.onTabWillChange();
+
+    expect(mockElement.blur).toHaveBeenCalled();
+  });
+
+  it('onTabWillChange should not throw if no activeElement', () => {
+    spyOnProperty(document, 'activeElement', 'get').and.returnValue(null);
+
+    expect(() => component.onTabWillChange()).not.toThrow();
   });
 });

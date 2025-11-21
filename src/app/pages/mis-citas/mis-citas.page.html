@@ -24,12 +24,10 @@
         <ion-item *ngFor="let a of appointments" class="appointment-item">
 
           <ion-label>
-
             <h2 class="appointment-datetime">
               {{ a.start_datetime | date:'EEEE d \'de\' MMMM':'':'es-CL' }} — {{ a.start_datetime | date:'hh:mm a' }}
             </h2>
             <p>Duración: {{ a.duration_minutes }} min</p>
-
 
             <p class="appointment-with">
               Con:
@@ -39,43 +37,33 @@
                 || 'Sin nombre disponible' }}
             </p>
 
-            <!-- Nuevo estado correcto -->
             <p class="appointment-status">
               Estado:
-
-              <!-- Cancelada -->
               <ng-container *ngIf="a.status === 'cancelled'">
                 Cita cancelada
               </ng-container>
-
-              <!-- No cancelada -->
               <ng-container *ngIf="a.status !== 'cancelled'">
-
-                <!-- Finalizada -->
                 <span *ngIf="isPastAppointment(a) && a.status === 'completed'; else scheduledState">
                   Cita finalizada
                 </span>
-
-                <!-- Programada -->
                 <ng-template #scheduledState>
                   Cita programada
                 </ng-template>
-
               </ng-container>
             </p>
-
           </ion-label>
 
           <div 
             class="appointment-actions"
+            [class.role-paciente]="role !== 'profesional'"
             [class.is-cancelled-solo]="a.status === 'cancelled'"
-                        [class.has-actions]="a.status !== 'cancelled' && ! (isPastAppointment(a) && a.status === 'scheduled') && ! (a.status === 'completed')"
-                        [class.is-uncaptured-solo]="isPastAppointment(a) && a.status === 'scheduled'"
-                        [class.is-finished-solo]="isPastAppointment(a) && a.status === 'completed'"
-
-            >
+            [class.has-actions]="a.status !== 'cancelled' && ! (isPastAppointment(a) && a.status === 'scheduled') && ! (a.status === 'completed')"
+            [class.is-uncaptured-solo]="isPastAppointment(a) && a.status === 'scheduled'"
+            [class.is-finished-solo]="isPastAppointment(a) && a.status === 'completed'"
+          >
 
             <ion-button
+              class="btn-mis-notas" 
               *ngIf="role === 'profesional' && isPastAppointment(a) && a.status !== 'cancelled'"
               (click)="goToNotas(a.id)"
             >
@@ -137,7 +125,6 @@
             </ion-button>
 
           </div>
-
 
         </ion-item>
 

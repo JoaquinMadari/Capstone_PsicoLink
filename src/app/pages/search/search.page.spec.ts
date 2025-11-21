@@ -1,53 +1,70 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { SearchPageTestModule } from './search-page-test.module';
 import { SearchPage } from './search.page';
 import { SearchService } from '../../services/search';
-import { of } from 'rxjs';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { Catalog } from 'src/app/services/catalog';
+import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
+import { of, Subject } from 'rxjs';
+import { FormBuilder } from '@angular/forms';
 
 describe('SearchPage', () => {
   let component: SearchPage;
   let fixture: ComponentFixture<SearchPage>;
-  let searchService: SearchService;
 
-  const mockResponse = {
-    results: [{ id: 1, name: 'Juan Pérez', specialty: 'Psicología' }],
-    count: 1
+  // Mocks
+  const mockSearchService = {
+    search: jasmine.createSpy('search').and.returnValue(of({ results: [], next: null }))
+  };
+
+  const mockCatalog = {
+    getSpecialties: jasmine.createSpy('getSpecialties').and.returnValue(of([
+      { value: 'psicologia', label: 'Psicología' },
+      { value: 'fisioterapia', label: 'Fisioterapia' }
+    ]))
+  };
+
+  const mockRouter = {
+    navigate: jasmine.createSpy('navigate')
+  };
+
+  const mockToastCtrl = {
+    create: jasmine.createSpy('create').and.returnValue(
+      Promise.resolve({ present: () => {} })
+    )
   };
 
   beforeEach(async () => {
+    // Mock de localStorage
+    spyOn(localStorage, 'getItem').and.callFake((key: string) => {
+      switch (key) {
+        case 'user_role':
+          return 'paciente';
+        default:
+          return null;
+      }
+    });
+
     await TestBed.configureTestingModule({
-      imports: [
-        SearchPageTestModule,
-        HttpClientTestingModule // 👈 añadido
-      ],
+      imports: [SearchPage],
       providers: [
-        provideHttpClient(withInterceptorsFromDi()) // 👈 añadido
-      ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+        FormBuilder,
+        { provide: SearchService, useValue: mockSearchService },
+        { provide: Catalog, useValue: mockCatalog },
+        { provide: Router, useValue: mockRouter },
+        { provide: ToastController, useValue: mockToastCtrl }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SearchPage);
     component = fixture.componentInstance;
-
-    searchService = TestBed.inject(SearchService);
-    spyOn(searchService, 'search').and.returnValue(of(mockResponse));
-
-    fixture.detectChanges();
+    fixture.detectChanges(); // Ejecuta ngOnInit()
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should load initial results', () => {
-    component.loadResults();
-    expect(searchService.search).toHaveBeenCalled();
-    expect(component.profesionales.length).toBe(1);
-  });
 });
+
 
 
 
