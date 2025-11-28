@@ -63,9 +63,9 @@ def create_zoom_meeting_for_appointment(appointment):
     return False
 
 
-# ===========================================================
-#  CREATE PREFERENCE — AHORA CON session_price
-# ===========================================================
+# ===================
+#  CREATE PREFERENCE
+# ===================
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -115,15 +115,15 @@ def create_preference(request):
         # Lógica de detección mejorada
         is_mobile = False
 
-        # 1. Si envían el header explícito, confiamos en él
+        # Si envían el header explícito, confiamos en él
         if platform in ["android", "ios", "mobile"]:
             is_mobile = True
-        # 2. Si no, revisamos el User-Agent (Plan B)
-        # 'wv' indica WebView (común en Ionic/Capacitor), 'android' o 'iphone' detectan el SO
+        # Si no, revisamos el User-Agent (Plan B)
+        # 'wv' indica WebView, 'android' o 'iphone' detectan el SO
         elif "wv" in user_agent or "android" in user_agent or "iphone" in user_agent:
             is_mobile = True
 
-        # Deep links SOLO para app
+        # Links SOLO para app
         if is_mobile:
             back_urls = {
                 "success": "psicolink://checkout/exitoso",
@@ -138,9 +138,7 @@ def create_preference(request):
                 "pending": f"{URL_FRONTEND_PUBLICO}/pendiente",
             }
 
-        # 👉 NO RETURNS AQUÍ  
-        # Solo se prepara la variable back_urls
-
+        # Se prepara la variable back_urls
         preference_data = {
             "notification_url": URL_WEBHOOK,
 
@@ -181,7 +179,7 @@ def create_preference(request):
 
 
 # ===========================================================
-#  WEBHOOK MERCADO PAGO — SE MANTIENE IGUAL + ZOOM
+#  WEBHOOK MERCADO PAGO
 # ===========================================================
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.request import Request

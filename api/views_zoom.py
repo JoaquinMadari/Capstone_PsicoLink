@@ -18,13 +18,9 @@ from django.shortcuts import redirect
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def zoom_connect(request):
-    """
-    Genera la URL de autorización de Zoom para que el psicólogo autorice la app.
-    Scopes definidos para User-managed:
-    - meeting:read:meeting
-    - meeting:write:meeting
-    - user:read:user
-    """
+    #Genera la URL de autorización de Zoom para que el psicólogo autorice la app.
+    #Scopes definidos para User-managed: meeting:read:meeting, meeting:write:meeting, user:read:user
+    
     user = request.user
     base_url = "https://zoom.us/oauth/authorize"
     params = {
@@ -41,13 +37,10 @@ def zoom_connect(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def zoom_callback(request):
-    """
-    Callback de Zoom: recibe code y state, intercambia por access/refresh tokens
-    y los guarda en el perfil del psicólogo.
-    """
+    # Callback de Zoom: recibe code y state, intercambia por access/refresh tokens 
+    # y los guarda en el perfil del psicólogo.
     code = request.GET.get("code")
-    # asignamos un valor por defecto de user_id para pruebas locales
-    state = request.GET.get("state") or "46"  # reemplaza 46 por tu ID de usuario de prueba
+    state = request.GET.get("state") or "46"
     if not code:
         return Response({"error": "Faltan parámetros: code"}, status=400)
 
@@ -96,7 +89,6 @@ def zoom_callback(request):
 
     # Ahora aplicamos el redirect adecuado
     if is_mobile:
-        # Deep link a la app
         return redirect("psicolink://zoom/success")
     else:
         # Redirección normal a la web

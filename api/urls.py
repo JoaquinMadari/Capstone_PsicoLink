@@ -41,9 +41,6 @@ path("appointments/<int:appointment_id>/notes/", AppointmentNotesListView.as_vie
     path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
     path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
     path('pro/profile/availability/', ProfessionalAvailabilityView.as_view(), name='pro-availability'),
-    # ================================
-    #   Ruta correcta para notas
-    # ================================
     path("zoom/connect/", zoom_connect, name="zoom_connect"),
     path("zoom/oauth/callback/", zoom_callback, name="zoom_callback"),
     path('profile/me/', MyProfileView.as_view(), name='my_profile'),

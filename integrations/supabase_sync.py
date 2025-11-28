@@ -1,4 +1,3 @@
-# supabase_sync.py
 import logging
 import time
 import unicodedata
@@ -143,7 +142,7 @@ def ensure_supabase_user(
         create_payload_full["password"] = password
 
     with requests.Session() as s:
-        # 1) existe?
+        # Verificar si existe
         try:
             existing = _admin_get_by_email(s, base_url, headers, email_norm)
         except SupabaseAdminError as e:
@@ -167,7 +166,7 @@ def ensure_supabase_user(
                 log.warning("Admin update supabase user (%s) no 2xx: %s %s", uid, up.status_code, up.text)
             return uid
 
-        # 2) create (full)
+        # create
         cr = s.post(admin_users, json=create_payload_full, headers=headers, timeout=20)
         if cr.status_code in (200, 201):
             data = _extract_user(cr.json()) or cr.json()
@@ -176,18 +175,18 @@ def ensure_supabase_user(
                 raise SupabaseAdminError(f"Creación sin id en respuesta: {cr.text}")
             return uid
 
-        # 3) datos inválidos o ya existe
+        # datos inválidos o ya existe
         if cr.status_code in (400, 409, 422):
             again = _admin_get_by_email(s, base_url, headers, email_norm)
             if again and again.get("id"):
                 return again["id"]
             raise SupabaseAdminError(f"Admin create fallo {cr.status_code}: {cr.text}")
 
-        # 4) 5xx → estrategia de rescate
+        # error 5xx → estrategia de rescate
         if 500 <= cr.status_code < 600:
             log.error("Admin create 5xx: %s %s", cr.status_code, cr.text)
 
-            # 4.1) lookup con backoff (a veces crea pero responde 500)
+            # lookup con backoff (a veces crea pero responde 500)
             for wait in (0.5, 1.2, 2.0):
                 time.sleep(wait)
                 try:
@@ -198,7 +197,7 @@ def ensure_supabase_user(
                 if u2 and u2.get("id"):
                     return u2["id"]
 
-            # 4.2) create mínimo (sin user_metadata)
+            # create mínimo (sin user_metadata)
             create_payload_min = {
                 "email": email_norm,
                 "email_confirm": True,
@@ -213,7 +212,7 @@ def ensure_supabase_user(
                 if not uid2:
                     raise SupabaseAdminError(f"Creación mínima sin id en respuesta: {cr2.text}")
 
-                # 4.3) patch metadata
+                # patch metadata
                 patch2 = { "user_metadata": meta, "email_confirm": True }
                 up2 = s.patch(f"{admin_users}/{uid2}", json=patch2, headers=headers, timeout=20)
                 if up2.status_code not in (200, 201):
@@ -222,7 +221,7 @@ def ensure_supabase_user(
                     log.warning("Patch metadata post-min-create no 2xx: %s %s", up2.status_code, up2.text)
                 return uid2
 
-            # 4.4) lookup final
+            # lookup final
             try:
                 u3 = _admin_get_by_email(s, base_url, headers, email_norm)
             except SupabaseAdminError as e:
@@ -233,5 +232,5 @@ def ensure_supabase_user(
 
             raise SupabaseAdminError(f"Admin create fallo {cr.status_code}: {cr.text}")
 
-        # 5) otro código
+        # otro código de error
         raise SupabaseAdminError(f"Admin create fallo {cr.status_code}: {cr.text}")

@@ -65,7 +65,7 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
     #certificates = serializers.FileField(required=False) 
     #curriculum_vitae = serializers.FileField(required=False)
 
-    #TEMPORAL QUITAR ESTO DESPUES Y AGREGAR LO QUE ESTA ARRIBA
+    #TEMPORAL QUITAR ESTO EN ACTUALIZACIONES FUTURAS Y AGREGAR LO QUE ESTA ARRIBA
     certificates = serializers.CharField(required=False, allow_blank=True) 
     curriculum_vitae = serializers.CharField(required=False, allow_blank=True)
     
@@ -85,7 +85,7 @@ class PsicologoProfileSerializer(serializers.ModelSerializer):
             'therapeutic_techniques', 'style_of_attention', 'work_modality', 'certificates',
             'address', 'payment_method',
             'session_price',
-            # Opcionales si quieres que se rellenen aquí también
+            # Opcionales
             'inclusive_orientation', 'languages', 'experience_years', 'curriculum_vitae'
         ]
 
@@ -158,7 +158,7 @@ class PacienteProfileSerializer(serializers.ModelSerializer):
         profile = PacienteProfile.objects.create(user=user, **validated_data)
         return profile
     
-
+#INACTIVO EN LA VERSION 1.0 DE LA APP
 class OrganizacionProfileSerializer(serializers.ModelSerializer):
     """ Serializador para que la organización complete su perfil después del registro. """
     
@@ -195,7 +195,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         data['user'] = {
-            'id': self.user.id,                 # 🔹 agregar el id
+            'id': self.user.id,
             'role': self.user.role,
             'email': self.user.email,
             'full_name': self.user.get_full_name() or None,
@@ -359,13 +359,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         
         end = start + timedelta(minutes=duration)
 
-        # Solapamientos
-        
-        # --- LÓGICA DE PACIENTE MODIFICADA ---
-        # 3. Hacemos que la validación de solapamiento del paciente
-        #    funcione tanto para el webhook como para la vista normal.
         request = self.context.get('request')
         
+        # -- INICIO LÓGICA PACIENTE (webhook)
         # Primero intenta obtener 'patient' de los datos (Webhook)
         patient = data.get('patient') 
         
@@ -375,11 +371,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
         
         if not patient:
             # Si no hay paciente ni en el data ni en el request, es un error
-            # (a menos que estés actualizando y no cambiando el paciente)
             if not self.instance:
                 raise serializers.ValidationError("No se pudo determinar el paciente.")
         # --- FIN LÓGICA DE PACIENTE ---
 
+        # SOLAPAMIENTOS
         if patient:
             qs = Appointment.objects.filter(patient=patient, status='scheduled')
             if self.instance:
@@ -396,20 +392,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
         return data
 
-    # -----------------------------
-# CREATE / UPDATE UNIFICADO
-# -----------------------------
+    # CREATE / UPDATE
     def create(self, validated_data):
         request = self.context.get('request')
 
-        # --- Asignar patient si no viene en validated_data ---
+        # Asignar patient si no viene en validated_data
         if 'patient' not in validated_data:
             if request and request.user and request.user.is_authenticated:
                 validated_data['patient'] = request.user
             else:
                 raise serializers.ValidationError({"patient": "No se proveyó un paciente."})
 
-        # --- Asignar professional_role si existe professional ---
+        # Asignar professional_role si existe professional
         professional = validated_data.get('professional')
         if professional:
             try:
@@ -417,20 +411,20 @@ class AppointmentSerializer(serializers.ModelSerializer):
             except AttributeError:
                 validated_data['professional_role'] = 'desconocido'
 
-        # --- Crear la instancia en transacción ---
+        # Crear la instancia en transacción
         with transaction.atomic():
             return super().create(validated_data)
 
 
     def update(self, instance, validated_data):
-        # --- Actualizar notes si vienen ---
+        # Actualizar notes si vienen
         notes = validated_data.get("notes", None)
         if notes is not None:
             instance.notes = notes
             instance.save()
             return instance
 
-        # --- Lógica adicional: transacción para otros updates ---
+        # Transacción para otros updates
         with transaction.atomic():
             return super().update(instance, validated_data)
 
@@ -589,7 +583,7 @@ class SupportTicketCreateSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     class Meta:
         model = SupportTicket
-        # Solo necesitamos estos campos para crear el ticket
+        # Campos para crear el ticket
         fields = ('id', 'name', 'email', 'subject', 'message', 'created_at', 'status', 'respuesta', 'respondido_por', 'fecha_respuesta')
         read_only_fields = ('id', 'created_at', 'status', 'respuesta', 'respondido_por', 'fecha_respuesta')
 

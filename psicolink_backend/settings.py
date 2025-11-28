@@ -211,16 +211,16 @@ SUPABASE_ANON_KEY = config("SUPABASE_ANON_KEY", default="")
 
 #USE_TZ = True
 
-# 1. Zona horaria de la aplicación: Santiago (Chile)
+# Zona horaria de la aplicación: Santiago (Chile)
 TIME_ZONE = 'America/Santiago' 
 
-# 2. Idioma de la aplicación: Español de Chile
+# Idioma de la aplicación: Español de Chile
 LANGUAGE_CODE = 'es-cl' 
 
-# 3. Activa el soporte para internacionalización
+# Activa el soporte para internacionalización
 USE_I18N = True
 
-# 4. Activa el soporte para zonas horarias (MANDATORIO para el manejo correcto de horarios)
+# Activa el soporte para zonas horarias (MANDATORIO para el manejo correcto de horarios)
 USE_TZ = True 
 
 

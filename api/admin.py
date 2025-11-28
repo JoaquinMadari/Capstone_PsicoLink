@@ -76,7 +76,7 @@ class AppointmentAdmin(admin.ModelAdmin):
         'patient', 
         'professional', 
         'start_datetime', 
-        'end_datetime', # Usamos la property
+        'end_datetime',
         'status', 
         'duration_minutes'
     )

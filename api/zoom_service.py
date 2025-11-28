@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime, timedelta
-from datetime import timezone as dt_timezone  # ✅ IMPORT CORRECTO
+from datetime import timezone as dt_timezone  # IMPORT CORRECTO
 from decouple import config
 
 ZOOM_API_BASE_URL = "https://api.zoom.us/v2"
@@ -13,7 +13,7 @@ def refresh_zoom_token(professional_profile):
     """
     Refresca el token de acceso de Zoom usando el refresh_token guardado.
     """
-    print(f"♻️ Intentando refrescar token de Zoom para {professional_profile.user.email}...")
+    print(f"Intentando refrescar token de Zoom para {professional_profile.user.email}...")
 
     token_url = "https://zoom.us/oauth/token"
     auth = (ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET)
@@ -23,7 +23,7 @@ def refresh_zoom_token(professional_profile):
         "refresh_token": professional_profile.zoom_refresh_token
     }
 
-    # ✅ HEADERS EXPLÍCITOS para form data
+    # HEADERS EXPLÍCITOS para form data
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     response = requests.post(token_url, auth=auth, data=data, headers=headers)
 
@@ -32,22 +32,20 @@ def refresh_zoom_token(professional_profile):
 
         professional_profile.zoom_access_token = token_data.get("access_token")
         professional_profile.zoom_refresh_token = token_data.get("refresh_token")
-        # ✅ TIMEZONE CORRECTO
+        # TIMEZONE CORRECTO
         professional_profile.zoom_token_expires_at = datetime.now(dt_timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600))
         professional_profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
 
-        print("✅ Token de Zoom actualizado correctamente.")
+        print("Token de Zoom actualizado correctamente.")
         return professional_profile.zoom_access_token
 
     else:
-        print(f"❌ Error al refrescar token de Zoom: {response.status_code} - {response.text}")
+        print(f"Error al refrescar token de Zoom: {response.status_code} - {response.text}")
         raise Exception("No se pudo refrescar el token de Zoom.")
 
 
 def create_zoom_meeting(access_token, topic, start_time, duration=60):
-    """
-    Crea una reunión en Zoom usando el token de acceso.
-    """
+    #Crea una reunión en Zoom usando el token de acceso.
     url = f"{ZOOM_API_BASE_URL}/users/me/meetings"
     headers = {"Authorization": f"Bearer {access_token}"}
     payload = {
@@ -67,28 +65,26 @@ def create_zoom_meeting(access_token, topic, start_time, duration=60):
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 201:
-        print("✅ Reunión Zoom creada con éxito.")
+        print(" Reunión Zoom creada con éxito.")
         return response.json()
     elif response.status_code == 401:
-        print(f"⚠️ Error 401 - Token inválido o expirado.")
+        print(f" Error 401 - Token inválido o expirado.")
         raise Exception("Token expirado o inválido.")
     else:
-        print(f"❌ Error al crear reunión Zoom: {response.status_code} - {response.text}")
+        print(f" Error al crear reunión Zoom: {response.status_code} - {response.text}")
         raise Exception("Error al crear reunión Zoom.")
 
 
 def create_meeting_for_professional(professional_profile, topic, start_time, duration=60):
-    """
-    Crea una reunión Zoom para un profesional, refrescando el token si es necesario.
-    """
+    #Crea una reunión Zoom para un profesional, refrescando el token si es necesario.
     try:
         # Verificar expiración
         if not professional_profile.zoom_access_token:
             raise Exception("El profesional no tiene token de Zoom configurado.")
 
-        # ✅ TIMEZONE CORRECTO
+        # TIMEZONE CORRECTO
         if professional_profile.zoom_token_expires_at and professional_profile.zoom_token_expires_at < datetime.now(dt_timezone.utc):
-            print("⏰ Token expirado. Refrescando...")
+            print(" Token expirado. Refrescando...")
             refresh_zoom_token(professional_profile)
 
         # Intentar crear la reunión
@@ -101,5 +97,5 @@ def create_meeting_for_professional(professional_profile, topic, start_time, dur
             raise e
 
     except Exception as e:
-        print(f"❌ No se pudo crear reunión para {professional_profile.user.email}: {e}")
+        print(f" No se pudo crear reunión para {professional_profile.user.email}: {e}")
         raise

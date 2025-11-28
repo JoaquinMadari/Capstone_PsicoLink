@@ -95,7 +95,7 @@ class PsicologoProfile(BaseProfile):
     main_focus = models.CharField(max_length=100)
     therapeutic_techniques = models.TextField()
     style_of_attention = models.TextField()
-    attention_schedule = models.CharField(max_length=255,null=True,blank=True) # Mejor un JSONField o FK a un modelo de Horario
+    attention_schedule = models.CharField(max_length=255,null=True,blank=True) # INACTIVO
     work_modality = models.CharField(max_length=50)
     certificates = models.FileField(upload_to='certificates/')
     
@@ -114,7 +114,7 @@ class PsicologoProfile(BaseProfile):
     zoom_refresh_token = models.TextField(blank=True, null=True)
     zoom_token_expires_at = models.DateTimeField(blank=True, null=True)
 
-    #--Mercado Pago Integration--
+    #--Mercado Pago Integración--
     session_price = models.PositiveIntegerField(
     null=True,
     blank=True,
@@ -289,7 +289,7 @@ class SupportTicket(models.Model):
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
-        related_name='tickets_respondidos' # Nuevo related_name para evitar conflicto con 'support_tickets'
+        related_name='tickets_respondidos'
     )
     fecha_respuesta = models.DateTimeField(null=True, blank=True)
 

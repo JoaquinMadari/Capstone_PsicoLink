@@ -37,7 +37,7 @@ from integrations.supabase_sync import ensure_supabase_user, get_supabase_sessio
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
-    authentication_classes = []  # ← AGREGAR ESTO
+    authentication_classes = []
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -223,7 +223,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                     appointment.zoom_meeting_id = zoom_data.get("id")
                     appointment.zoom_join_url = zoom_data.get("join_url")
                     appointment.zoom_start_url = zoom_data.get("start_url")
-                    print(f"✅ Reunión Zoom creada correctamente para {appointment.professional}")
+                    print(f" Reunión Zoom creada correctamente para {appointment.professional}")
 
             except Exception as e:
                 print(f"⚠️ Error al crear reunión Zoom: {e}")
@@ -256,7 +256,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         # Serializamos la cita
         response_data = AppointmentSerializer(appointment, context={'request': request}).data
 
-        # ✅ Agregamos los URLs de Zoom explícitamente
+        # Agregamos los URLs de Zoom explícitamente
         response_data['zoom_join_url'] = appointment.zoom_join_url
         response_data['zoom_start_url'] = appointment.zoom_start_url
 
@@ -305,7 +305,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         })
 
 
-    # -----------------------
+# -----------------------
 # Appointment Notes (Crear / Editar)
 # -----------------------
 class AppointmentNotesCreateView(generics.CreateAPIView):
