@@ -26,10 +26,7 @@ describe('HomePage', () => {
     fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;
 
-    // Inicializa arrays usados en template si los hubiera
-    // component.pages = [{ title: 'Login', root: '/login' }]; // solo si tu template usa p.root
-
-    fixture.detectChanges(); // dispara ngOnInit()
+    fixture.detectChanges();
   });
 
   it('should create', () => {

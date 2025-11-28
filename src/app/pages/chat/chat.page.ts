@@ -57,7 +57,7 @@ export class ChatPage implements OnInit, OnDestroy {
   async ngOnInit() {
     this.resolveRoleAndBack();
 
-    // Evita focus atrapado al navegar hacia atrás / entre outlets
+    // Evita focus atrapado al navegar hacia atrás
     this.routerSub = this.router.events.subscribe(ev => {
       if (ev instanceof NavigationStart) {
         (document.activeElement as HTMLElement | null)?.blur?.();
@@ -125,7 +125,7 @@ export class ChatPage implements OnInit, OnDestroy {
     try { this.msgCh?.unsubscribe(); } catch {}
     try { this.presCh?.unsubscribe(); } catch {}
     try { this.chat.unsubscribeAll(); } catch {}
-    try { this.chat.setTyping(false); } catch {} // <- opcional: apaga typing
+    try { this.chat.setTyping(false); } catch {}
     try { this.routerSub?.unsubscribe(); } catch {}
   }
 

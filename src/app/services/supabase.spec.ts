@@ -11,7 +11,6 @@ describe('SupabaseService', () => {
     ngZoneSpy = jasmine.createSpyObj('NgZone', ['runOutsideAngular']);
     ngZoneSpy.runOutsideAngular.and.callFake((fn: Function) => fn());
 
-    // ⛔ NO usamos TestBed
     service = new SupabaseService(ngZoneSpy);
   });
 

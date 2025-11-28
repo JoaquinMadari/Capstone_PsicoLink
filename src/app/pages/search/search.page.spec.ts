@@ -34,14 +34,14 @@ describe('SearchPage', () => {
     )
   };
 
-  // ⛑️ Mock correcto de NavController para evitar el subscribe undefined
+  // Mock correcto de NavController para evitar el subscribe undefined
   const mockNavController = {
     navigateForward: jasmine.createSpy('navigateForward'),
     navigateBack: jasmine.createSpy('navigateBack'),
     navigateRoot: jasmine.createSpy('navigateRoot')
   };
 
-  // ⛑️ Mock de ActivatedRoute (algunos componentes lo usan indirectamente)
+  // Mock de ActivatedRoute (algunos componentes lo usan indirectamente)
   const mockActivatedRoute = {
     snapshot: {
       paramMap: {

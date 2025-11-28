@@ -13,7 +13,7 @@ import { ToastController } from '@ionic/angular';
 interface SpecialtyOption {
   value: string;
   label: string;
-  requires_detail?: boolean; // para "otro"
+  requires_detail?: boolean;
 }
 
 @Component({
@@ -24,7 +24,6 @@ interface SpecialtyOption {
   imports: [
     CommonModule, 
     ReactiveFormsModule,
-    // Módulos Ionic
     IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar, IonItem, IonLabel,
     IonSelect, IonSelectOption ,IonList,IonInfiniteScrollContent,IonInfiniteScroll,
     IonBackButton, IonButtons, IonButton, IonIcon,

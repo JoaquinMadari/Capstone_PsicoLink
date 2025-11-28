@@ -1,29 +1,17 @@
-/*
- * ESTILOS GLOBALES DE LA APLICACIÓN
- *
- * Este archivo define el "look and feel" principal (tema de color)
- * para toda la aplicación.
- */
-
-/* --- Header / Toolbar --- */
-/* * Define el color de la barra de navegación superior.
- * Hacemos que solo aplique a la toolbar DENTRO del header.
- */
+/* ESTILOS GLOBALES DE LA APLICACIÓN */
 ion-header ion-toolbar {
   --background: #274472; /* Blue Nova */
-  --color: #ffffff;      /* Texto blanco */
+  --color: #ffffff;
 }
 
 
 /* --- Fondo de Contenido --- */
-/* Define el color de fondo para todas las páginas */
 ion-content {
-  --background: #C5D5E4; /* Azul grisáceo claro */
+  --background: #C5D5E4;
 }
 
 
 /* --- Tarjetas --- */
-/* Estilo para los <ion-card> (como en agendar-cita) */
 ion-card {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -37,39 +25,22 @@ ion-card-title {
 
 
 /* --- Items y Listas --- */
-
-/* --- ¡CAMBIO AÑADIDO! --- */
-/* * Hacemos que el fondo de la lista sea transparente
- * para que los márgenes de los items muestren
- * el color de fondo de ion-content.
- */
 ion-list {
   background: transparent;
   --background: transparent;
-  /* * También asegurémonos de que la lista no tenga padding
-   * si está dentro de un ion-content con padding.
-   */
+
   margin: 0;
   padding: 0;
 }
 
-/* * Estilo para los <ion-item> dentro de listas, 
- * como en tu página de "Buscar Profesionales".
- * Esto hará que cada profesional se vea como una "mini-tarjeta".
- */
 ion-list ion-item {
-  --background: #f7fbff; /* Un blanco muy suave */
+  --background: #f7fbff;
   margin-bottom: 8px;
   border-radius: 8px;
 
-  /* * Esto quita la línea negra (borde) entre los items.
-   */
   --inner-border-width: 0px;
 }
 
-/* * Estilo general para items (formularios, etc.)
- * Quita el fondo por defecto para que se vea el fondo del --background.
- */
 ion-item {
   --background: transparent;
   --highlight-color-focused: #A7C7E7;
@@ -82,7 +53,7 @@ ion-item ion-label {
 
 /* --- Controles de Formulario --- */
 ion-datetime {
-  --background: #f9fbfd; /* fondo gris muy suave */
+  --background: #f9fbfd;
   --ion-text-color: #0a2540; /* texto principal */
   color: #0a2540;
   border: 1px solid #cfd9e6;
@@ -100,35 +71,30 @@ ion-select-option {
 
 /* --- Botones --- */
 ion-button {
-  --background: #4A90E2; /* Azul más brillante para acción */
+  --background: #4A90E2;
   --color: #fff;
 }
 
 
-/* --- Barra de Búsqueda --- */
-/* * Hacemos que la toolbar que contiene el search 
- * sea transparente para que se vea el fondo de la página.
- */
+/* --- Toolbar --- */
 ion-content ion-toolbar {
   --background: transparent;
 }
 
 ion-searchbar {
-  --background: #ffffff; /* Fondo blanco */
-  --color: #0a2540; /* Texto oscuro */
+  --background: #ffffff;
+  --color: #0a2540;
   --placeholder-color: #8898aa;
-  --icon-color: #4A90E2; /* Icono azul (de los botones) */
+  --icon-color: #4A90E2;
   --clear-button-color: #8898aa;
-  --border-radius: 12px; /* Redondeado */
+  --border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   padding: 0;
-  /* * Ajusta el margen para que se alinee con el padding 
-   * estándar de ion-content (usualmente 16px).
-   */
+
   margin: 8px 16px; 
 }
 
-/* 🔍 SEARCHBAR RESPONSIVE */
+/* SEARCHBAR RESPONSIVE */
 
 /* Quita restricciones del toolbar para que el search pueda adaptarse */
 ion-content ion-toolbar {
@@ -145,8 +111,8 @@ ion-searchbar {
   --icon-color: #4A90E2;
   --border-radius: 12px;
   margin: 10px 16px;
-  width: calc(100% - 32px); /* asegura que nunca sobresalga */
-  height: 44px;             /* altura elegante estándar */
+  width: calc(100% - 32px);
+  height: 44px;
   font-size: 0.95rem;
 }
 
@@ -157,10 +123,10 @@ ion-searchbar .searchbar-input-container {
 
 ion-searchbar input {
   font-size: 0.9rem !important;
-  padding-left: 36px !important; /* espacio para el ícono */
+  padding-left: 36px !important;
 }
 
-/* 📱 Pantallas pequeñas (iPhone SE, Android mini) */
+/* Pantallas pequeñas (iPhone SE, Android mini) */
 @media (max-width: 390px) {
   ion-searchbar {
     height: 40px;
@@ -174,7 +140,7 @@ ion-searchbar input {
   }
 }
 
-/* 📱 Pantallas muy pequeñas (<340px) */
+/* Pantallas muy pequeñas (<340px) */
 @media (max-width: 340px) {
   ion-searchbar {
     height: 36px;
@@ -184,7 +150,7 @@ ion-searchbar input {
   }
 }
 
-/* 📱 Ajustes exclusivos para pantallas muy pequeñas (320px o menos) */
+/* Ajustes exclusivos para pantallas muy pequeñas (320px o menos) */
 @media (max-width: 320px) {
 
   /* --- Contenedor principal del item --- */
@@ -205,7 +171,7 @@ ion-item.custom-item-card ion-icon {
   /* --- Texto: Nombre y Especialidad --- */
   ion-item.custom-item-card ion-label h2 {
     font-size: 13px;
-    white-space: normal; /* Permite saltos de línea */
+    white-space: normal;
     line-height: 1.2;
     word-break: break-word;
     padding-left: 10px;
@@ -213,7 +179,7 @@ ion-item.custom-item-card ion-icon {
 
   ion-item.custom-item-card ion-label p {
     font-size: 9px;
-    white-space: normal; /* Permite salto */
+    white-space: normal;
     margin-top: 6px;
     line-height: 1.2;
     padding-left: 10px;
@@ -228,14 +194,14 @@ ion-item.custom-item-card ion-icon {
     word-break: break-word !important;
   }
 
-  /* --- Mover solo el slot del icono más a la izquierda --- */
+/* --- Mover solo el slot del icono más a la izquierda --- */
 ion-item.custom-item-card ::ng-deep .item-start {
-  margin-left: -100px !important;    /* ⬅️ Ajusta solo el icono */
+  margin-left: -100px !important;
 }
 
 
 ion-item.custom-item-card ion-button {
-  margin-top: 20px !important;   /* ⬅️ ajusta aquí */
+  margin-top: 20px !important;
 }
 
 }

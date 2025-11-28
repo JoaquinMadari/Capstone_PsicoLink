@@ -48,7 +48,6 @@ describe('HomeProPage', () => {
     fixture = TestBed.createComponent(HomeProPage);
     component = fixture.componentInstance;
 
-    // Toast create mock
     mockToast.create.and.returnValue(Promise.resolve({ present: jasmine.createSpy() } as any));
   });
 

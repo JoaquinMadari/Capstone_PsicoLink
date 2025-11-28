@@ -36,7 +36,7 @@ ion-content {
   --background: #e0e5ec;
   border-radius: 12px;
   text-align: center;
-  padding: 12px 6px; /* ⭐ Más espacio para texto */
+  padding: 12px 6px;
 
   ion-card-title {
     color: #4A90E2;
@@ -48,14 +48,11 @@ ion-content {
     word-break: break-word;
     overflow-wrap: break-word;
 
-    /* ⭐ evita cortes RAROS en palabras largas */
     word-break: keep-all;
 
-    /* ⭐ centra y deja margen lateral adicional */
     max-width: 95%;
     margin: 0 auto;
 
-    /* ⭐ permite 2 líneas y no más */
     overflow: hidden;
   }
 
@@ -67,7 +64,7 @@ ion-content {
   }
 }
 
-/* Pantallas MUY pequeñas (320px) */
+/* Pantallas MUY pequeñas*/
 @media (max-width: 360px) {
   .action-card ion-card-title {
     font-size: 0.78rem;
@@ -79,7 +76,7 @@ ion-content {
   }
 }
 
-/* Pantallas EXTREMAS como 320px */
+/* Pantallas EXTREMAS*/
 @media (max-width: 330px) {
   .action-card ion-card-title {
     font-size: 0.72rem;

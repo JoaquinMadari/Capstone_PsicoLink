@@ -13,9 +13,9 @@ import { SearchPage } from './search.page';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    HttpClientTestingModule, // ✅ HttpClient
-    RouterTestingModule,     // ✅ Router
-    SearchPage               // ✅ tu standalone component
+    HttpClientTestingModule,
+    RouterTestingModule,
+    SearchPage
   ]
 })
 export class SearchPageTestModule {}

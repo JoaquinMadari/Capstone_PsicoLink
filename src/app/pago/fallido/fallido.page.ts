@@ -48,7 +48,6 @@ export class FallidoPage implements OnInit, OnDestroy {
 
   goToSearch() {
     this.timerSubscription?.unsubscribe();
-    // 🔴 ¡Cambia esta ruta a tu página de búsqueda o home!
     this.router.navigate(['/home'], { replaceUrl: true });
   }
 }

@@ -10,12 +10,12 @@ describe('TicketsPage', () => {
   let component: TicketsPage;
   let fixture: ComponentFixture<TicketsPage>;
 
-  // 🔹 Mock ActivatedRoute (/tickets/1)
+  //Mock ActivatedRoute (/tickets/1)
   const mockActivatedRoute = {
     snapshot: { paramMap: { get: () => '1' } }
   };
 
-  // 🔹 Mock SoporteService
+  //Mock SoporteService
   const mockSoporteService = {
     getTicketDetailsForAdmin: jasmine.createSpy('getTicketDetailsForAdmin').and.returnValue(
       of({
@@ -29,19 +29,19 @@ describe('TicketsPage', () => {
     replyToTicket: jasmine.createSpy('replyToTicket').and.returnValue(of({}))
   };
 
-  // 🔹 Mock ToastController
+  //Mock ToastController
   const mockToastCtrl = {
     create: jasmine.createSpy('create').and.returnValue(
       Promise.resolve({ present: () => {} })
     )
   };
 
-  // 🔹 Mock Router
+  //Mock Router
   const mockRouter = {
     navigate: jasmine.createSpy('navigate')
   };
 
-  // 🔹 Mock NavController (ION-BACK BUTTON NECESITA ESTO)
+  //Mock NavController (ION-BACK BUTTON NECESITA ESTO)
   const mockNavController = {
     back: jasmine.createSpy('back'),
     navigateForward: jasmine.createSpy('navigateForward'),
@@ -64,11 +64,11 @@ describe('TicketsPage', () => {
 
     fixture = TestBed.createComponent(TicketsPage);
     component = fixture.componentInstance;
-    fixture.detectChanges(); // ejecuta ngOnInit()
+    fixture.detectChanges();
   });
 
   // -------------------------------------------
-  // 🧪 PRUEBAS
+  // PRUEBA INICIAL
   // -------------------------------------------
 
   it('should create', () => {

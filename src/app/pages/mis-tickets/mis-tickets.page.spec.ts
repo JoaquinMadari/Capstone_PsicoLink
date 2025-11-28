@@ -42,7 +42,7 @@ describe('MisTicketsPage', () => {
     await TestBed.configureTestingModule({
       imports: [
         MisTicketsPage,
-        RouterTestingModule.withRoutes([]) // Provee un Router real de testing
+        RouterTestingModule.withRoutes([])
       ],
       providers: [
         { provide: SoporteService, useValue: soporteServiceSpy },

@@ -11,7 +11,6 @@ describe('UserDetailPage', () => {
   let component: UserDetailPage;
   let fixture: ComponentFixture<UserDetailPage>;
 
-  // 🧪 Mocks necesarios
   const mockActivatedRoute = {
     snapshot: { paramMap: { get: () => '1' } }
   };
@@ -47,7 +46,6 @@ describe('UserDetailPage', () => {
     navigate: jasmine.createSpy('navigate')
   };
 
-  // ⬇️ Mocks faltantes (los que causaban el error)
   const mockNav = jasmine.createSpyObj('NavController', [
     'navigateRoot',
     'navigateForward',
@@ -70,7 +68,7 @@ describe('UserDetailPage', () => {
         { provide: ToastController, useValue: mockToastCtrl },
         { provide: Router, useValue: mockRouter },
 
-        // ⬇️ AGREGADO PARA QUE NO FALLE NAVCONTROLLER
+        // AGREGADO PARA QUE NO FALLE NAVCONTROLLER
         { provide: NavController, useValue: mockNav },
         { provide: Platform, useValue: mockPlatform },
         { provide: Location, useValue: mockLocation }

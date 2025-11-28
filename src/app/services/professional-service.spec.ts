@@ -7,7 +7,7 @@ describe('ProfessionalService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule], // agrega HttpClientTestingModule
+      imports: [HttpClientTestingModule],
       providers: [ProfessionalService]
     });
     service = TestBed.inject(ProfessionalService);

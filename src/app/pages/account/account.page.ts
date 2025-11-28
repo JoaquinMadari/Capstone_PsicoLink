@@ -42,7 +42,7 @@ export class AccountPage {
   email = '';
   phone = '';
   specialty = '';
-  session_price: number | null = null; // <-- NUEVO CAMPO
+  session_price: number | null = null;
 
   constructor(
     private auth: Auth,
@@ -66,7 +66,6 @@ export class AccountPage {
         this.specialty = data.specialty || '';
         this.role = data.role || this.role;
 
-        // cargar precio solo si es profesional
         if (this.role === 'profesional') {
           this.session_price = data.session_price ?? null;
         }
@@ -96,7 +95,7 @@ export class AccountPage {
       phone: this.phone
     };
 
-    // incluir solo si es profesional
+    // Se incluye este campo solo si es profesional
     if (this.role === 'profesional') {
       payload.session_price = this.session_price;
     }
@@ -104,7 +103,7 @@ export class AccountPage {
     this.profileService.updateMyProfile(payload).subscribe({
       next: async (res) => {
         this.editing = false;
-        this.loadProfile(); // refrescar
+        this.loadProfile();
         const alert = await this.alertCtrl.create({
           header: 'Listo',
           message: 'Perfil actualizado correctamente.',

@@ -1,4 +1,4 @@
-/* 🎨 Header */
+/* Header */
 ion-header,
 ion-toolbar {
   --background: #274C77;
@@ -15,7 +15,7 @@ ion-content {
   padding-top: 24px;
 }
 
-/* 🧩 Card responsiva */
+/* Card responsiva */
 ion-card {
   width: 100%;
   max-width: 450px;
@@ -54,7 +54,7 @@ ion-input {
   color: #1A1A1A;
 }
 
-/* 🧩 Selector de rol (segment) */
+/* Selector de rol (segment) */
 .role-selector {
   width: 100%;
   display: flex;
@@ -62,12 +62,11 @@ ion-input {
   margin-top: 8px;
 }
 
-/* Hacemos que el ion-segment sea un flex container que permita wrap */
 ion-segment {
   width: 100%;
   display: flex;
-  flex-wrap: wrap;      /* permite que los botones pasen a la siguiente línea */
-  gap: 8px;             /* separación entre botones sin usar margin */
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
   box-sizing: border-box;
 }
@@ -83,7 +82,6 @@ ion-segment-button {
   font-weight: 500;
   padding: 8px 0;
 
-  /* Para que se acomoden fluidamente */
   flex: 1;
   margin: 0 4px;
 }
@@ -124,7 +122,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* 📱 Tablets */
+/* Tablets */
 @media (min-width: 768px) {
   ion-card {
     max-width: 500px;
@@ -135,7 +133,7 @@ a:hover {
   }
 }
 
-/* 💻 Desktop */
+/* Desktop */
 @media (min-width: 1024px) {
   ion-content {
     padding-top: 40px;

@@ -26,8 +26,8 @@ describe('DetalleTicketPage', () => {
 
   await TestBed.configureTestingModule({
     imports: [
-      DetalleTicketPage,       // 👈 standalone component debe ir aquí
-      RouterTestingModule      // 👈 necesario por IonBackButton y ActivatedRoute
+      DetalleTicketPage,
+      RouterTestingModule
     ],
     providers: [
       { provide: SoporteService, useValue: spy },

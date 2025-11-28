@@ -9,7 +9,7 @@ describe('DetalleCitaPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DetalleCitaPage, IonicModule.forRoot()], // <- IMPORTS en vez de declarations
+      imports: [DetalleCitaPage, IonicModule.forRoot()],
       providers: [
         {
           provide: ActivatedRoute,

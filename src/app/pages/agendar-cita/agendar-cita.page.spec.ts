@@ -7,9 +7,7 @@ import { MercadoPago as MercadopagoService } from 'src/app/services/mercado-pago
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController, AlertController, LoadingController, NavController } from '@ionic/angular/standalone';
 
-// -------------------------
-// 🧪 MOCKS DE SERVICIOS
-// -------------------------
+// MOCKS DE SERVICIOS
 
 class MockAppointmentService {
   getProfessionals() {
@@ -63,10 +61,7 @@ class MockLoadingController {
   }
 }
 
-// -------------------------
-// ✔ Router Mock con events (NECESARIO PARA IONIC NAVCONTROLLER)
-// -------------------------
-
+// Router Mock con events (NECESARIO PARA IONIC NAVCONTROLLER)
 const routerEvents$ = new Subject<any>();
 
 const routerMock = {
@@ -74,10 +69,7 @@ const routerMock = {
   navigate: jasmine.createSpy('navigate')
 };
 
-// -------------------------
-// ✔ ActivatedRoute completo
-// -------------------------
-
+//ActivatedRoute completo
 const activatedRouteMock = {
   snapshot: {
     paramMap: {
@@ -87,19 +79,13 @@ const activatedRouteMock = {
   queryParams: of({})
 };
 
-// -------------------------
-// ✔ NavController Mock
-// -------------------------
-
+// NavController Mock
 const navControllerMock = {
   navigateForward: jasmine.createSpy('navigateForward'),
   navigateBack: jasmine.createSpy('navigateBack')
 };
 
-// -------------------------
 // TEST
-// -------------------------
-
 describe('AgendarCitaPage', () => {
   let component: AgendarCitaPage;
   let fixture: ComponentFixture<AgendarCitaPage>;
@@ -122,25 +108,25 @@ describe('AgendarCitaPage', () => {
     fixture = TestBed.createComponent(AgendarCitaPage);
     component = fixture.componentInstance;
 
-    fixture.detectChanges(); // Ejecuta ngOnInit()
+    fixture.detectChanges();
   });
 
-  // 🧪 1. Componente creado
+  // Componente creado
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // 🧪 2. Carga profesionales
+  // Carga profesionales
   it('should load professionals on init', () => {
     expect(component.professionals.length).toBeGreaterThan(0);
   });
 
-  // 🧪 3. Slots generados
+  // Slots generados
   it('should generate slots', () => {
     expect(component.slots.length).toBeGreaterThan(0);
   });
 
-  // 🧪 4. Formulario inválido
+  // Formulario inválido
   it('form should be invalid if no professional selected', () => {
     component.form.patchValue({
       professional: null,
@@ -153,7 +139,7 @@ describe('AgendarCitaPage', () => {
     expect(component.form.valid).toBeFalse();
   });
 
-  // 🧪 5. Formulario válido
+  // Formulario válido
   it('form should be valid with correct data', () => {
     component.form.patchValue({
       professional: 1,

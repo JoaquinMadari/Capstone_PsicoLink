@@ -69,11 +69,11 @@ export class HomeProPage implements OnInit {
 
   // Estado
   loading = false;
-  isAvailable = signal<boolean>(true); // nos falta la logica para que desactive al profesional
+  isAvailable = signal<boolean>(true);
   upcoming: AppointmentDTO[] = [];
   pending: AppointmentDTO[] = [];
   kpis: Kpis = { hoursToday: 0, weekAppointments: 0,};
-  submittingAvailability: boolean = false; // ⬅️ Declárala aquí
+  submittingAvailability: boolean = false;
   constructor(
     private svc: AppointmentService,
     private toastCtrl: ToastController,

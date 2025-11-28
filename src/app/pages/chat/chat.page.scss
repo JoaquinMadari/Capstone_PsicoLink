@@ -21,7 +21,7 @@ ion-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-bottom: 90px; // espacio para el footer
+  padding-bottom: 90px;
 }
 
 /* Cada mensaje */
@@ -53,7 +53,7 @@ ion-content {
   word-break: break-word;
 }
 
-/* Estilos de color por emisor (coherente con la inversión) */
+/* Estilos de color por emisor */
 .msg.mine .bubble {
   background: $white;
   border: 1px solid $blue-nova;

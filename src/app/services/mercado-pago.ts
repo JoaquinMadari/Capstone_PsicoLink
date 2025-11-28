@@ -8,25 +8,22 @@ import { HttpHeaders } from '@angular/common/http';
 })
 export class MercadoPago {
 
-  // 🔴 ¡OJO! Esta es la URL de tu backend.
-  // Ajusta el endpoint a como lo tengas en urls.py
   private backendUrl = environment.MP_URL;
 
   constructor(private http: HttpClient) { }
 
   crearPreferencia(dataDeLaCita: any): Observable<any> {
     
-    // 2. Obtener el token de acceso (ajusta la 'key' si la guardaste con otro nombre)
+    // Obtener el token de acceso
     const token = localStorage.getItem('access_token'); 
 
-    // 3. Crear las cabeceras (Headers)
+    // Crear Headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      // ¡Aquí está la magia!
       'Authorization': `Bearer ${token}` 
     });
 
-    // 4. Enviar la petición POST con los datos Y las cabeceras
+    // Enviar la petición POST con los datos Y las cabeceras
     return this.http.post<any>(this.backendUrl, dataDeLaCita, { headers: headers });
   }
 }

@@ -3,10 +3,9 @@ import { ChatSupabase } from './chat-supabase';
 import { SupabaseService } from './supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-// --- MOCK FACTORY ---
 // Ayuda a crear un objeto que simula la cadena infinita de Supabase (.from.select.eq...)
 const createSupabaseMock = () => {
-  // 1. Mock de Auth
+  // Mock de Auth
   const authSpy = {
     signInWithPassword: jasmine.createSpy('signInWithPassword').and.resolveTo({ data: { user: { id: 'user-123' } }, error: null }),
     setSession: jasmine.createSpy('setSession').and.resolveTo({ error: null }),
@@ -15,7 +14,7 @@ const createSupabaseMock = () => {
     signOut: jasmine.createSpy('signOut').and.resolveTo({ error: null })
   };
 
-  // 2. Mock de Base de Datos (Query Builder)
+  // Mock de Base de Datos (Query Builder)
   // Devuelve 'this' para permitir encadenamiento: .select().eq().order()...
   const dbBuilder: any = {
     select: jasmine.createSpy('select').and.returnValue(null), // Se reasigna abajo
@@ -29,7 +28,7 @@ const createSupabaseMock = () => {
     maybeSingle: jasmine.createSpy('maybeSingle').and.resolveTo({ data: null, error: null })
   };
   
-  // Hacemos que los métodos encadenables se devuelvan a sí mismos
+  // métodos encadenables se devuelvan a sí mismos
   dbBuilder.select.and.returnValue(dbBuilder);
   dbBuilder.insert.and.returnValue(dbBuilder);
   dbBuilder.eq.and.returnValue(dbBuilder);
@@ -38,7 +37,7 @@ const createSupabaseMock = () => {
   dbBuilder.order.and.returnValue(dbBuilder);
   dbBuilder.limit.and.returnValue(dbBuilder);
 
-  // 3. Mock de Realtime
+  // Mock de Realtime
   const channelSpy = {
     on: jasmine.createSpy('on').and.returnValue(null),
     subscribe: jasmine.createSpy('subscribe').and.callFake((fn: any) => {
@@ -51,7 +50,7 @@ const createSupabaseMock = () => {
   };
   channelSpy.on.and.returnValue(channelSpy);
 
-  // 4. El Cliente Principal
+  // El Cliente Principal
   const clientSpy: any = {
     auth: authSpy,
     from: jasmine.createSpy('from').and.returnValue(dbBuilder),
@@ -70,7 +69,7 @@ describe('ChatSupabase Service', () => {
   beforeEach(() => {
     mocks = createSupabaseMock();
 
-    // Mock del Wrapper SupabaseService que inyectas en el constructor
+    // Mock del Wrapper SupabaseService que se inyecta en el constructor
     supabaseServiceMock = {
       client: mocks.clientSpy
     };
@@ -120,7 +119,7 @@ describe('ChatSupabase Service', () => {
 
   it('listMessages should select from message table', async () => {
     const mockList = [{ id: 1 }, { id: 2 }];
-    // Simulamos comportamiento de promesa directa para .limit() ya que devuelve data
+    // Se simula comportamiento de promesa directa para .limit() ya que devuelve data
     mocks.dbBuilder.limit.and.resolveTo({ data: mockList, error: null });
 
     const res = await service.listMessages('conv-1');
@@ -148,7 +147,7 @@ describe('ChatSupabase Service', () => {
   });
 
   it('setTyping should call track on presence channel', async () => {
-    // Primero hay que inicializar el canal de presencia
+    // Primero se inicializa el canal de presencia
     await service.presence('conv-1', () => {});
     
     await service.setTyping(true);

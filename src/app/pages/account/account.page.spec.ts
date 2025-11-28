@@ -50,7 +50,7 @@ describe('AccountPage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        AccountPage,              // Standalone component
+        AccountPage,
         HttpClientTestingModule,
         IonicModule.forRoot()
       ],
@@ -68,7 +68,7 @@ describe('AccountPage', () => {
   });
 
   // -------------------------------------------
-  // 🧪 PRUEBA 1: el componente se crea
+  // PRUEBA 1: el componente se crea
   // -------------------------------------------
   it('should create', () => {
     expect(component).toBeTruthy();

@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonItem, IonLabel, IonInput, IonButton, IonSpinner, IonIcon // <-- AGREGAR IONICON AQUÍ
+  IonItem, IonLabel, IonInput, IonButton, IonSpinner, IonIcon
 } from '@ionic/angular/standalone'
 import { firstValueFrom } from 'rxjs';
 // Necesario para que los iconos de Ionic funcionen correctamente en Standalone
@@ -21,7 +21,7 @@ function normalizeEmail(v: unknown): string {
     .toLowerCase();
 }
 
-// Registrar los iconos que vamos a usar
+//Aqui se registran los iconos de esta page
 addIcons({ eyeOutline, eyeOffOutline });
 
 
@@ -36,7 +36,6 @@ addIcons({ eyeOutline, eyeOffOutline });
     FormsModule, 
     ReactiveFormsModule, 
     RouterModule, 
-    // Asegúrate de que IonIcon esté en los imports para que el HTML funcione
     IonHeader, IonToolbar, IonTitle, IonContent, 
     IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
     IonItem, IonLabel, IonInput, IonButton, IonSpinner, IonIcon
@@ -48,11 +47,8 @@ export class LoginPage implements OnInit {
   errorMessage: string = '';
   loading = false;
   
-  // 1. PROPIEDADES PARA LA VISIBILIDAD DE CONTRASEÑA
-  /** Determina si el input es de tipo 'password' o 'text'. Por defecto: 'password'. */
   public passwordFieldType: string = 'password';
 
-  /** Determina qué icono mostrar (ojo abierto o cerrado). Por defecto: false (oculto). */
   public passwordVisible: boolean = false;
 
   constructor(
@@ -68,7 +64,7 @@ export class LoginPage implements OnInit {
     });
   }
   
-  // 2. FUNCIÓN PARA ALTERNAR LA VISIBILIDAD
+  // FUNCIÓN PARA ALTERNAR LA VISIBILIDAD
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
     this.passwordFieldType = this.passwordVisible ? 'text' : 'password';

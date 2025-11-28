@@ -141,7 +141,7 @@ export class ProfileSetupPage implements OnInit {
       experience_years: [null, [Validators.min(0), Validators.max(60)]]
     });
 
-    // specialty === 'otro' → specialty_other requerido (≤100)
+    // specialty === 'otro' -> specialty_other requerido (≤100)
     this.proForm.get('specialty')!.valueChanges.subscribe((val) => {
       const ctrl = this.proForm.get('specialty_other')!;
       if (val === 'otro') {

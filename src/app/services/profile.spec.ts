@@ -8,8 +8,7 @@ describe('ProfileService', () => {
   let service: ProfileService;
   let httpMock: HttpTestingController;
 
-  // Calculamos la URL base esperada usando la misma lógica que tu servicio
-  // Esto evita errores si tu environment tiene o no tiene el slash al final
+  // Se calcula la URL base esperada usando la misma lógica que en el servicio
   const rawUrl = environment.API_URL || '';
   const expectedBaseUrl = rawUrl.replace(/\/$/, '');
 
@@ -17,8 +16,8 @@ describe('ProfileService', () => {
     TestBed.configureTestingModule({
       providers: [
         ProfileService,
-        provideHttpClient(),        // Habilita HttpClient real
-        provideHttpClientTesting()  // Habilita el Mock para interceptar peticiones
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
     });
 
@@ -27,7 +26,7 @@ describe('ProfileService', () => {
   });
 
   afterEach(() => {
-    // Verifica que no queden peticiones pendientes o "zombies"
+    // Verifica que no queden peticiones pendientes
     httpMock.verify();
   });
 
@@ -39,19 +38,19 @@ describe('ProfileService', () => {
   it('getMyProfile should send a GET request to correct URL', () => {
     const mockProfile = { id: 1, email: 'test@test.com', name: 'User' };
 
-    // 1. Llamada al método
+    // Llamada al método
     service.getMyProfile().subscribe(profile => {
       expect(profile).toEqual(mockProfile);
     });
 
-    // 2. Interceptamos la petición
+    // Se intercepta la petición
     // Esperamos: URL_BASE + /profile/me/
     const req = httpMock.expectOne(`${expectedBaseUrl}/profile/me/`);
     
-    // 3. Verificamos método
+    // Se verifica el método
     expect(req.request.method).toBe('GET');
 
-    // 4. Devolvemos respuesta simulada
+    // Se devuelve respuesta simulada
     req.flush(mockProfile);
   });
 
@@ -60,19 +59,19 @@ describe('ProfileService', () => {
     const payload = { phone: '12345678' };
     const mockResponse = { success: true, ...payload };
 
-    // 1. Llamada al método
+    // Llamada al método
     service.updateMyProfile(payload).subscribe(res => {
       expect(res).toEqual(mockResponse);
     });
 
-    // 2. Interceptamos la petición
+    // Se intercepta la petición
     const req = httpMock.expectOne(`${expectedBaseUrl}/profile/me/`);
 
-    // 3. Verificamos método y cuerpo (body)
+    // Se verifica método y cuerpo (body)
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(payload);
 
-    // 4. Devolvemos respuesta simulada
+    // Se devuelve respuesta simulada
     req.flush(mockResponse);
   });
 });

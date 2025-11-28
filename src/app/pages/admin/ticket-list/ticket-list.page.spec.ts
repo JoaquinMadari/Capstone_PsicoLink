@@ -10,7 +10,7 @@ describe('TicketListPage', () => {
   let component: TicketListPage;
   let fixture: ComponentFixture<TicketListPage>;
 
-  // ✅ Mock SoporteService
+  // Mock SoporteService
   const mockSoporteService = {
     getTicketsForAdmin: jasmine.createSpy('getTicketsForAdmin').and.returnValue(
       of([
@@ -49,9 +49,6 @@ describe('TicketListPage', () => {
 
     fixture = TestBed.createComponent(TicketListPage);
     component = fixture.componentInstance;
-
-    // 🙌 Importante: NO ejecutar detectChanges
-    // evita que ngOnInit llame a loadTickets() automáticamente
   });
 
   it('should create', () => {

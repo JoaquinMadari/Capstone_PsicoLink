@@ -4,7 +4,6 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 
-// Ajusta tu base URL (o usa environment.apiUrl)
 const API_URL: string = environment.API_URL
 
 export interface ProfessionalSummary {
@@ -31,17 +30,17 @@ export interface ProfessionalProfile {
   main_focus: string;
   therapeutic_techniques: string;
   style_of_attention: string;
-  attention_schedule: string;      // Si se cambia a JSON en backend, se coloca Record<string, any>
+  attention_schedule: string;
   work_modality: string;
 
-  certificates?: string | null;    // Si luego vuelves a FileField, será una URL
+  certificates?: string | null;
   inclusive_orientation: boolean;
   languages?: string | null;
   experience_years?: number | null;
   curriculum_vitae?: string | null;
 
   cases_attended?: number;
-  rating?: number;                 // decimal 0–5 aprox
+  rating?: number; // decimal 0–5 aprox
 }
 
 @Injectable({ providedIn: 'root' })
@@ -49,7 +48,6 @@ export class ProfessionalService {
   private http = inject(HttpClient);
 
   private authHeaders(): HttpHeaders {
-    // Ajusta el nombre de la key donde guardas tu JWT
     const token = localStorage.getItem('access') || localStorage.getItem('token');
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) headers = headers.set('Authorization', `Bearer ${token}`);

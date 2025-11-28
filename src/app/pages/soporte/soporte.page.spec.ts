@@ -40,7 +40,7 @@ describe('SoportePage', () => {
     await TestBed.configureTestingModule({
       imports: [
         SoportePage,
-        RouterTestingModule.withRoutes([]) // <-- Router real de testing
+        RouterTestingModule.withRoutes([])
       ],
       providers: [
         FormBuilder,
@@ -61,7 +61,6 @@ describe('SoportePage', () => {
     fixture = TestBed.createComponent(SoportePage);
     component = fixture.componentInstance;
 
-    // Si necesitas trackear navegación, usa Router real:
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
 

@@ -1,29 +1,17 @@
-/*
- * ESTILOS GLOBALES DE LA APLICACIÓN
- *
- * Este archivo define el "look and feel" principal (tema de color)
- * para toda la aplicación.
- */
-
-/* --- Header / Toolbar --- */
-/* * Define el color de la barra de navegación superior.
- * Hacemos que solo aplique a la toolbar DENTRO del header.
- */
+/* ESTILOS GLOBALES DE LA APLICACIÓN */
 ion-header ion-toolbar {
-  --background: #274472; /* Blue Nova */
-  --color: #ffffff;      /* Texto blanco */
+  --background: #274472;
+  --color: #ffffff;
 }
 
 
 /* --- Fondo de Contenido --- */
-/* Define el color de fondo para todas las páginas */
 ion-content {
-  --background: #C5D5E4; /* Azul grisáceo claro */
+  --background: #C5D5E4;
 }
 
 
 /* --- Tarjetas --- */
-/* Estilo para los <ion-card> (como en agendar-cita) */
 ion-card {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -37,39 +25,21 @@ ion-card-title {
 
 
 /* --- Items y Listas --- */
-
-/* --- ¡CAMBIO AÑADIDO! --- */
-/* * Hacemos que el fondo de la lista sea transparente
- * para que los márgenes de los items muestren
- * el color de fondo de ion-content.
- */
 ion-list {
   background: transparent;
   --background: transparent;
-  /* * También asegurémonos de que la lista no tenga padding
-   * si está dentro de un ion-content con padding.
-   */
   margin: 0;
   padding: 0;
 }
 
-/* * Estilo para los <ion-item> dentro de listas, 
- * como en tu página de "Buscar Profesionales".
- * Esto hará que cada profesional se vea como una "mini-tarjeta".
- */
 ion-list ion-item {
-  --background: #f7fbff; /* Un blanco muy suave */
+  --background: #f7fbff;
   margin-bottom: 8px;
   border-radius: 8px;
 
-  /* * Esto quita la línea negra (borde) entre los items.
-   */
   --inner-border-width: 0px;
 }
 
-/* * Estilo general para items (formularios, etc.)
- * Quita el fondo por defecto para que se vea el fondo del --background.
- */
 ion-item {
   --background: transparent;
   --highlight-color-focused: #A7C7E7;
@@ -82,7 +52,7 @@ ion-item ion-label {
 
 /* --- Controles de Formulario --- */
 ion-datetime {
-  --background: #f9fbfd; /* fondo gris muy suave */
+  --background: #f9fbfd;
   --ion-text-color: #0a2540; /* texto principal */
   color: #0a2540;
   border: 1px solid #cfd9e6;
@@ -100,30 +70,24 @@ ion-select-option {
 
 /* --- Botones --- */
 ion-button {
-  --background: #4A90E2; /* Azul más brillante para acción */
+  --background: #4A90E2;
   --color: #fff;
 }
 
 
-/* --- Barra de Búsqueda --- */
-/* * Hacemos que la toolbar que contiene el search 
- * sea transparente para que se vea el fondo de la página.
- */
+/* --- toolbar --- */
 ion-content ion-toolbar {
   --background: transparent;
 }
 
 ion-searchbar {
-  --background: #ffffff; /* Fondo blanco */
-  --color: #0a2540; /* Texto oscuro */
+  --background: #ffffff;
+  --color: #0a2540;
   --placeholder-color: #8898aa;
-  --icon-color: #4A90E2; /* Icono azul (de los botones) */
+  --icon-color: #4A90E2;
   --clear-button-color: #8898aa;
-  --border-radius: 12px; /* Redondeado */
+  --border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   padding: 0;
-  /* * Ajusta el margen para que se alinee con el padding 
-   * estándar de ion-content (usualmente 16px).
-   */
   margin: 8px 16px; 
 }

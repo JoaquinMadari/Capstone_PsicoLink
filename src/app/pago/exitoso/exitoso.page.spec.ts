@@ -12,7 +12,7 @@ describe('ExitosoPage', () => {
     await TestBed.configureTestingModule({
       imports: [
         ExitosoPage,
-        RouterTestingModule  // ← IMPORTANTE: provee Router + ActivatedRoute
+        RouterTestingModule
       ],
       providers: [
         {

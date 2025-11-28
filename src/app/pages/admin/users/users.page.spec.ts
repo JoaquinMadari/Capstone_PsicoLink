@@ -30,18 +30,13 @@ describe('UsersPage', () => {
     component = fixture.componentInstance;
   });
 
-  // ---------------------------------------------------------
-  // INICIALIZACIÓN
-  // ---------------------------------------------------------
+  // PRUEBA INICIAL
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // ---------------------------------------------------------
   // CARGA DE USUARIOS CON ÉXITO
-  // ---------------------------------------------------------
-
   it('should load users on init (success case)', () => {
     soporteServiceMock.getUsersForAdmin.and.returnValue(of(mockUsers));
 
@@ -53,10 +48,7 @@ describe('UsersPage', () => {
     expect(soporteServiceMock.getUsersForAdmin).toHaveBeenCalled();
   });
 
-  // ---------------------------------------------------------
   // CARGA DE USUARIOS - ERROR
-  // ---------------------------------------------------------
-
   it('should set error when loadUsers fails', () => {
     soporteServiceMock.getUsersForAdmin.and.returnValue(throwError(() => new Error('Fail')));
 
@@ -66,10 +58,7 @@ describe('UsersPage', () => {
     expect(component.loading).toBeFalse();
   });
 
-  // ---------------------------------------------------------
   // ORDENAMIENTO DE USUARIOS
-  // ---------------------------------------------------------
-
   it('should sort users: active first, then by date', () => {
     soporteServiceMock.getUsersForAdmin.and.returnValue(of(mockUsers));
 
@@ -81,10 +70,7 @@ describe('UsersPage', () => {
     expect(component.users[2].id).toBe(2); // inactivo
   });
 
-  // ---------------------------------------------------------
-  // DESTRUCCIÓN (ngOnDestroy)
-  // ---------------------------------------------------------
-
+  // ngOnDestroy
   it('should unsubscribe on destroy', () => {
     soporteServiceMock.getUsersForAdmin.and.returnValue(of(mockUsers));
 
@@ -96,10 +82,7 @@ describe('UsersPage', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  // ---------------------------------------------------------
-  // MÉTODOS GETTERS (STATUS)
-  // ---------------------------------------------------------
-
+  // MÉTODOS GET (STATUS)
   it('getStatusColor should return correct color', () => {
     expect(component.getStatusColor(true)).toBe('success');
     expect(component.getStatusColor(false)).toBe('danger');

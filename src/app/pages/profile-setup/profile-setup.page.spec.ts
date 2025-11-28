@@ -31,14 +31,14 @@ describe('ProfileSetupPage', () => {
     await TestBed.configureTestingModule({
       imports: [
         ProfileSetupPage,
-        RouterTestingModule  // ← NECESARIO
+        RouterTestingModule
       ],
       providers: [
         FormBuilder,
         { provide: HttpClient, useValue: mockHttp },
         { provide: Router, useValue: mockRouter },
         { provide: Catalog, useValue: mockCatalog },
-        { provide: NavController, useValue: {} } // ← MOCK REQUERIDO POR IonBackButton
+        { provide: NavController, useValue: {} }
       ]
     }).compileComponents();
 

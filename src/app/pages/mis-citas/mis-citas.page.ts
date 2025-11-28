@@ -145,7 +145,6 @@ export class MisCitasPage implements OnInit, OnDestroy {
     
   //Llama al servicio para cerrar la cita.
   onClose(appointment: AppointmentDTO) {
-    //Implementar un Alert/Confirm para asegurar que el profesional quiere cerrarla
     if (!confirm(`¿Estás seguro de que deseas cerrar la cita con ${appointment.patient_detail?.full_name}?`)) {
       return;
     }

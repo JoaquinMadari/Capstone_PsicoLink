@@ -10,7 +10,7 @@ describe('TabsPage', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabsPage,
-        RouterTestingModule   // 👈 Necesario para ActivatedRoute y RouterOutlet
+        RouterTestingModule
       ]
     }).compileComponents();
 

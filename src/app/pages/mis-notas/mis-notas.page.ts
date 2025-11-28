@@ -19,8 +19,8 @@ type Role = 'paciente' | 'profesional' | 'organizacion' | 'admin';
 })
 export class MisNotasPage implements OnInit {
   appointmentId: string | null = null;
-  nuevaNota: string = ''; //  Cambiado de 'notes' a 'nuevaNota'
-  historialNotas: { id: number; text: string; fecha: string }[] = []; //  Agregado 'id'
+  nuevaNota: string = '';
+  historialNotas: { id: number; text: string; fecha: string }[] = [];
   role: string | null = null;
   status: string | null = null;
   canEdit: boolean = false;
@@ -59,7 +59,7 @@ export class MisNotasPage implements OnInit {
 
     this.appointmentService.getAppointment(Number(this.appointmentId)).subscribe({
       next: (res) => {
-        this.nuevaNota = ''; //  Limpiamos porque ahora es campo temporal
+        this.nuevaNota = '';
         this.status = res.status;
 
         // Cargar el historial de notas desde la API
@@ -122,7 +122,7 @@ export class MisNotasPage implements OnInit {
     return this.historialNotas.length > 0;
   }
 
-  async guardarNota() { //  Cambiado de 'guardarNotas' a 'guardarNota'
+  async guardarNota() {
     if (!this.nuevaNota.trim()) {
       const toast = await this.toastCtrl.create({
         message: 'No has escrito ninguna nota',
@@ -141,7 +141,6 @@ export class MisNotasPage implements OnInit {
       return;
     }
 
-    //  USAMOS EL NUEVO MÉTODO
     this.appointmentService.createAppointmentNote(Number(this.appointmentId), this.nuevaNota).subscribe({
       next: async (nuevaNotaCreada) => {
         const toast = await this.toastCtrl.create({
@@ -181,7 +180,6 @@ export class MisNotasPage implements OnInit {
     });
   }
 
-  //  Opcional: Método para formatear fecha
   formatearFecha(fechaISO: string): string {
     return new Date(fechaISO).toLocaleString('es-ES');
   }

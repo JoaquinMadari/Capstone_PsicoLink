@@ -7,13 +7,13 @@ $white:       #ffffff;
 
 /* Header/Toolbar */
 ion-header, ion-toolbar {
-  --background: #274C77; /* $blue-nova */
+  --background: #274C77; /* blue-nova */
   --color: #ffffff;
 }
 
 /* Fondo */
 ion-content {
-  --background: #C5D5E4; /* $stones */
+  --background: #C5D5E4; /* stones */
 }
 
 /* Tarjetas */
@@ -28,7 +28,7 @@ ion-toggle {
   --handle-background: #ffffff;
   --handle-background-checked: #ffffff;
   --background: rgba(0,0,0,0.12);
-  --background-checked: rgba(39,76,119,0.45); /* $blue-nova con alpha */
+  --background-checked: rgba(39,76,119,0.45); /* blue-nova con alpha */
 }
 
 /* KPI cards */
@@ -61,12 +61,12 @@ ion-item ion-label h2 {
   margin-bottom: 4px;
 }
 ion-item ion-label p {
-  color: #274472; /* tono relacionado a $blue-nova */
+  color: #274472; /* tono relacionado a blue-nova */
 }
 
 ion-badge[color="success"] {
-  --background: #A7C7E7; /* $renew-blue */
-  --color: #1A1A1A;      /* $ink */
+  --background: #A7C7E7; /* renew-blue */
+  --color: #1A1A1A;      /* ink */
 }
 
 /* Botones primarios */

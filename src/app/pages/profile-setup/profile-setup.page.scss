@@ -117,14 +117,14 @@ ion-textarea {
     margin-top: 5px; 
 }
 
-/* Toggle APAGADO → pista gris + circulo gris */
+/* Toggle APAGADO */
 ion-toggle:not(.toggle-checked) {
-  --handle-background: #b5b5b5 !important;   /* círculo */
-  --track-background: #e0e0e0 !important;    /* pista gris */
-  --background: #e0e0e0 !important;          /* fallback */
+  --handle-background: #b5b5b5 !important;
+  --track-background: #e0e0e0 !important;
+  --background: #e0e0e0 !important;
 }
 
-/* Toggle ENCENDIDO → deja el azul original */
+/* Toggle ENCENDIDO */
 ion-toggle.toggle-checked {
   --track-background: var(--ion-color-primary, #4A90E2);
   --handle-background: #ffffff;

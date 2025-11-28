@@ -1,4 +1,4 @@
-/* 🎨 Colores base */
+/* Colores base */
 ion-header,
 ion-toolbar {
   --background: #274C77;
@@ -14,7 +14,7 @@ ion-content {
   align-items: center;
 }
 
-/* 🧩 Card responsive */
+/* Card responsive */
 ion-card {
   width: 100%;
   max-width: 420px; /* Tamaño ideal para móviles y tablets */
@@ -70,7 +70,7 @@ ion-button {
   --background-hover: #1E3A5F;
   --color: #ffffff;
   --border-radius: 12px;
-  width: 100%; /* 🔥 Full width para mejor UX */
+  width: 100%;
   max-width: 300px;
   margin: auto;
   font-weight: 600;
@@ -87,7 +87,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* 📱 Breakpoints para pantallas más grandes */
+/* Breakpoints para pantallas más grandes */
 @media (min-width: 768px) {
   ion-card {
     max-width: 480px;
@@ -98,7 +98,7 @@ a:hover {
   }
 }
 
-/* 💻 Desktop (si PsicoLink va a web) */
+/* Desktop */
 @media (min-width: 1024px) {
   ion-content {
     padding-top: 40px;
@@ -109,25 +109,19 @@ a:hover {
   }
 }
 
-/* 1. Estilos base del Icono (Ojo) */
+/* Estilos base del Icono (Ojo) */
 .password-toggle-icon {
     font-size: 1.4rem; 
     cursor: pointer;
-    color: #A7C7E7; // Usa un color que destaque un poco de tu paleta
-    // Propiedad para asegurar que el puntero cambie
+    color: #A7C7E7;
     pointer-events: auto; 
-    // 🔥 AJUSTE CLAVE: Mueve el icono 5px hacia abajo
     margin-top: 35px;
 }
 
-/* 2. SOLUCIÓN CLAVE: Asegurar que el input respete el espacio del icono */
 ion-item {
-    // Al usar slot="end", el input debe ser consciente de que hay otro elemento
-    // Ionic generalmente maneja esto, pero a veces es necesario forzar un padding
     --padding-end: 10px; 
 }
 
-// Alternativamente, si el padding no funciona con la variable:
 ion-item .item-inner {
     padding-right: 10px; 
 }

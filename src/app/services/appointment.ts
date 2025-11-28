@@ -77,8 +77,8 @@ export class AppointmentService {
   // Crear nueva nota (POST)
   createAppointmentNote(appointmentId: number, text: string): Observable<AppointmentNote> {
     const data = {
-      appointment: appointmentId,  //  Importante: incluir el appointment_id
-      text: text                   //  Ahora se llama "text" en lugar de "notes"
+      appointment: appointmentId,
+      text: text
     };
 
     return this.http.post<AppointmentNote>(

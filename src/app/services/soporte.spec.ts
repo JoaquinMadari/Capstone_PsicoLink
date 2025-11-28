@@ -20,7 +20,7 @@ describe('SoporteService', () => {
     service = TestBed.inject(SoporteService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    // Mockeamos el localStorage para todas las pruebas
+    // Mock del localStorage para todas las pruebas
     spyOn(localStorage, 'getItem').and.callFake((key) => {
       if (key === 'access_token') return 'fake-token-123';
       return null;
@@ -46,7 +46,7 @@ describe('SoporteService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(payload);
     
-    // Verificamos que se añadieron los headers de autenticación
+    // Verificar que se añadieron los headers de autenticación
     expect(req.request.headers.get('Authorization')).toBe('Bearer fake-token-123');
     req.flush({});
   });
@@ -56,8 +56,6 @@ describe('SoporteService', () => {
 
     const req = httpMock.expectOne(`${apiUrl}/support/mis-tickets/`);
     expect(req.request.method).toBe('GET');
-    // Nota: Según tu código, este método NO envía headers explícitamente.
-    // Si debería enviarlos, revisa tu servicio.
     req.flush([]);
   });
 
@@ -79,7 +77,7 @@ describe('SoporteService', () => {
     service.replyToTicket(ticketId, reply).subscribe();
 
     const req = httpMock.expectOne(`${apiUrl}/support/tickets/${ticketId}/reply/`);
-    expect(req.request.method).toBe('PATCH'); // Importante: Verifica que sea PATCH
+    expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(reply);
     expect(req.request.headers.has('Authorization')).toBeTrue();
     req.flush({});

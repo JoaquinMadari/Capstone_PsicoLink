@@ -24,16 +24,12 @@ describe('SplashPage', () => {
     fixture.detectChanges();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 1: El componente se crea
-  // -------------------------------------------
+  // PRUEBA 1: El componente se crea
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 2: Debe redirigir al login después de 3 segundos
-  // -------------------------------------------
+  // PRUEBA 2: Debe redirigir al login después de 3 segundos
   it('should navigate to /login after 3 seconds', fakeAsync(() => {
     component.ngOnInit(); 
 

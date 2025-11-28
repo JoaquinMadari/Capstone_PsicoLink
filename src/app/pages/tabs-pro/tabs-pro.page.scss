@@ -18,7 +18,7 @@ ion-tabs .tabs-inner {
   z-index: 1;
 }
 
-/* La barra de tabs: deja que Ionic calcule offsets; no uses position: fixed aquí */
+/* barra de tabs */
 ion-tab-bar {
   position: sticky;
   bottom: 0;
@@ -32,14 +32,14 @@ $renew-blue:  #A7C7E7;
 $ink:         #1A1A1A;
 $white:       #ffffff;
 
-/* Fondo general detrás de las tabs (solo el contenedor, sin tocar router-outlet) */
+/* Fondo general de las tabs (solo el contenedor, sin tocar router-outlet) */
 ion-tabs {
   background: $stones;
 }
 
 /* Colores de la Tab Bar */
 ion-tab-bar {
-  --background: #274C77; /* $blue-nova */
+  --background: #274C77; /* blue-nova */
   --border: 0;
   --color: rgba(255,255,255,0.7);
   --color-selected: #ffffff;

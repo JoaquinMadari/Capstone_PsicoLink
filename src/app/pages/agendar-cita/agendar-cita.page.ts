@@ -41,11 +41,10 @@ interface BusySlot {
     id: number;
     start: string;
     end: string;
-    // Agregamos professional_id para el filtro
 
 }
 
-// Define el tipo de la respuesta del servicio (debe coincidir con tu servicio)
+// Define el tipo de la respuesta del servicio
 interface BusyResponse {
     professional: BusySlot[];
     patient: BusySlot[];
@@ -94,7 +93,7 @@ export class AgendarCitaPage implements OnInit {
     });
 
     professionals: any[] = [];
-    private _allAppointments: any[] = []; // Nueva propiedad privada para todas las citas
+    private _allAppointments: any[] = [];
     busyTimes: string[] = [];
 
     get selectedProfessional() {
@@ -106,10 +105,10 @@ export class AgendarCitaPage implements OnInit {
         const now = new Date();
         
         return this._allAppointments.filter(a => {
-            // 1. Filtrar por estado 'scheduled'
+            // Filtrar por estado 'scheduled'
             const isScheduled = a.status === 'scheduled';
             
-            // 2. Filtrar por fecha futura (o la de hoy)
+            // Filtrar por fecha futura (o la de hoy)
             const appointmentDate = new Date(a.start_datetime);
             
             // Compara solo el día (ignora la hora) para incluir citas de hoy
@@ -124,7 +123,6 @@ export class AgendarCitaPage implements OnInit {
     }
 
 
-    // --------- Slots / disponibilidad ----------
     STEP_MINUTES = 30;
     DAY_START = '08:00';
     DAY_END = '20:00';
@@ -221,7 +219,7 @@ export class AgendarCitaPage implements OnInit {
 
     loadAppointments() {
         this.svc.getAppointments().subscribe({
-            next: res => this._allAppointments = res, //asigna a la propiedad privada
+            next: res => this._allAppointments = res,
             error: err => console.error(err)
         });
         }
@@ -305,7 +303,6 @@ export class AgendarCitaPage implements OnInit {
 
 
     //MÉTODOS DE MANEJO DE SLOTS:
-
     formatSlotLabel(s: string): string {
         return s.slice(0, 5);
     }
@@ -344,7 +341,6 @@ export class AgendarCitaPage implements OnInit {
 
         this.svc.getBusy(professionalId, dateISO).subscribe({
             next: (res: any) => {
-            //ELIMINAMOS EL FILTRO: backend ya garantiza que los datos están filtrados
             const proAppointments = res.professional;
 
             //Asignación de busyPro

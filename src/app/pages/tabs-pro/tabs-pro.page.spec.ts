@@ -14,7 +14,7 @@ describe('TabsProPage', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabsProPage,
-        RouterTestingModule.withRoutes([])   // 🔥 FIX: Esto resuelve el error
+        RouterTestingModule.withRoutes([])
       ],
       providers: [
         {
@@ -33,16 +33,12 @@ describe('TabsProPage', () => {
     fixture.detectChanges();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 1: El componente se crea
-  // -------------------------------------------
+  // PRUEBA 1: El componente se crea
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 2: onTabWillChange blurea el elemento activo
-  // -------------------------------------------
+  // PRUEBA 2: onTabWillChange blurea el elemento activo
   it('onTabWillChange should blur active element if possible', () => {
     const mockElement = {
       blur: jasmine.createSpy('blur')
@@ -55,9 +51,7 @@ describe('TabsProPage', () => {
     expect(mockElement.blur).toHaveBeenCalled();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 3: No lanza error si activeElement es null
-  // -------------------------------------------
+  // PRUEBA 3: No lanza error si activeElement es null
   it('onTabWillChange should not throw if no activeElement', () => {
     spyOnProperty(document, 'activeElement', 'get').and.returnValue(null);
 

@@ -1,14 +1,14 @@
-/* 🎨 Estilo general */
+/* Estilo general */
 ion-toolbar {
-  --background: #274472; /* Azul Oscuro */
+  --background: #274472;
   --color: #fff;
 }
 
 ion-content {
-  --background: #C5D5E4; /* Azul Claro */
+  --background: #C5D5E4;
 }
 
-/* 🩵 Tarjeta principal (Listado de Citas) */
+/* Tarjeta principal (Listado de Citas) */
 ion-card {
   --background: #f8fbfd !important; 
   background: #f8fbfd !important;
@@ -17,7 +17,7 @@ ion-card {
   box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 🖥️ Ancho Máximo para Escritorio */
+/* Ancho Máximo para Escritorio */
 @media (min-width: 768px) {
   ion-card {
     max-width: 900px;
@@ -53,7 +53,7 @@ ion-item ion-label {
     padding: 0;
 }
 
-/* 💻 TABLET / ESCRITORIO (>= 576px) */
+/* TABLET / ESCRITORIO (>= 576px) */
 @media (min-width: 576px) {
   ion-item {
     flex-direction: row;
@@ -148,11 +148,10 @@ ion-label p {
 }
 
 /* ========================================= */
-/* 🎨 ESTILOS DE BOTONES PRINCIPALES (Unirse / Cancelar) */
+/* ESTILOS DE BOTONES PRINCIPALES (Unirse / Cancelar) */
 /* ========================================= */
 
-/* 📱 1. ESTILO BASE (Móviles pequeños) 
-   Aquí definimos el tamaño estándar y la forma. */
+// ESTILO BASE (Móviles pequeños) 
 .btn-unirse,
 .btn-cancelar {
   min-width: 140px;
@@ -162,24 +161,20 @@ ion-label p {
   --border-radius: 10px;
 }
 
-/* 💻 2. ESCALADO PARA TABLET (>= 768px) 
-   Hacemos los botones un poco más grandes y controlamos la separación. */
+// ESCALADO PARA TABLET (>= 768px)
 @media (min-width: 768px) {
   .btn-unirse,
   .btn-cancelar {
-    min-width: 160px; /* Aumentamos el ancho */
-    height: 50px;     /* Aumentamos el alto */
-    font-size: 1rem;  /* Texto más grande */
-    margin-top: 15px; /* Más aire arriba */
+    min-width: 160px;
+    height: 50px;
+    font-size: 1rem;
+    margin-top: 15px;
     
-    /* 🟢 AJUSTE DE SEPARACIÓN: */
-    /* Antes: 55px (Muy separados) -> Ahora: 15px (Separación normal) */
     margin-right: 40px !important; 
   }
 }
 
-/* 🖥️ 3. ESCALADO PARA ESCRITORIO (>= 1024px) 
-   Botones en su tamaño máximo para pantallas grandes. */
+//ESCALADO PARA ESCRITORIO (>= 1024px) 
 @media (min-width: 1024px) {
   .btn-unirse,
   .btn-cancelar {
@@ -188,140 +183,110 @@ ion-label p {
     font-size: 1.1rem;
     margin-top: 20px;
     
-    /* 🟢 AJUSTE DE SEPARACIÓN: */
-    /* Un poquito más de aire en pantallas gigantes, pero sutil. */
     margin-right: 50px !important; 
   }
 }
 
 
 
-/* ========================================================= */
-/* 👔 VISTA PROFESIONAL: AJUSTES MÓVILES (Unirse / Cancelar) */
-/* ========================================================= */
-/* La lógica es: .appointment-actions:not(.role-paciente)    */
-/* Esto significa: "Contenedor de acciones que NO sea paciente" */
-/* ========================================================= */
+/* VISTA PROFESIONAL: AJUSTES MÓVILES (Unirse / Cancelar) */
 
-/* 📱 1. MÓVIL GRANDE (Hasta 425px) */
+/* MÓVIL GRANDE (Hasta 425px) */
 @media (max-width: 425px) {
   
-  /* Botón UNIRSE (Profesional) */
+  /* Botón UNIRSE */
   .appointment-actions:not(.role-paciente) .btn-unirse {
     position: relative !important;
     
-    /* ↕️ VERTICAL: + baja, - sube */
+    /* VERTICAL: + baja, - sube */
     top: 0px !important; 
     
-    /* ↔️ HORIZONTAL: + derecha, - izquierda */
+    /* HORIZONTAL: + derecha, - izquierda */
     left: 0px !important;      
     
     margin-top: 8px !important;
   }
 
-  /* Botón CANCELAR (Profesional) */
+  /* Botón CANCELAR */
   .appointment-actions:not(.role-paciente) .btn-cancelar {
     position: relative !important;
     
-    /* ↕️ VERTICAL */
-    top: 40px !important; 
-    
-    /* ↔️ HORIZONTAL */
-    left: 0px !important;      
-    
+    top: 40px !important;
+    left: 0px !important;
     margin-top: 8px !important;
   }
 }
 
-/* 📱 2. MÓVIL MEDIANO (Hasta 375px) */
+/* MÓVIL MEDIANO (Hasta 375px) */
 @media (max-width: 375px) {
 
   /* Botón UNIRSE (Profesional) */
   .appointment-actions:not(.role-paciente) .btn-unirse {
-    /* ✏️ Ajustes específicos para 375px */
     top: 0px !important; 
     left: 0px !important; 
   }
 
   /* Botón CANCELAR (Profesional) */
   .appointment-actions:not(.role-paciente) .btn-cancelar {
-    /* ✏️ Ajustes específicos para 375px */
     top: 40px !important; 
     left: 0px !important; 
   }
 }
 
-/* 📱 3. MÓVIL PEQUEÑO (Hasta 320px) */
+/* MÓVIL PEQUEÑO (Hasta 320px) */
 @media (max-width: 320px) {
 
   /* Botón UNIRSE (Profesional) */
   .appointment-actions:not(.role-paciente) .btn-unirse {
-    /* ✏️ Ajustes específicos para 320px */
     top: 0px !important; 
     left: 0px !important; 
   }
 
   /* Botón CANCELAR (Profesional) */
   .appointment-actions:not(.role-paciente) .btn-cancelar {
-    /* ✏️ Ajustes específicos para 320px */
     top: 40px !important; 
     left: 0px !important; 
   }
 }
 
-/* ========================================================= */
-/* 👔 VISTA PROFESIONAL: ESCRITORIO (Solo Botón Cancelar)    */
-/* ========================================================= */
-/* Ajustes exclusivos para el botón 'Cancelar' del profesional */
-/* en pantallas grandes. No afecta al paciente.                */
-/* ========================================================= */
+/* VISTA PROFESIONAL: ESCRITORIO (Solo Botón Cancelar)    */
 
-/* 1. TABLET (Desde 768px) */
+/* TABLET (Desde 768px) */
 @media (min-width: 768px) {
   .appointment-actions:not(.role-paciente) .btn-cancelar {
     position: relative !important;
     
-    /* ↕️ VERTICAL */
     top: 0px !important; 
-    margin-top: 0px !important; /* Mantén el margen base o ajústalo */
+    margin-top: 0px !important;
 
-    /* ↔️ HORIZONTAL */
     left: 0px !important; 
-    /* right: auto !important; */
   }
   
 }
 
 
-/* 2. LAPTOP (Desde 1024px) */
+/* LAPTOP (Desde 1024px) */
 @media (min-width: 1024px) {
   .appointment-actions:not(.role-paciente) .btn-cancelar {
-    /* ✏️ Ajustes específicos para 1024px */
     top: 0px !important; 
-    left: 0px !important; 
-    
-    /* Puedes aumentar el margen derecho si quieres separarlo más del borde */
-    /* margin-right: 40px !important; */
+    left: 0px !important;
   }
 }
 
-/* 3. PANTALLA GIGANTE (Desde 1440px) */
+/* PANTALLA GIGANTE (Desde 1440px) */
 @media (min-width: 1440px) {
   .appointment-actions:not(.role-paciente) .btn-cancelar {
-    /* ✏️ Ajustes específicos para 1440px */
     top: 0px !important; 
     left: 0px !important; 
   }
 }
 
-/* ========================================================= */
-/* 🎯 CONTROL DE POSICIONES (CANCELADO Y SIN CERRAR) */
-/* ========================================================= */
+/* CONTROL DE POSICIONES (CANCELADO Y SIN CERRAR) */
 
 /* Centrado cuando solo hay botón cancelado */
 .appointment-actions.is-cancelled-solo {
   align-items: center !important;
-  margin-top: 70px !important; /* Móvil */
+  margin-top: 70px !important;
 }
 
 @media (min-width: 576px) {
@@ -352,9 +317,7 @@ ion-label p {
   }
 }
 
-/* ========================================================= */
-/* 🎯 CONTROL DE POSICIONES: REUNIÓN FINALIZADA (Optimizado) */
-/* ========================================================= */
+/* CONTROL DE POSICIONES: REUNIÓN FINALIZADA (Optimizado) */
 
 .appointment-actions.is-finished-solo {
     align-items: center !important;
@@ -362,7 +325,7 @@ ion-label p {
     position: relative;
 }
 
-/* 1. Vista Escritorio (Anchos Grandes) */
+/* Vista Escritorio (Anchos Grandes) */
 @media (min-width: 768px) {
     .appointment-actions.is-finished-solo ion-button {
         position: relative !important;
@@ -371,8 +334,7 @@ ion-label p {
     }
 }
 
-/* 2. Ajuste Intermedio (Cubre cuando la pantalla se achica pero no es móvil aún) */
-/* Esto reemplaza tus reglas repetidas de 1440px, 1024px, etc. */
+/* Ajuste Intermedio (Cubre cuando la pantalla se achica pero no es móvil aún) */
 @media (max-width: 1440px) and (min-width: 769px) {
   .appointment-actions.is-finished-solo ion-button {
       top: 0px !important; 
@@ -380,35 +342,28 @@ ion-label p {
   }
 }
 
-/* 3. Ajuste TODOS los Móviles (425px, 375px, etc.) */
-/* Aquí definimos el estándar móvil */
+/* Ajuste TODOS los Móviles (425px, 375px, etc.) */
 @media (max-width: 425px) {
   .appointment-actions.is-finished-solo ion-button {
       position: relative !important;
-      top: 40px !important;  /* Baja el botón */
-      left: 11px !important; /* Mueve a la derecha */
+      top: 40px !important;
+      left: 11px !important;
       right: auto !important;
   }
 }
 
-/* 4. Ajuste ESPECÍFICO para 320px (Ultra pequeños) */
-/* Si necesitas que en 320px sea diferente a 11px, cambia el valor aquí.
-   Si 11px está bien, esta regla solo refuerza lo anterior. */
+/* Ajuste ESPECÍFICO para 320px (Ultra pequeños) */
 @media (max-width: 320px) {
   .appointment-actions.is-finished-solo ion-button {
-      /* Puedes cambiar este 11px si en el teléfono más chico necesitas moverlo más */
       left: 1px !important; 
   }
 }
 
 
-/* ========================================= */
-/* ↔️ SEPARACIÓN: MIS NOTAS / REUNIÓN FINALIZADA */
-/* ========================================= */
+/* SEPARACIÓN: MIS NOTAS / REUNIÓN FINALIZADA */
 
 @media (min-width: 768px) {
   .btn-mis-notas {
-    /* Empuja el botón de "Reunión Finalizada" hacia la derecha */
     margin-right: 0px !important; 
     
   
@@ -417,11 +372,8 @@ ion-label p {
 
 @media (min-width: 320px) {
   .btn-mis-notas {
-    /* Empuja el botón de "Reunión Finalizada" hacia la derecha */
     margin-right: 0px !important; 
     
-    /* Opcional: Si sientes que "Mis Notas" se mueve mucho por culpa
-       de las reglas de 'is-finished-solo', esto lo estabiliza: */
     position: relative !important;
     right: auto !important; 
     left: auto !important;
@@ -430,11 +382,8 @@ ion-label p {
 
 @media (min-width: 375px) {
   .btn-mis-notas {
-    /* Empuja el botón de "Reunión Finalizada" hacia la derecha */
     margin-right: 0px !important; 
-    
-    /* Opcional: Si sientes que "Mis Notas" se mueve mucho por culpa
-       de las reglas de 'is-finished-solo', esto lo estabiliza: */
+
     position: relative !important;
     right: auto !important; 
     left: auto !important;
@@ -443,11 +392,8 @@ ion-label p {
 
 @media (min-width: 425px) {
   .btn-mis-notas {
-    /* Empuja el botón de "Reunión Finalizada" hacia la derecha */
     margin-right: 0px !important; 
     
-    /* Opcional: Si sientes que "Mis Notas" se mueve mucho por culpa
-       de las reglas de 'is-finished-solo', esto lo estabiliza: */
     position: relative !important;
     right: auto !important; 
     left: auto !important;
@@ -463,59 +409,46 @@ ion-label p {
 
 
 
-/* ========================================= */
-/* ↔️ SCSS DEL PACIENTE */
-/* ========================================= */
+/* CSS DEL PACIENTE */
 
 
-/* 1. REUNIÓN FINALIZADA DEL PACIENTE */
-    /* Aquí 'reseteamos' la posición extraña del profesional para que tú 
-       puedas moverla libremente para el paciente */
+/* REUNIÓN FINALIZADA DEL PACIENTE */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        top: 60px !important;      /* Quitamos la subida del profesional */
+        top: 60px !important;
         margin-top: 0px !important; 
         
-        right: -10px !important;    /* 👈 CAMBIA ESTO para mover horizontalmente (ej: 20px) */
+        right: -10px !important;
         left: auto !important;
         
-        /* Si quieres centrarlo, usa esto: margin: 0 auto !important; */
     }
 
-    /* 2. CITA CANCELADA DEL PACIENTE */
+    /* CITA CANCELADA DEL PACIENTE */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
-        margin-top: 10px !important; /* Quitamos el margen negativo del pro */
+        margin-top: 10px !important;
         margin-right: -10px !important;
         
-        right: 0px !important;      /* 👈 CAMBIA ESTO para moverlo a la izquierda */
+        right: 0px !important;
   }
 
 
 
 
 
-/* =================================================================== */
-/* 🏥 VISTA PACIENTE: AJUSTES RESPONSIVE (768, 1024, 1440)             */
-/* =================================================================== */
-/* Estas reglas solo aplican si es paciente.                           */
-/* =================================================================== */
+/* VISTA PACIENTE: AJUSTES RESPONSIVE (768, 1024, 1440) Estas reglas solo aplican si es paciente. */
 
-/* ------------------------------------------------------------------- */
-/* 1️⃣ TABLET / PANTALLA PEQUEÑA (Desde 768px hasta 1023px)           */
-/* ------------------------------------------------------------------- */
+/* TABLET / PANTALLA PEQUEÑA (Desde 768px hasta 1023px) */
 @media (min-width: 768px) {
 
-    /* >> REUNIÓN FINALIZADA (Paciente 768px) */
+    /* REUNIÓN FINALIZADA (Paciente 768px) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        /* Ajustes verticales */
         top: 60px !important; 
         margin-top: 0px !important; 
         
-        /* Ajustes horizontales */
         right: -10px !important; 
         left: auto !important;
     }
 
-    /* >> CITA CANCELADA (Paciente 768px) */
+    /* CITA CANCELADA (Paciente 768px) */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
         margin-top: 10px !important;
         margin-right: -10px !important;
@@ -523,174 +456,139 @@ ion-label p {
     }
 }
 
-/* ------------------------------------------------------------------- */
-/* 2️⃣ LAPTOP / ESCRITORIO MEDIO (Desde 1024px hasta 1439px)           */
-/* ------------------------------------------------------------------- */
+/* LAPTOP / ESCRITORIO MEDIO (Desde 1024px hasta 1439px) */
 @media (min-width: 1024px) {
 
-    /* >> REUNIÓN FINALIZADA (Paciente 1024px) */
+    /* REUNIÓN FINALIZADA (Paciente 1024px) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        /* ✏️ Si en laptop se ve muy abajo, cambia este 60px */
         top: 0px !important; 
         
-        /* ✏️ Si en laptop necesitas moverlo más a la derecha/izquierda */
         right: 150px !important; 
     }
 
-    /* >> CITA CANCELADA (Paciente 1024px) */
+    /* CITA CANCELADA (Paciente 1024px) */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
         margin-top: -70px !important;
-        /* ✏️ Ajuste horizontal específico para 1024px */
         margin-right: 150px !important; 
     }
 
-    /* 👇👇👇 AGREGADO AQUÍ 👇👇👇 */
     
-    /* >> REUNIÓN SIN CERRAR (Paciente 1024px) */
+    /* REUNIÓN SIN CERRAR (Paciente 1024px) */
     .appointment-actions.role-paciente.is-uncaptured-solo ion-button {
-        /* ↕️ VERTICAL: Cambia este número para subir/bajar */
         margin-top: -20px !important; 
         
-        /* ↔️ HORIZONTAL: Cambia este número para mover a la izquierda */
         margin-right: 150px !important; 
     }
 
 
 }
 
-/* ------------------------------------------------------------------- */
-/*  PANTALLAS GIGANTES (Desde 1440px en adelante)                    */
-/* ------------------------------------------------------------------- */
+/* PANTALLAS GIGANTES (Desde 1440px en adelante) */
 @media (min-width: 1440px) {
 
-    /* >> REUNIÓN FINALIZADA (Paciente 1440px) */
+    /* REUNIÓN FINALIZADA (Paciente 1440px) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        /* ✏️ Ajuste para pantalla gigante */
         top: 60px !important; 
         right: -10px !important; 
     }
 
-    /* >> CITA CANCELADA (Paciente 1440px) */
+    /* CITA CANCELADA (Paciente 1440px) */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
         margin-top: 10px !important;
         right: 0px !important; 
     }
 }
 
-/* ------------------------------------------------------------------- */
-/*  PANTALLAS GIGANTES ( 768px )                    */
-/* ------------------------------------------------------------------- */
+/*  PANTALLAS GIGANTES ( 768px ) */
 @media (min-width: 768px) {
 
-    /* >> REUNIÓN FINALIZADA (Paciente 768px) */
+    /* REUNIÓN FINALIZADA (Paciente 768px) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        /* ✏️ Ajuste para pantalla gigante */
         top: 0px !important; 
         right: 100px !important; 
     }
 
-    /* >> CITA CANCELADA (Paciente 768px) */
+    /* CITA CANCELADA (Paciente 768px) */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
         margin-top: -70px !important;
         margin-right: 100px !important; 
     }
 
-    /* >> REUNIÓN SIN CERRAR (Paciente 1024px) */
+    /* REUNIÓN SIN CERRAR (Paciente 1024px) */
     .appointment-actions.role-paciente.is-uncaptured-solo ion-button {
-        /* ↕️ VERTICAL: Cambia este número para subir/bajar */
         margin-top: -20px !important; 
         
-        /* ↔️ HORIZONTAL: Cambia este número para mover a la izquierda */
         margin-right: 100px !important; 
     }
 
-
-    /* 👇👇👇 NUEVOS AGREGADOS PARA EDITAR 👇👇👇 */
-
-    /* >> BOTÓN UNIRSE (Paciente 768px) */
+    /* BOTÓN UNIRSE (Paciente 768px) */
     .appointment-actions.role-paciente .btn-unirse {
         position: relative !important;
         
-        /* ↕️ VERTICAL: + baja, - sube */
         top: 0px !important; 
         margin-top: 0px !important;
 
-        /* ↔️ HORIZONTAL: + derecha, - izquierda */
         left: -20px !important; 
-        margin-right: 15px !important; /* Separación con el botón de al lado */
+        margin-right: 15px !important;
     }
 
-    /* >> BOTÓN CANCELAR (Paciente 768px) */
+    /* BOTÓN CANCELAR (Paciente 768px) */
     .appointment-actions.role-paciente .btn-cancelar {
         position: relative !important;
         
-        /* ↕️ VERTICAL: + baja, - sube */
         top: 0px !important; 
         margin-top: 0px !important;
 
-        /* ↔️ HORIZONTAL: + derecha, - izquierda */
         left: -30px !important; 
         
-        /* O usa 'right' si prefieres empujarlo desde la derecha */
         right: auto !important;
     }
 }
 
-/* =================================================================== */
-/* 📱 VISTA PACIENTE: MÓVILES (Hasta 425px)                            */
-/* =================================================================== */
+/* VISTA PACIENTE: MÓVILES (Hasta 425px) */
 
 @media (max-width: 425px) {
 
-    /* 1. Botón CANCELAR (Paciente 425px) */
+    /* Botón CANCELAR (Paciente 425px) */
     .appointment-actions.role-paciente .btn-cancelar {
         position: relative !important;
         
-        /* ↕️ VERTICAL: Pon números positivos para bajar (ej: 10px) o negativos para subir */
         top: 40px !important; 
-        margin-top: 15px !important; /* Un margen base para que no se pegue al anterior */
+        margin-top: 15px !important;
 
-        /* ↔️ HORIZONTAL: Pon números positivos para derecha, negativos para izquierda */
         left: 0px !important; 
     }
 
-    /* 2. Botón REUNIÓN SIN CERRAR (Paciente 425px) */
+    /* Botón REUNIÓN SIN CERRAR (Paciente 425px) */
     .appointment-actions.role-paciente.is-uncaptured-solo ion-button {
         position: relative !important;
 
-        /* ↕️ VERTICAL */
         top: 50px !important; 
 
-        /* ↔️ HORIZONTAL */
         left: 0px !important; 
     }
 
-    /* >> REUNIÓN FINALIZADA (Paciente 425px) */
+    /* REUNIÓN FINALIZADA (Paciente 425px) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
-        /* ✏️ Ajuste para pantalla gigante */
         top: 70px !important; 
         right: -10px !important; 
     }
 
-    /* 3. Botón REUNIÓN FINALIZADA (Estado) */
+    /* Botón REUNIÓN FINALIZADA (Estado) */
     .appointment-actions.role-paciente.is-finished-solo ion-button {
         position: relative !important;
-        /* Ajusta este valor si quieres subirlo o bajarlo */
         top: 80px !important; 
         
-        /* Ajusta este valor para moverlo a la izquierda/derecha */
         right: -10px !important; 
     }
 
-    /* 4. Botón CITA CANCELADA (Estado: cuando ya se canceló) */
+    /* Botón CITA CANCELADA (Estado: cuando ya se canceló) */
     .appointment-actions.role-paciente.is-cancelled-solo ion-button {
         position: relative !important;
         
-        /* ↕️ VERTICAL: Juega con este valor */
         top: 20px !important; 
         margin-top: 0px !important; 
 
-        /* ↔️ HORIZONTAL: Juega con este valor */
         left: 0px !important; 
         right: auto !important;
     }

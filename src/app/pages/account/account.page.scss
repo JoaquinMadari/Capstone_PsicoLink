@@ -1,12 +1,11 @@
 /*
  * Estilos Globales de la Aplicación
- * Define la paleta de colores principal (look & feel).
+ * Define la paleta de colores principal.
  */
 
-/* --- 1. Cabecera y Contenido (Paleta Principal) --- */
+/* --- Cabecera y Contenido (Paleta Principal) --- */
 
 /* * Solo aplica el fondo azul a la cabecera principal de la página.
- * Usamos 'ion-header > ion-toolbar' para ser específicos.
  */
 ion-header > ion-toolbar {
     --background: #274C77; /* Azul oscuro */
@@ -14,10 +13,10 @@ ion-header > ion-toolbar {
 }
 
 ion-content {
-    --background: #C5D5E4; /* Azul claro/grisáceo para el fondo */
+    --background: #C5D5E4; /* para el fondo */
 }
 
-/* --- 2. Tarjetas (Cards) --- */
+/* --- Cards --- */
 ion-card {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -31,15 +30,10 @@ ion-card-title {
     font-weight: 600;
 }
 
-/* --- 3. Listas e Items (Arreglo para "líneas negras" y "modo oscuro") --- */
+/* --- Listas e Items (Arreglo para "líneas negras" y "modo oscuro") --- */
 
 /*
- * ¡IMPORTANTE!
- * Hacemos que las listas y los items sean transparentes por defecto.
- * Esto arregla:
- * 1. Las "líneas negras" entre items (que era el fondo de la lista).
- * 2. El fondo negro de la página de perfil (que era el 'dark mode').
- * Usamos !important para anular (override) el 'dark mode' del navegador.
+ * !important para anular (override) el 'dark mode' del navegador.
  */
 ion-list {
     background: transparent !important;
@@ -65,13 +59,7 @@ ion-item ion-label {
     color: #274472; // Color de texto principal en items
 }
 
-/* --- 4. Barra de Búsqueda (en la página de búsqueda) --- */
-
-/*
- * Hacemos que la toolbar de la búsqueda sea transparente
- * para que se mezcle con el fondo ion-content.
- * (Aplica a cualquier toolbar que esté *dentro* de ion-content)
- */
+/* Puede ser que no se este usando */
 ion-content ion-toolbar {
     --background: transparent;
     --border-width: 0;
@@ -89,7 +77,7 @@ ion-searchbar {
 }
 
 
-/* --- 5. Estilos de Formularios (Inputs, Selects, Datetime) --- */
+/* --- Estilos de Formularios (Inputs, Selects, Datetime) --- */
 
 ion-datetime {
     --background: #f9fbfd;
@@ -106,7 +94,7 @@ ion-input, ion-select, ion-select-option {
 }
 
 
-/* --- 6. Botones --- */
+/* --- Botones --- */
 
 ion-button {
     --background: #4A90E2; // Azul principal del botón

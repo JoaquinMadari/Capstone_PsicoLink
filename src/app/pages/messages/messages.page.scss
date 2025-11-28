@@ -42,7 +42,7 @@ ion-note {
 
 /* Estado vacío: que se vea SIEMPRE */
 ion-item.empty-state {
-  --background: transparent;        /* sin tarjeta blanca */
+  --background: transparent;
   box-shadow: none;
   border-radius: 12px;
   justify-content: center;

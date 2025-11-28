@@ -5,10 +5,7 @@ import { Location } from '@angular/common';
 import { ChatSupabase, MessageRow, DirectConversation } from 'src/app/services/chat-supabase';
 import { By } from '@angular/platform-browser';
 
-// ------------------------------
 // MOCKS
-// ------------------------------
-
 const fakeOtherUid = 'user-123';
 const fakeConversationId = 'conv-456';
 
@@ -28,7 +25,7 @@ const locationMock = {
   back: jasmine.createSpy('back')
 };
 
-// 🔥 MOCK REALISTA DE SUPABASE
+//MOCK SUPABASE
 const chatMock: any = {
   currentUserId: jasmine.createSpy('currentUserId').and.resolveTo('me-uid'),
 
@@ -45,7 +42,7 @@ const chatMock: any = {
   profileBasics: jasmine.createSpy('profileBasics')
     .and.resolveTo([{ id: fakeOtherUid, full_name: 'Other User', role: 'paciente' }]),
 
-  // 🔥 Guarda callback para realtime tests
+  //Guarda callback para realtime tests
   subscribeMessages: jasmine.createSpy('subscribeMessages')
     .and.callFake((_convId, callback) => {
       return {
@@ -60,7 +57,7 @@ const chatMock: any = {
       track: jasmine.createSpy('track')
     })),
 
-  // 🔥 NO devolver mensaje aquí para evitar duplicación
+  //NO devolver mensaje aquí para evitar duplicación
   sendMessage: jasmine.createSpy('sendMessage').and.resolveTo(undefined),
 
   setTyping: jasmine.createSpy('setTyping').and.resolveTo(),
@@ -68,10 +65,7 @@ const chatMock: any = {
   unsubscribeAll: jasmine.createSpy('unsubscribeAll')
 };
 
-// ------------------------------------------
 // TEST SUITE
-// ------------------------------------------
-
 describe('ChatPage', () => {
   let component: ChatPage;
   let fixture: ComponentFixture<ChatPage>;
@@ -90,7 +84,6 @@ describe('ChatPage', () => {
     fixture = TestBed.createComponent(ChatPage);
     component = fixture.componentInstance;
 
-    // stub scroll to avoid DOM timing issues
     spyOn(component as any, 'scrollToBottomSoon').and.stub();
   }));
 
@@ -98,15 +91,12 @@ describe('ChatPage', () => {
     expect(component).toBeTruthy();
   });
 
-  // ---------------------------
   // INIT LOAD
-  // ---------------------------
   it('ngOnInit should load conversation and messages correctly', fakeAsync(() => {
     const historyMsgs = [{ id: 1, body: 'Hola', sender: fakeOtherUid, created_at: new Date().toISOString() }];
     chatMock.listMessages.and.resolveTo(historyMsgs);
 
     component.ngOnInit();
-    // resolve all awaited promises inside ngOnInit
     flushMicrotasks();
     tick();
 
@@ -121,16 +111,13 @@ describe('ChatPage', () => {
     expect(chatMock.subscribeMessages).toHaveBeenCalled();
   }));
 
-  // ---------------------------
   // SEND (OPTIMISTA)
-  // ---------------------------
   it('send() should add optimistic message, clear input and call service', fakeAsync(() => {
     component.conversationId = fakeConversationId;
     component.meId = 'me-uid';
     component.input = 'Mensaje Test';
 
     component.send();
-    // send() is async (await chat.sendMessage). settle promises:
     flushMicrotasks();
     tick();
 

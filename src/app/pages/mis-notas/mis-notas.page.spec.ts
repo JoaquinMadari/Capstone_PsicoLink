@@ -15,7 +15,6 @@ describe('MisNotasPage', () => {
   const mockLocation = { getState: () => ({}) };
 
   beforeEach(async () => {
-    // Creamos un mock fresco por cada test
     mockAppointmentService = {
       getAppointment: jasmine.createSpy().and.returnValue(
         of({ id: 99, status: 'completed', historial: [] })
@@ -40,7 +39,7 @@ describe('MisNotasPage', () => {
 
     fixture = TestBed.createComponent(MisNotasPage);
     component = fixture.componentInstance;
-    fixture.detectChanges(); // 🔥 necesario para que se ejecute ngOnInit
+    fixture.detectChanges(); // necesario para que se ejecute ngOnInit
   });
 
   it('should create', () => {
