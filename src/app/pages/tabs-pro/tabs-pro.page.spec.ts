@@ -1,5 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabsProPage } from './tabs-pro.page';
+import {RouterTestingModule } from '@angular/router/testing';
+import { of } from 'rxjs';
+import { NavController } from '@ionic/angular';
+import { ActivatedRoute } from '@angular/router';
+
 
 describe('TabsProPage', () => {
   let component: TabsProPage;
@@ -7,7 +12,20 @@ describe('TabsProPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TabsProPage]
+      imports: [
+        TabsProPage,
+        RouterTestingModule.withRoutes([])   // 🔥 FIX: Esto resuelve el error
+      ],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: { params: of({}), queryParams: of({}) }
+        },
+        {
+          provide: NavController,
+          useValue: { navigateForward: () => {}, navigateRoot: () => {} }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TabsProPage);
@@ -30,7 +48,6 @@ describe('TabsProPage', () => {
       blur: jasmine.createSpy('blur')
     } as any;
 
-    // Simulamos document.activeElement
     spyOnProperty(document, 'activeElement', 'get').and.returnValue(mockElement);
 
     component.onTabWillChange();
@@ -47,4 +64,6 @@ describe('TabsProPage', () => {
     expect(() => component.onTabWillChange()).not.toThrow();
   });
 });
+
+
 

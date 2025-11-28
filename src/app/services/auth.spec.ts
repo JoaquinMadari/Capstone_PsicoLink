@@ -29,7 +29,7 @@ describe('Auth Service', () => {
         expect(res).toEqual(mockResponse);
       });
 
-    const req = httpMock.expectOne(`${environment.API_URL}/login/`);
+    const req = httpMock.expectOne(`${environment.API_URL.replace(/\/$/, '')}/auth/login/`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ email: 'test@example.com', password: '123456' });
 

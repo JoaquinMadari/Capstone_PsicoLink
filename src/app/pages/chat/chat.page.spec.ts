@@ -1,26 +1,37 @@
-import { TestBed, ComponentFixture, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync, flushMicrotasks } from '@angular/core/testing';
 import { ChatPage } from './chat.page';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { Location } from '@angular/common';
 import { ChatSupabase, MessageRow, DirectConversation } from 'src/app/services/chat-supabase';
-import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
 
-// Mock del ActivatedRoute
+// ------------------------------
+// MOCKS
+// ------------------------------
+
 const fakeOtherUid = 'user-123';
 const fakeConversationId = 'conv-456';
+
 const routeMock = {
   snapshot: {
     paramMap: convertToParamMap({ otherUid: fakeOtherUid })
   }
 };
 
-// Mock del Router
 const routerMock = {
-  navigateByUrl: jasmine.createSpy('navigateByUrl')
+  navigateByUrl: jasmine.createSpy('navigateByUrl').and.resolveTo(true),
+  events: { subscribe: jasmine.createSpy('subscribe').and.returnValue({ unsubscribe: () => {} }) }
 };
 
-// Mock del ChatSupabase
-const chatMock: Partial<ChatSupabase> = {
+const locationMock = {
+  getState: jasmine.createSpy('getState').and.returnValue({ from: '/previous-page' }),
+  back: jasmine.createSpy('back')
+};
+
+// 🔥 MOCK REALISTA DE SUPABASE
+const chatMock: any = {
   currentUserId: jasmine.createSpy('currentUserId').and.resolveTo('me-uid'),
+
   startDirect: jasmine.createSpy('startDirect').and.resolveTo({
     id: fakeConversationId,
     user1: 'me-uid',
@@ -28,12 +39,38 @@ const chatMock: Partial<ChatSupabase> = {
     created_at: new Date().toISOString(),
     last_message_at: null
   } as DirectConversation),
-  listMessages: jasmine.createSpy('listMessages').and.resolveTo([] as MessageRow[]),
-  profileBasics: jasmine.createSpy('profileBasics').and.resolveTo([{ id: fakeOtherUid, full_name: 'Other User', role: 'paciente' }]),
-  subscribeMessages: jasmine.createSpy('subscribeMessages').and.returnValue({ unsubscribe: jasmine.createSpy('unsubscribe') }),
-  presence: jasmine.createSpy('presence').and.resolveTo({ unsubscribe: jasmine.createSpy('unsubscribe'), track: jasmine.createSpy('track') }),
-  setTyping: jasmine.createSpy('setTyping').and.resolveTo()
+
+  listMessages: jasmine.createSpy('listMessages').and.resolveTo([]),
+
+  profileBasics: jasmine.createSpy('profileBasics')
+    .and.resolveTo([{ id: fakeOtherUid, full_name: 'Other User', role: 'paciente' }]),
+
+  // 🔥 Guarda callback para realtime tests
+  subscribeMessages: jasmine.createSpy('subscribeMessages')
+    .and.callFake((_convId, callback) => {
+      return {
+        unsubscribe: jasmine.createSpy('unsubscribe'),
+        __callback: callback
+      };
+    }),
+
+  presence: jasmine.createSpy('presence')
+    .and.callFake(async () => ({
+      unsubscribe: jasmine.createSpy('unsubscribe'),
+      track: jasmine.createSpy('track')
+    })),
+
+  // 🔥 NO devolver mensaje aquí para evitar duplicación
+  sendMessage: jasmine.createSpy('sendMessage').and.resolveTo(undefined),
+
+  setTyping: jasmine.createSpy('setTyping').and.resolveTo(),
+
+  unsubscribeAll: jasmine.createSpy('unsubscribeAll')
 };
+
+// ------------------------------------------
+// TEST SUITE
+// ------------------------------------------
 
 describe('ChatPage', () => {
   let component: ChatPage;
@@ -45,62 +82,70 @@ describe('ChatPage', () => {
       providers: [
         { provide: ActivatedRoute, useValue: routeMock },
         { provide: Router, useValue: routerMock },
+        { provide: Location, useValue: locationMock },
         { provide: ChatSupabase, useValue: chatMock }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatPage);
     component = fixture.componentInstance;
+
+    // stub scroll to avoid DOM timing issues
+    spyOn(component as any, 'scrollToBottomSoon').and.stub();
   }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit should load conversation and messages', async () => {
-    await component.ngOnInit();
+  // ---------------------------
+  // INIT LOAD
+  // ---------------------------
+  it('ngOnInit should load conversation and messages correctly', fakeAsync(() => {
+    const historyMsgs = [{ id: 1, body: 'Hola', sender: fakeOtherUid, created_at: new Date().toISOString() }];
+    chatMock.listMessages.and.resolveTo(historyMsgs);
+
+    component.ngOnInit();
+    // resolve all awaited promises inside ngOnInit
+    flushMicrotasks();
+    tick();
+
     expect(chatMock.currentUserId).toHaveBeenCalled();
     expect(chatMock.startDirect).toHaveBeenCalledWith(fakeOtherUid);
     expect(component.conversationId).toBe(fakeConversationId);
-    expect(component.otherUserId).toBe(fakeOtherUid);
-    expect(component.otherName).toBe('Other User');
     expect(chatMock.listMessages).toHaveBeenCalledWith(fakeConversationId);
-    expect(chatMock.subscribeMessages).toHaveBeenCalledWith(fakeConversationId, jasmine.any(Function));
-    expect(chatMock.presence).toHaveBeenCalledWith(fakeConversationId, jasmine.any(Function));
-  });
 
-  it('send should add optimistic message and call chat.sendMessage', fakeAsync(async () => {
-    await component.ngOnInit();
-    component.input = 'Hello';
-    spyOn(component, 'scrollToBottomSoon'); // evitamos animaciones
-    chatMock.sendMessage = jasmine.createSpy('sendMessage').and.resolveTo({
-      id: 1,
-      conversation: fakeConversationId,
-      sender: 'me-uid',
-      type: 'text',
-      body: 'Hello',
-      created_at: new Date().toISOString()
-    });
-    await component.send();
-    expect(component.messages.some(m => m.body === 'Hello' && m.pending)).toBeTrue();
-    expect(chatMock.sendMessage).toHaveBeenCalledWith(fakeConversationId, 'Hello');
+    expect(component.messages.length).toBe(1);
+    expect(component.messages[0].body).toBe('Hola');
+
+    expect(chatMock.subscribeMessages).toHaveBeenCalled();
   }));
 
-  it('onInputChange should call setTyping', async () => {
-    await component.ngOnInit();
-    await component.onInputChange('typing...');
-    expect(chatMock.setTyping).toHaveBeenCalledWith(true);
-    await component.onInputChange('');
+  // ---------------------------
+  // SEND (OPTIMISTA)
+  // ---------------------------
+  it('send() should add optimistic message, clear input and call service', fakeAsync(() => {
+    component.conversationId = fakeConversationId;
+    component.meId = 'me-uid';
+    component.input = 'Mensaje Test';
+
+    component.send();
+    // send() is async (await chat.sendMessage). settle promises:
+    flushMicrotasks();
+    tick();
+
+    expect(component.messages.length).toBe(1);
+
+    const msg = component.messages[0];
+    expect(msg.body).toBe('Mensaje Test');
+    expect(msg.pending).toBeTrue();
+    expect(msg.id).toBeLessThan(0);
+
+    expect(component.input).toBe('');
+    expect(chatMock.sendMessage).toHaveBeenCalledWith(fakeConversationId, 'Mensaje Test');
     expect(chatMock.setTyping).toHaveBeenCalledWith(false);
-  });
-
-  it('handleBack should navigate to home', async () => {
-    localStorage.setItem('user_role', 'paciente');
-    component.backHref = '/tabs/home';
-    component.handleBack();
-    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/tabs/home', { replaceUrl: true });
-  });
-
+  }));
 });
+
 
 

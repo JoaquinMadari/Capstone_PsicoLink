@@ -3,6 +3,7 @@ import { DetalleTicketPage } from './detalle-ticket.page';
 import { SoporteService, SupportTicket } from 'src/app/services/soporte';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('DetalleTicketPage', () => {
   let component: DetalleTicketPage;
@@ -21,30 +22,33 @@ describe('DetalleTicketPage', () => {
   };
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('SoporteService', ['getTicketDetails']);
+  const spy = jasmine.createSpyObj('SoporteService', ['getTicketDetails']);
 
-    await TestBed.configureTestingModule({
-      imports: [],
-      declarations: [DetalleTicketPage],
-      providers: [
-        { provide: SoporteService, useValue: spy },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              paramMap: {
-                get: () => '1' // id del ticket
-              }
+  await TestBed.configureTestingModule({
+    imports: [
+      DetalleTicketPage,       // 👈 standalone component debe ir aquí
+      RouterTestingModule      // 👈 necesario por IonBackButton y ActivatedRoute
+    ],
+    providers: [
+      { provide: SoporteService, useValue: spy },
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            paramMap: {
+              get: () => '1'
             }
           }
         }
-      ]
-    }).compileComponents();
+      }
+    ]
+  }).compileComponents();
 
-    fixture = TestBed.createComponent(DetalleTicketPage);
-    component = fixture.componentInstance;
-    soporteServiceSpy = TestBed.inject(SoporteService) as jasmine.SpyObj<SoporteService>;
-  });
+  fixture = TestBed.createComponent(DetalleTicketPage);
+  component = fixture.componentInstance;
+  soporteServiceSpy = TestBed.inject(SoporteService) as jasmine.SpyObj<SoporteService>;
+});
+
 
   it('should create', () => {
     expect(component).toBeTruthy();

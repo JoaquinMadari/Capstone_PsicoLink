@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DetalleCitaPage } from './detalle-cita.page';
 import { ActivatedRoute } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 
 describe('DetalleCitaPage', () => {
   let component: DetalleCitaPage;
@@ -8,7 +9,7 @@ describe('DetalleCitaPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DetalleCitaPage],
+      imports: [DetalleCitaPage, IonicModule.forRoot()], // <- IMPORTS en vez de declarations
       providers: [
         {
           provide: ActivatedRoute,
@@ -45,4 +46,5 @@ describe('DetalleCitaPage', () => {
     expect(component.hora).toBe('16:00');
   });
 });
+
 

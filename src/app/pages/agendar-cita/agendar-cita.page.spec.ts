@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { AgendarCitaPage } from './agendar-cita.page';
 import { AppointmentService } from 'src/app/services/appointment';
 import { MercadoPago as MercadopagoService } from 'src/app/services/mercado-pago';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
+import { ToastController, AlertController, LoadingController, NavController } from '@ionic/angular/standalone';
 
 // -------------------------
 // 🧪 MOCKS DE SERVICIOS
@@ -43,18 +43,14 @@ class MockMercadoPagoService {
 }
 
 class MockToastController {
-  create(opts: any) {
-    return Promise.resolve({
-      present: () => Promise.resolve()
-    });
+  create() {
+    return Promise.resolve({ present: () => Promise.resolve() });
   }
 }
 
 class MockAlertController {
   create() {
-    return Promise.resolve({
-      present: () => Promise.resolve()
-    });
+    return Promise.resolve({ present: () => Promise.resolve() });
   }
 }
 
@@ -66,6 +62,43 @@ class MockLoadingController {
     });
   }
 }
+
+// -------------------------
+// ✔ Router Mock con events (NECESARIO PARA IONIC NAVCONTROLLER)
+// -------------------------
+
+const routerEvents$ = new Subject<any>();
+
+const routerMock = {
+  events: routerEvents$,
+  navigate: jasmine.createSpy('navigate')
+};
+
+// -------------------------
+// ✔ ActivatedRoute completo
+// -------------------------
+
+const activatedRouteMock = {
+  snapshot: {
+    paramMap: {
+      get: () => '123'
+    }
+  },
+  queryParams: of({})
+};
+
+// -------------------------
+// ✔ NavController Mock
+// -------------------------
+
+const navControllerMock = {
+  navigateForward: jasmine.createSpy('navigateForward'),
+  navigateBack: jasmine.createSpy('navigateBack')
+};
+
+// -------------------------
+// TEST
+// -------------------------
 
 describe('AgendarCitaPage', () => {
   let component: AgendarCitaPage;
@@ -80,41 +113,34 @@ describe('AgendarCitaPage', () => {
         { provide: ToastController, useClass: MockToastController },
         { provide: AlertController, useClass: MockAlertController },
         { provide: LoadingController, useClass: MockLoadingController },
-        { provide: Router, useValue: {} },
-        { provide: ActivatedRoute, useValue: { queryParams: of({}) } }
+        { provide: Router, useValue: routerMock },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: NavController, useValue: navControllerMock }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AgendarCitaPage);
     component = fixture.componentInstance;
 
-    fixture.detectChanges(); // Dispara ngOnInit()
+    fixture.detectChanges(); // Ejecuta ngOnInit()
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 1: el componente se crea
-  // -------------------------------------------
+  // 🧪 1. Componente creado
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 2: carga de profesionales
-  // -------------------------------------------
+  // 🧪 2. Carga profesionales
   it('should load professionals on init', () => {
     expect(component.professionals.length).toBeGreaterThan(0);
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 3: slots creados correctamente
-  // -------------------------------------------
+  // 🧪 3. Slots generados
   it('should generate slots', () => {
     expect(component.slots.length).toBeGreaterThan(0);
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 4: formulario inválido si falta profesional
-  // -------------------------------------------
+  // 🧪 4. Formulario inválido
   it('form should be invalid if no professional selected', () => {
     component.form.patchValue({
       professional: null,
@@ -127,9 +153,7 @@ describe('AgendarCitaPage', () => {
     expect(component.form.valid).toBeFalse();
   });
 
-  // -------------------------------------------
-  // 🧪 PRUEBA 5: formulario válido con datos completos
-  // -------------------------------------------
+  // 🧪 5. Formulario válido
   it('form should be valid with correct data', () => {
     component.form.patchValue({
       professional: 1,
@@ -141,8 +165,8 @@ describe('AgendarCitaPage', () => {
 
     expect(component.form.valid).toBeTrue();
   });
-
 });
+
 
 
 

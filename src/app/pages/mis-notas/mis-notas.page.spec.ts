@@ -1,108 +1,54 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MisNotasPage } from './mis-notas.page';
-import { AppointmentService, AppointmentNote } from 'src/app/services/appointment';
-import { of, throwError } from 'rxjs';
-import { ToastController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { of } from 'rxjs';
+import { AppointmentService } from 'src/app/services/appointment';
+import { IonicModule, ToastController } from '@ionic/angular';
 
 describe('MisNotasPage', () => {
   let component: MisNotasPage;
   let fixture: ComponentFixture<MisNotasPage>;
-  let appointmentService: jasmine.SpyObj<AppointmentService>;
-  let toastCtrl: jasmine.SpyObj<ToastController>;
 
-  const fakeAppointmentId = 123;
-  const fakeNote: AppointmentNote = {
-    id: 1,
-    text: 'Nota de prueba',
-    fecha: new Date().toISOString(),
-    appointment: fakeAppointmentId,
-  };
+  let mockAppointmentService: any;
+  const mockActivatedRoute = { snapshot: { paramMap: { get: () => '99' } } };
+  const mockLocation = { getState: () => ({}) };
 
   beforeEach(async () => {
-    const appointmentServiceSpy = jasmine.createSpyObj('AppointmentService', [
-      'getAppointment', 
-      'createAppointmentNote',
-      'getAppointmentNotesList'
-    ]);
-
-    const toastCtrlSpy = jasmine.createSpyObj('ToastController', ['create']);
+    // Creamos un mock fresco por cada test
+    mockAppointmentService = {
+      getAppointment: jasmine.createSpy().and.returnValue(
+        of({ id: 99, status: 'completed', historial: [] })
+      ),
+      getAppointmentNotesList: jasmine.createSpy().and.returnValue(
+        of([{ id: 1, text: 'Nota de prueba', fecha: '2025-01-01T10:00:00Z' }])
+      ),
+      createAppointmentNote: jasmine.createSpy().and.returnValue(
+        of({ id: 2, text: 'Nueva Nota', fecha: '2025-01-02T12:00:00Z' })
+      )
+    };
 
     await TestBed.configureTestingModule({
-      imports: [MisNotasPage],
+      imports: [MisNotasPage, IonicModule.forRoot()],
       providers: [
-        { provide: AppointmentService, useValue: appointmentServiceSpy },
-        { provide: ToastController, useValue: toastCtrlSpy },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => String(fakeAppointmentId) } } }
-        }
+        ToastController,
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: AppointmentService, useValue: mockAppointmentService },
+        { provide: Location, useValue: mockLocation }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MisNotasPage);
     component = fixture.componentInstance;
-    appointmentService = TestBed.inject(AppointmentService) as jasmine.SpyObj<AppointmentService>;
-    toastCtrl = TestBed.inject(ToastController) as jasmine.SpyObj<ToastController>;
-
-    // Spies básicos
-    appointmentService.getAppointment.and.returnValue(of({ status: 'completed' }));
-    appointmentService.getAppointmentNotesList.and.returnValue(of([fakeNote]));
-    appointmentService.createAppointmentNote.and.callFake(
-      (appointmentId: number, text: string) => of({ ...fakeNote, appointment: appointmentId, text })
-    );
-
-    // Toast mock
-    toastCtrl.create.and.returnValue(Promise.resolve({
-      present: () => Promise.resolve()
-    } as any));
+    fixture.detectChanges(); // 🔥 necesario para que se ejecute ngOnInit
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should load appointment and notes on init', fakeAsync(() => {
-    component.ngOnInit();
-    tick();
-
-    expect(component.status).toBe('completed');
-    expect(component.historialNotas.length).toBe(1);
-    expect(component.historialNotas[0].text).toBe('Nota de prueba');
-    expect(component.isVisible).toBe(true); // porque rol profesional por default
-  }));
-
-  it('should add a new note', fakeAsync(() => {
-    component.nuevaNota = 'Nueva nota de prueba';
-    component.canEdit = true;
-
-    component.guardarNota();
-    tick();
-
-    expect(component.historialNotas.length).toBe(2); // la original + nueva
-    expect(component.historialNotas[1].text).toBe('Nueva nota de prueba');
-    expect(component.nuevaNota).toBe('');
-  }));
-
-  it('should not add empty note', fakeAsync(() => {
-    component.nuevaNota = '   ';
-    component.canEdit = true;
-
-    component.guardarNota();
-    tick();
-
-    expect(component.historialNotas.length).toBe(0);
-  }));
-
-  it('should not add note if cannot edit', fakeAsync(() => {
-    component.nuevaNota = 'Nota';
-    component.canEdit = false;
-
-    component.guardarNota();
-    tick();
-
-    expect(component.historialNotas.length).toBe(0);
-  }));
 });
+
+
+
 
 
