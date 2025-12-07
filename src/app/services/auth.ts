@@ -44,7 +44,23 @@ export class Auth {
 
       // Guardar Supabase UID si existe
       const sbUid = res?.user?.supabase_uid ?? null;
-      if (sbUid) localStorage.setItem('sb_uid', String(sbUid));
+      if (sbUid) {
+        localStorage.setItem('sb_uid', String(sbUid));
+      } else {
+        // Esto solo ocurriría si el sync falló en Django y no hay UID
+        console.warn('UID de Supabase no recibida del backend.');
+      }
+
+      // 2. Guardar los tokens de Supabase (vienen de LoginView de Django)
+      const sbAccessToken = res.supabase_access_token;
+      const sbRefreshToken = res.supabase_refresh_token;
+
+      if (sbAccessToken && sbRefreshToken) {
+        localStorage.setItem('supabase_access_token', sbAccessToken);
+        localStorage.setItem('supabase_refresh_token', sbRefreshToken);
+      } else {
+        console.warn('Tokens de sesión de Supabase no recibidos del backend.');
+      }
 
       // ---------- GUARDAR USER_ID ----------
       let userId = res?.user?.id ?? res?.id ?? null;
@@ -58,10 +74,11 @@ export class Auth {
         console.log('Guardando user_id en localStorage:', userId);
         localStorage.setItem('user_id', String(userId));
       } else {
-        console.warn('⚠️ user_id no guardado: backend no devolvió id');
+        console.warn('user_id no guardado: backend no devolvió id');
       }
     }),
-    mergeMap((res: any) =>
+    
+    /*mergeMap((res: any) =>
       from(this.chatSb.signIn(payload.email, payload.password)).pipe(
         catchError(err => {
           console.warn('Supabase sign-in falló:', err?.message || err);
@@ -70,10 +87,19 @@ export class Auth {
         map(() => res)
       )
     )
-  );
+    */
 
-
-}
+      mergeMap((res: any) => 
+        from(this.initSupabaseSession()).pipe(
+          catchError(err => {
+            console.warn('Fallo al inicializar sesión de Supabase:', err);
+            return of(null);
+          }),
+        map(() => res) // Retorna la respuesta original de Django para el flujo
+        )
+      )
+    );
+  }
 
 
   async logout(): Promise<void> {

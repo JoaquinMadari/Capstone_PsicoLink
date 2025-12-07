@@ -28,14 +28,24 @@
               {{ a.start_datetime | date:'EEEE d \'de\' MMMM':'':'es-CL' }} — {{ a.start_datetime | date:'hh:mm a' }}
             </h2>
             <p>Duración: {{ a.duration_minutes }} min</p>
-
-            <p class="appointment-with">
-              Con:
-              {{ a.professional_detail?.full_name
-                || (a.professional_detail?.first_name + ' ' + a.professional_detail?.last_name)
-                || a.professional_detail?.email
-                || 'Sin nombre disponible' }}
-            </p>
+            <ng-container *ngIf="role === 'profesional'; else patientView">
+              <p class="appointment-with">
+                Con: 
+                {{ a.patient_detail?.full_name
+                  || (a.patient_detail?.first_name + ' ' + a.patient_detail?.last_name)
+                  || a.patient_detail?.email
+                  || 'Sin nombre disponible' }}
+              </p>
+            </ng-container>
+            <ng-template #patientView>
+              <p class="appointment-with">
+                Con: 
+                {{ a.professional_detail?.full_name
+                  || (a.professional_detail?.first_name + ' ' + a.professional_detail?.last_name)
+                  || a.professional_detail?.email
+                  || 'Sin nombre disponible' }}
+              </p>
+            </ng-template>
 
             <p class="appointment-status">
               Estado:

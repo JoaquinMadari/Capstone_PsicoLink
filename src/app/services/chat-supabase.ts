@@ -23,7 +23,7 @@ export class ChatSupabase {
   }
 
 
-  // 0) login Supabase
+  // login Supabase OBSOLETA
   async signIn(email: string, password: string) {
     if (this.signInInFlight) return this.signInInFlight;
     this.signInInFlight = this.sb.auth.signInWithPassword({ email, password })
@@ -34,7 +34,7 @@ export class ChatSupabase {
   }
 
   async setSession(accessToken: string, refreshToken: string): Promise<void> {
-    const { error } = await this.sb.auth.setSession({ 
+    const { data, error } = await this.sb.auth.setSession({ 
         access_token: accessToken, 
         refresh_token: refreshToken,
     });
@@ -43,7 +43,13 @@ export class ChatSupabase {
         console.error('Error al establecer la sesión de Supabase:', error);
         throw error;
     }
-}
+
+    if (data.session) {
+      localStorage.setItem('supabase_access_token', data.session.access_token);
+      localStorage.setItem('supabase_refresh_token', data.session.refresh_token);
+    }
+  }
+
 
 
   async hasSession(): Promise<boolean> {
