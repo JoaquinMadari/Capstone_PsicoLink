@@ -434,12 +434,12 @@ class ProfessionalSearchSerializer(UserSerializer):
     specialty = serializers.SerializerMethodField()
     specialty_label = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
-    work_modality = serializers.SerializerMethodField() 
-
+    work_modality = serializers.SerializerMethodField()
+    cases_attended = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         model = CustomUser
-        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name', 'work_modality')
+        fields = UserSerializer.Meta.fields + ('specialty', 'specialty_label', 'full_name', 'work_modality', 'cases_attended')
 
     def get_specialty(self, obj):
         try: return obj.psicologoprofile.specialty
@@ -457,6 +457,12 @@ class ProfessionalSearchSerializer(UserSerializer):
             return obj.psicologoprofile.work_modality  # 'Presencial' | 'Online' | 'Mixta'
         except AttributeError:
             return None
+        
+    def get_cases_attended(self, obj):
+        try: 
+            return obj.psicologoprofile.cases_attended
+        except AttributeError: 
+            return 0
 
 class PsicologoProfileDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
