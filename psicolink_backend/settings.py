@@ -138,14 +138,14 @@ DATABASES = {
             #'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=0),  # 0 = sin conexiones persistentes
             'DISABLE_SERVER_SIDE_CURSORS': True,
             'OPTIONS': {
-                'sslmode': 'require',   # Obligatorio con Supabase
+                'sslmode': 'disable',   # Obligatorio con Supabase
             },
         },
         
         
-    #    'TEST': {
-    #        'NAME': config('TEST_DB_NAME', default=None),  # base de test ya creada
-    #    
+    #   'TEST': {
+    #       'NAME': config('TEST_DB_NAME', default=None),  # base de test ya creada
+        
     #},
     
 }

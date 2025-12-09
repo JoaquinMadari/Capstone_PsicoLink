@@ -24,6 +24,7 @@ from datetime import datetime, date, time as dtime, timedelta
 from django.utils import timezone
 from datetime import timezone as dt_timezone
 from api.zoom_service import refresh_zoom_token
+from django.db.models import F
 from django.db import transaction
 from integrations.supabase_sync import ensure_supabase_user 
 import logging
@@ -595,8 +596,24 @@ class CloseAppointmentView(APIView):
             )
 
         #Procesar el Cierre
-        appointment.status = 'completed'
-        appointment.save()
+        with transaction.atomic():
+            
+            try:
+                profesional_profile = appointment.professional.psicologoprofile
+                # Incremento atomico suma 1 al valor actual de cases_attended en la BD
+                profesional_profile.cases_attended = F('cases_attended') + 1
+                profesional_profile.save(update_fields=['cases_attended'])
+                
+            except AttributeError:
+                # Esto no debería pasar si el rol es 'profesional', pero es una buena defensa
+                print(f"Advertencia: Profesional {appointment.professional.email} no tiene perfil asociado.")
+            except Exception as e:
+                # mostrar cualquier otro error de BD
+                print(f"Error al incrementar cases_attended: {e}")
+            
+            #CAMBIAR EL ESTADO DE LA CITA
+            appointment.status = 'completed'
+            appointment.save(update_fields=['status'])
 
         return Response(
             {"detail": "Cita marcada como completada con éxito.", "status": "completed"}, 
