@@ -125,7 +125,7 @@ export class AccountPage {
 
   async connectZoom() {
     const clientId = environment.zoomClientId;
-    const redirectUri = 'http://127.0.0.1:8000/api/zoom/oauth/callback/';
+    const redirectUri = 'http://localhost:8000/api/zoom/oauth/callback/';
     const userId = localStorage.getItem('user_id');
 
     if (!userId) {
