@@ -89,7 +89,7 @@ class PsicologoProfileTests(TestCase):
             role='profesional'
         )
         
-        # ✅ CORREGIDO: certificates como string numérico
+        #  CORREGIDO: certificates como string numérico
         self.profile_data = {
             'user': self.user,
             'rut': '12345678-9',
@@ -104,7 +104,7 @@ class PsicologoProfileTests(TestCase):
             'style_of_attention': 'Individual y Grupal',
             'attention_schedule': 'Lunes a Viernes 9:00-18:00',
             'work_modality': 'Online',
-            'certificates': '12345'  # ✅ Código numérico como string
+            'certificates': '12345'  #  Código numérico como string
         }
 
     def test_create_psicologo_profile(self):
@@ -115,7 +115,7 @@ class PsicologoProfileTests(TestCase):
 
     def test_specialty_choices_validation(self):
         """Test que verifica las especialidades válidas"""
-        # ✅ CORREGIDO: No usar **self.profile_data con specialty duplicado
+        #  CORREGIDO: No usar **self.profile_data con specialty duplicado
         profile_data = self.profile_data.copy()
         profile_data['specialty'] = 'psiquiatria'  # Especialidad válida
         
@@ -135,7 +135,7 @@ class PsicologoProfileTests(TestCase):
 
     def test_session_price_validation(self):
         """Test para el precio de sesión"""
-        # ✅ CORREGIDO: Asegurarse de incluir todos los campos obligatorios
+        #  CORREGIDO: Asegurarse de incluir todos los campos obligatorios
         profile_data = self.profile_data.copy()
         profile_data['session_price'] = 25000
         
@@ -294,7 +294,7 @@ class AppointmentTestCase(TestCase):
             style_of_attention='Individual',
             attention_schedule='Lun-Vie 9-18',
             work_modality='Online',
-            certificates='12345'  # ✅ Código numérico
+            certificates='12345'  #  Código numérico
         )
 
         self.start_time = timezone.now() + timezone.timedelta(hours=2)
@@ -514,7 +514,7 @@ class ValidationTests(TestCase):
             duration_minutes=50
         )
         
-        # ✅ CORREGIDO: Usar rest_framework.exceptions.ValidationError
+        #  CORREGIDO: Usar rest_framework.exceptions.ValidationError
         from rest_framework.exceptions import ValidationError as DRFValidationError
         
         with self.assertRaises(DRFValidationError) as context:
@@ -535,8 +535,8 @@ class ValidationTests(TestCase):
             start_datetime=future_date,
             duration_minutes=0
         )
-        
-        # ✅ CORREGIDO: Usar rest_framework.exceptions.ValidationError
+    
+        #  CORREGIDO: Usar rest_framework.exceptions.ValidationError
         from rest_framework.exceptions import ValidationError as DRFValidationError
         
         with self.assertRaises(DRFValidationError) as context:
@@ -557,7 +557,7 @@ class ValidationTests(TestCase):
             duration_minutes=-10
         )
         
-        # ✅ CORREGIDO: Usar rest_framework.exceptions.ValidationError
+        #  CORREGIDO: Usar rest_framework.exceptions.ValidationError
         from rest_framework.exceptions import ValidationError as DRFValidationError
         
         with self.assertRaises(DRFValidationError) as context:
