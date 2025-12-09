@@ -33,7 +33,11 @@ def refresh_zoom_token(professional_profile):
         professional_profile.zoom_access_token = token_data.get("access_token")
         professional_profile.zoom_refresh_token = token_data.get("refresh_token")
         # TIMEZONE CORRECTO
-        professional_profile.zoom_token_expires_at = datetime.now(dt_timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600))
+        professional_profile.zoom_token_expires_at = (
+        datetime.now(dt_timezone.utc)
+        + timedelta(seconds=token_data["expires_in"] - 120)
+)
+
         professional_profile.save(update_fields=["zoom_access_token", "zoom_refresh_token", "zoom_token_expires_at"])
 
         print("Token de Zoom actualizado correctamente.")
@@ -76,26 +80,29 @@ def create_zoom_meeting(access_token, topic, start_time, duration=60):
 
 
 def create_meeting_for_professional(professional_profile, topic, start_time, duration=60):
-    #Crea una reunión Zoom para un profesional, refrescando el token si es necesario.
     try:
-        # Verificar expiración
         if not professional_profile.zoom_access_token:
             raise Exception("El profesional no tiene token de Zoom configurado.")
 
-        # TIMEZONE CORRECTO
-        if professional_profile.zoom_token_expires_at and professional_profile.zoom_token_expires_at < datetime.now(dt_timezone.utc):
+        now = datetime.now(dt_timezone.utc)
+
+        # ✅ REFRESH SOLO AQUÍ
+        if (
+            professional_profile.zoom_token_expires_at
+            and professional_profile.zoom_token_expires_at <= now
+        ):
             print(" Token expirado. Refrescando...")
             refresh_zoom_token(professional_profile)
 
-        # Intentar crear la reunión
-        try:
-            return create_zoom_meeting(professional_profile.zoom_access_token, topic, start_time, duration)
-        except Exception as e:
-            if "Token expirado" in str(e):
-                refresh_zoom_token(professional_profile)
-                return create_zoom_meeting(professional_profile.zoom_access_token, topic, start_time, duration)
-            raise e
+        # ✅ una única llamada
+        return create_zoom_meeting(
+            professional_profile.zoom_access_token,
+            topic,
+            start_time,
+            duration
+        )
 
     except Exception as e:
         print(f" No se pudo crear reunión para {professional_profile.user.email}: {e}")
         raise
+

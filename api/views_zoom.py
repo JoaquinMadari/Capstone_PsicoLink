@@ -40,7 +40,7 @@ def zoom_callback(request):
     # Callback de Zoom: recibe code y state, intercambia por access/refresh tokens 
     # y los guarda en el perfil del psicólogo.
     code = request.GET.get("code")
-    state = request.GET.get("state") or "46"
+    state = request.GET.get("state") or "7"
     if not code:
         return Response({"error": "Faltan parámetros: code"}, status=400)
 
