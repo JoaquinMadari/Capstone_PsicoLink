@@ -95,6 +95,13 @@ def create_preference(request):
 
         prof_name = professional.get_full_name() or professional.email
 
+        #---------------------------------------------------------------
+        # VALIDACIONES DEL SERIALIZER
+        # -------------------------------------------------------------
+        serializer = AppointmentSerializer(data=appointment_data)
+        serializer.is_valid(raise_exception=True)
+
+        
         # --------------------------------------------------------------
         #  URLs desde settings (ambiente seguro)
         # --------------------------------------------------------------
